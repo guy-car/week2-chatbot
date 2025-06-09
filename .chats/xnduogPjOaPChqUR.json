@@ -1,0 +1,30 @@
+[
+  {
+    "id": "msgc-6uLdxPzIB9iuFH4l",
+    "createdAt": "2025-06-09T21:57:39.767Z",
+    "role": "user",
+    "content": "merci bien",
+    "parts": [
+      {
+        "type": "text",
+        "text": "merci bien"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-FKLSZC8EiiOjiL7H",
+    "createdAt": "2025-06-09T21:57:41.629Z",
+    "content": "De rien ! How can I assist you today? Are you looking for recommendations for movies, shows, or something else?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "De rien ! How can I assist you today? Are you looking for recommendations for movies, shows, or something else?"
+      }
+    ]
+  }
+]
