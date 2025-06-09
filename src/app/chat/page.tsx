@@ -13,11 +13,8 @@ function Spinner() {
 }
 
 export default function Page() {
-  const { messages, setMessages, input, handleInputChange, handleSubmit, status, stop, error, reload } = useChat();
+  const { messages, input, handleInputChange, handleSubmit, status, stop, error, reload } = useChat();
 
-  const handleDelete = (id) => {
-  setMessages(messages.filter(message => message.id !== id))
-}
 
   return (
     <div className="max-w-2xl mx-auto p-6">
