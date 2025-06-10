@@ -6,7 +6,6 @@ import { appendResponseMessages,
   type Message } from 'ai';
 import { saveChat, loadChat } from 'tools/chat-store';
 
-
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 

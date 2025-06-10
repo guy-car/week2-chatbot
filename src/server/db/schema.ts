@@ -25,3 +25,27 @@ export const posts = createTable(
   }),
   (t) => [index("name_idx").on(t.name)],
 );
+
+export const chats = createTable("chat", (d) => ({
+  id: d.varchar({ length: 256 }).primaryKey(),
+  title: d.varchar({ length: 512 }),
+  createdAt: d
+    .timestamp({ withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}));
+
+export const messages = createTable("messages", (d) => ({
+  id: d.varchar({ length: 256 }).primaryKey(),
+  chat_id: d.varchar({ length: 256 }).references(() => chats.id),
+  role: d.varchar({ length: 50 }), 
+  content: d.text(),
+  createdAt: d
+    .timestamp({ withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}),
+
+  (t) => [index("chat_id_idx").on(t.chat_id)]
+
+);

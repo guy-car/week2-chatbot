@@ -1,0 +1,30 @@
+[
+  {
+    "id": "msgc-qT30wynlPpGzD3eF",
+    "createdAt": "2025-06-10T00:22:57.010Z",
+    "role": "user",
+    "content": "hello",
+    "parts": [
+      {
+        "type": "text",
+        "text": "hello"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-ftjxRV6X66OG3rDE",
+    "createdAt": "2025-06-10T00:22:57.786Z",
+    "content": "Hello! How can I assist you today? Are you looking for movie or show recommendations, or do you have something specific in mind?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Hello! How can I assist you today? Are you looking for movie or show recommendations, or do you have something specific in mind?"
+      }
+    ]
+  }
+]
