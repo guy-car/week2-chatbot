@@ -2,7 +2,6 @@
 
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
-import { log } from 'console';
 import { Loader2 } from "lucide-react";
 
 function Spinner() {
