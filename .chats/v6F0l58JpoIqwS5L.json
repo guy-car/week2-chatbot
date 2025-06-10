@@ -1,0 +1,58 @@
+[
+  {
+    "id": "msgc-a4VQK2OIMlL9ge8e",
+    "createdAt": "2025-06-10T14:29:35.810Z",
+    "role": "user",
+    "content": "Hello",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Hello"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-BUlajT4QaKw3dJfd",
+    "createdAt": "2025-06-10T14:29:45.930Z",
+    "content": "Hello! How can I assist you today? Are you looking for movie or show recommendations, or do you have something specific in mind?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Hello! How can I assist you today? Are you looking for movie or show recommendations, or do you have something specific in mind?"
+      }
+    ]
+  },
+  {
+    "id": "msgc-smmULONMbAkr9eEX",
+    "createdAt": "2025-06-10T14:29:54.621Z",
+    "role": "user",
+    "content": "just checking in to see if you're awake",
+    "parts": [
+      {
+        "type": "text",
+        "text": "just checking in to see if you're awake"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-hOmCtAHbupOQhEtJ",
+    "createdAt": "2025-06-10T14:30:11.353Z",
+    "content": "I'm always awake and ready to help! What’s on your mind?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I'm always awake and ready to help! What’s on your mind?"
+      }
+    ]
+  }
+]
