@@ -1,34 +1,52 @@
 import { generateId } from 'ai';
 import { type Message } from 'ai';
-import { existsSync, mkdirSync } from 'fs';
-import { writeFile, readFile } from 'fs/promises';
-import path from 'path';
+import { db } from "~/server/db"
+import { chats, messages } from "~/server/db/schema"
+import { eq } from "drizzle-orm"
 
 export async function createChat(): Promise<string> {
   const id = generateId(); // generate a unique chat ID
-  await writeFile(getChatFile(id), '[]'); // create an empty chat file
+  await db.insert(chats).values({ id }); // create chat record in database
   return id;
 }
 
 export async function loadChat(id: string): Promise<Message[]> {
-  const file = await readFile(getChatFile(id), 'utf8')
-  const messages = JSON.parse(file) as Message[];
-  return messages
-}
-
-function getChatFile(id: string): string {
-  const chatDir = path.join(process.cwd(), '.chats');
-  if (!existsSync(chatDir)) mkdirSync(chatDir, { recursive: true });
-  return path.join(chatDir, `${id}.json`);
+  const result = await db
+    .select()
+    .from(messages)
+    .where(eq(messages.chat_id, id));
+  
+  return result.map(row => ({
+    id: row.id,
+    content: row.content?? '', // handle potential null
+    role: row.role as 'system' | 'user' | 'assistant' | 'data', // type assertion
+    createdAt: row.createdAt,
+    // Note: we don't include chat_id since Message interface doesn't have it
+  }));
 }
 
 export async function saveChat({
   id,
-  messages,
+  messages: messageList,
 }: {
   id: string;
   messages: Message[];
 }): Promise<void> {
-  const content = JSON.stringify(messages, null, 2);
-  await writeFile(getChatFile(id), content);
+  // First, delete existing messages for this chat
+  await db.delete(messages).where(eq(messages.chat_id, id));
+  
+  // Then insert all the new messages
+  if (messageList.length > 0) {
+    await db.insert(messages).values(
+      messageList.map(msg => ({
+        id: msg.id,
+        chat_id: id,
+        role: msg.role,
+        content: msg.content,
+        createdAt: msg.createdAt ? new Date(msg.createdAt) : new Date(),
+      }))
+      
+    );
+  }
 }
+
