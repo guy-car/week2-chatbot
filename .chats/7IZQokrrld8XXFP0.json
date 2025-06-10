@@ -1,0 +1,108 @@
+[
+  {
+    "id": "msgc-pMmnmxOp7djKuBu6",
+    "createdAt": "2025-06-10T18:06:12.713Z",
+    "role": "user",
+    "content": "What's the weather here?",
+    "parts": [
+      {
+        "type": "text",
+        "text": "What's the weather here?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-DF0dhOv96BK9F9eO",
+    "createdAt": "2025-06-10T18:06:14.191Z",
+    "content": "I can help with that! However, I need to confirm your location first. Would you like me to get your location?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I can help with that! However, I need to confirm your location first. Would you like me to get your location?"
+      }
+    ]
+  },
+  {
+    "id": "msgc-ZYYYurlRyigM3EeB",
+    "createdAt": "2025-06-10T18:06:55.537Z",
+    "role": "user",
+    "content": "what's my location",
+    "parts": [
+      {
+        "type": "text",
+        "text": "what's my location"
+      }
+    ]
+  },
+  {
+    "id": "msgs-2ZjCDBpVLcflP75Q",
+    "createdAt": "2025-06-10T18:06:56.629Z",
+    "role": "assistant",
+    "content": "The weather in Chicago is currently rainy. Make sure to stay dry! If you need any recommendations for indoor activities or shows to watch, just let me know!",
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "tool-invocation",
+        "toolInvocation": {
+          "state": "result",
+          "step": 0,
+          "toolCallId": "call_Gsno2wuG2z5idoenMjPxGd48",
+          "toolName": "getLocation",
+          "args": {},
+          "result": "Chicago"
+        }
+      },
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "tool-invocation",
+        "toolInvocation": {
+          "state": "result",
+          "step": 1,
+          "toolCallId": "call_3ZVjghxywO2zMJgc6RRaNunD",
+          "toolName": "getWeatherInformation",
+          "args": {
+            "city": "Chicago"
+          },
+          "result": "rainy"
+        }
+      },
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "The weather in Chicago is currently rainy. Make sure to stay dry! If you need any recommendations for indoor activities or shows to watch, just let me know!"
+      }
+    ],
+    "toolInvocations": [
+      {
+        "state": "result",
+        "step": 0,
+        "toolCallId": "call_Gsno2wuG2z5idoenMjPxGd48",
+        "toolName": "getLocation",
+        "args": {},
+        "result": "Chicago"
+      },
+      {
+        "state": "result",
+        "step": 1,
+        "toolCallId": "call_3ZVjghxywO2zMJgc6RRaNunD",
+        "toolName": "getWeatherInformation",
+        "args": {
+          "city": "Chicago"
+        },
+        "result": "rainy"
+      }
+    ],
+    "revisionId": "msgc-AY9cwnH2KTOAI32n"
+  }
+]

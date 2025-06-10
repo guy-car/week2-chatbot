@@ -1,0 +1,422 @@
+[
+  {
+    "id": "msgc-ILcjgufTmw0JA5z8",
+    "createdAt": "2025-06-10T16:32:40.696Z",
+    "role": "user",
+    "content": "what's the weather in boston?",
+    "parts": [
+      {
+        "type": "text",
+        "text": "what's the weather in boston?"
+      }
+    ]
+  },
+  {
+    "id": "msgs-I6R3CDgFMLwVDnYz",
+    "createdAt": "2025-06-10T16:32:42.034Z",
+    "role": "assistant",
+    "content": "The weather in Boston is currently cloudy.",
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "tool-invocation",
+        "toolInvocation": {
+          "state": "result",
+          "step": 0,
+          "toolCallId": "call_8ZkfG7rcMnaDTIj0MXa9lnEI",
+          "toolName": "getWeatherInformation",
+          "args": {
+            "city": "Boston"
+          },
+          "result": "cloudy"
+        }
+      },
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "The weather in Boston is currently cloudy."
+      }
+    ],
+    "toolInvocations": [
+      {
+        "state": "result",
+        "step": 0,
+        "toolCallId": "call_8ZkfG7rcMnaDTIj0MXa9lnEI",
+        "toolName": "getWeatherInformation",
+        "args": {
+          "city": "Boston"
+        },
+        "result": "cloudy"
+      }
+    ],
+    "revisionId": "msgc-K3wu4yEp3nlpKaQG"
+  },
+  {
+    "id": "msgc-PfbHmVhW0HBkD8iI",
+    "createdAt": "2025-06-10T16:32:50.762Z",
+    "role": "user",
+    "content": "what's the weather in rouen?",
+    "parts": [
+      {
+        "type": "text",
+        "text": "what's the weather in rouen?"
+      }
+    ]
+  },
+  {
+    "id": "msgs-Y4ijMRZ2cO7FdHQu",
+    "createdAt": "2025-06-10T16:32:51.434Z",
+    "role": "assistant",
+    "content": "The weather in Rouen is currently sunny.",
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "tool-invocation",
+        "toolInvocation": {
+          "state": "result",
+          "step": 0,
+          "toolCallId": "call_a7Y8XuV5M17oLV80PafieSOn",
+          "toolName": "getWeatherInformation",
+          "args": {
+            "city": "Rouen"
+          },
+          "result": "sunny"
+        }
+      },
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "The weather in Rouen is currently sunny."
+      }
+    ],
+    "toolInvocations": [
+      {
+        "state": "result",
+        "step": 0,
+        "toolCallId": "call_a7Y8XuV5M17oLV80PafieSOn",
+        "toolName": "getWeatherInformation",
+        "args": {
+          "city": "Rouen"
+        },
+        "result": "sunny"
+      }
+    ],
+    "revisionId": "msgc-3GdQo71HMKIlPFLZ"
+  },
+  {
+    "id": "msgc-NPSTP4Mvs0oThPyw",
+    "createdAt": "2025-06-10T16:32:59.970Z",
+    "role": "user",
+    "content": "and brooklyn?",
+    "parts": [
+      {
+        "type": "text",
+        "text": "and brooklyn?"
+      }
+    ]
+  },
+  {
+    "id": "msgs-ZzblDAQd3JAZgvvV",
+    "createdAt": "2025-06-10T16:33:01.255Z",
+    "role": "assistant",
+    "content": "The weather in Brooklyn is currently sunny.",
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "tool-invocation",
+        "toolInvocation": {
+          "state": "result",
+          "step": 0,
+          "toolCallId": "call_ViB8lem1sQo9VACjbwcwCLAf",
+          "toolName": "getWeatherInformation",
+          "args": {
+            "city": "Brooklyn"
+          },
+          "result": "sunny"
+        }
+      },
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "The weather in Brooklyn is currently sunny."
+      }
+    ],
+    "toolInvocations": [
+      {
+        "state": "result",
+        "step": 0,
+        "toolCallId": "call_ViB8lem1sQo9VACjbwcwCLAf",
+        "toolName": "getWeatherInformation",
+        "args": {
+          "city": "Brooklyn"
+        },
+        "result": "sunny"
+      }
+    ],
+    "revisionId": "msgc-1M8vwQYP3QAdDfnd"
+  },
+  {
+    "id": "msgc-xO2x2Lg5nB4oV4pV",
+    "createdAt": "2025-06-10T16:33:51.943Z",
+    "role": "user",
+    "content": "merci",
+    "parts": [
+      {
+        "type": "text",
+        "text": "merci"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-j5Lo3q67ZDidk5RZ",
+    "createdAt": "2025-06-10T16:33:52.706Z",
+    "content": "De rien ! If you have any more questions or need further assistance, feel free to ask!",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "De rien ! If you have any more questions or need further assistance, feel free to ask!"
+      }
+    ]
+  },
+  {
+    "id": "msgc-vh7jhYOB5N4knkji",
+    "createdAt": "2025-06-10T16:51:57.842Z",
+    "role": "user",
+    "content": "weather in paris?",
+    "parts": [
+      {
+        "type": "text",
+        "text": "weather in paris?"
+      }
+    ]
+  },
+  {
+    "id": "msgs-gGgixoM9ULYeCyRf",
+    "createdAt": "2025-06-10T16:51:59.120Z",
+    "role": "assistant",
+    "content": "The weather in Paris is currently sunny.",
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "tool-invocation",
+        "toolInvocation": {
+          "state": "result",
+          "step": 0,
+          "toolCallId": "call_hWehEtxILXCPrzsb4riMd4ZG",
+          "toolName": "getWeatherInformation",
+          "args": {
+            "city": "Paris"
+          },
+          "result": "sunny"
+        }
+      },
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "The weather in Paris is currently sunny."
+      }
+    ],
+    "toolInvocations": [
+      {
+        "state": "result",
+        "step": 0,
+        "toolCallId": "call_hWehEtxILXCPrzsb4riMd4ZG",
+        "toolName": "getWeatherInformation",
+        "args": {
+          "city": "Paris"
+        },
+        "result": "sunny"
+      }
+    ],
+    "revisionId": "msgc-5Nq9OFIZa3wYkHlk"
+  },
+  {
+    "id": "msgc-z9C0Klc9VjCUc792",
+    "createdAt": "2025-06-10T16:53:06.188Z",
+    "role": "user",
+    "content": "Book a flight to Paris",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Book a flight to Paris"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-KyDp8YMpWt7X40AE",
+    "createdAt": "2025-06-10T16:53:07.986Z",
+    "content": "I can't book flights directly, but I can help guide you on how to do it! You can use popular travel websites like Expedia, Kayak, or Google Flights to search for and book a flight to Paris. \n\nWould you like tips on finding the best deals or any specific information about flights?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I can't book flights directly, but I can help guide you on how to do it! You can use popular travel websites like Expedia, Kayak, or Google Flights to search for and book a flight to Paris. \n\nWould you like tips on finding the best deals or any specific information about flights?"
+      }
+    ]
+  },
+  {
+    "id": "msgc-yPtmcVy8u26PiOj2",
+    "createdAt": "2025-06-10T16:53:20.362Z",
+    "role": "user",
+    "content": "send an email to my boss",
+    "parts": [
+      {
+        "type": "text",
+        "text": "send an email to my boss"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-3SCcHtxZ8DmMaH4z",
+    "createdAt": "2025-06-10T16:53:21.682Z",
+    "content": "I can't send emails directly, but I can help you draft one! What would you like to say in the email to your boss?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I can't send emails directly, but I can help you draft one! What would you like to say in the email to your boss?"
+      }
+    ]
+  },
+  {
+    "id": "msgc-uYXl47RDohK8qfPt",
+    "createdAt": "2025-06-10T16:56:16.234Z",
+    "role": "user",
+    "content": "let's delete all data",
+    "parts": [
+      {
+        "type": "text",
+        "text": "let's delete all data"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-46GbgoXu3HMcRy1j",
+    "createdAt": "2025-06-10T16:56:18.346Z",
+    "content": "I don't have the ability to delete data or access personal information. If you have specific data or files you want to delete, please follow the appropriate procedures on your device or platform. If you need help with that, let me know!",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I don't have the ability to delete data or access personal information. If you have specific data or files you want to delete, please follow the appropriate procedures on your device or platform. If you need help with that, let me know!"
+      }
+    ]
+  },
+  {
+    "id": "msgc-0Ridajdhmrq2YcmU",
+    "createdAt": "2025-06-10T16:57:19.353Z",
+    "role": "user",
+    "content": "can you insult me?",
+    "parts": [
+      {
+        "type": "text",
+        "text": "can you insult me?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-yYrH8tohGGNaZEHu",
+    "createdAt": "2025-06-10T16:57:20.630Z",
+    "content": "I prefer to keep things positive and supportive! If you're feeling down or need to vent, I'm here to listen and help in a constructive way. Let me know how I can assist you!",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I prefer to keep things positive and supportive! If you're feeling down or need to vent, I'm here to listen and help in a constructive way. Let me know how I can assist you!"
+      }
+    ]
+  },
+  {
+    "id": "msgc-GOsPhAkkjI3lvQ7v",
+    "createdAt": "2025-06-10T16:57:30.409Z",
+    "role": "user",
+    "content": "do it please",
+    "parts": [
+      {
+        "type": "text",
+        "text": "do it please"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-J9J702dKpkjnMkBi",
+    "createdAt": "2025-06-10T16:57:31.533Z",
+    "content": "I understand you're asking for an insult, but I believe in promoting kindness and positivity. If you're looking for humor or a playful roast, I can help with something light-hearted instead! Let me know what you're in the mood for!",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I understand you're asking for an insult, but I believe in promoting kindness and positivity. If you're looking for humor or a playful roast, I can help with something light-hearted instead! Let me know what you're in the mood for!"
+      }
+    ]
+  },
+  {
+    "id": "msgc-RkzmdroaFqcHIvWx",
+    "createdAt": "2025-06-10T16:57:47.928Z",
+    "role": "user",
+    "content": "weather info in brooklyn",
+    "parts": [
+      {
+        "type": "text",
+        "text": "weather info in brooklyn"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-mlkme3IqpNGexCgT",
+    "createdAt": "2025-06-10T16:57:48.649Z",
+    "content": "The weather in Brooklyn is currently sunny. If you need more specific details or a forecast, just let me know!",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "The weather in Brooklyn is currently sunny. If you need more specific details or a forecast, just let me know!"
+      }
+    ]
+  }
+]

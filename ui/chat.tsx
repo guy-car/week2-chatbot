@@ -2,6 +2,7 @@
 
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
+import { log } from 'console';
 import { Loader2 } from "lucide-react";
 
 function Spinner() {
@@ -13,14 +14,19 @@ function Spinner() {
   );
 }
 
-export default function Chat({
+export default function Chat({ 
   id,
   initialMessages,
 }: { id?: string | undefined; initialMessages?: Message[] } = {}) {
   
-  const { messages, input, handleInputChange, handleSubmit, status, stop, error, reload } = useChat({
+  const { messages, 
+    input, status, error,
+    handleInputChange, handleSubmit, 
+    stop, reload, 
+    addToolResult } = useChat({
     id,
     initialMessages,
+    maxSteps: 5,
     sendExtraMessageFields: true,
     experimental_prepareRequestBody({ messages, id }) {
         return { message: messages[messages.length - 1], id };
@@ -29,6 +35,12 @@ export default function Chat({
         prefix: 'msgc',
         size: 16,
   }),
+  async onToolCall({ toolCall }) {
+    if (toolCall.toolName === 'getLocation') {
+      const cities = ['New York', 'Los Angeles', 'Chicago', 'San Francisco'];
+      return cities[Math.floor(Math.random() * cities.length)];
+    }
+  },
   });
 
   return (
@@ -45,6 +57,104 @@ export default function Chat({
                 if (part.type === 'text') {
                   return <div key={index}>{part.text}</div>;
                 }
+
+                // if AI decided to use a tool:
+                else if (part.type === 'tool-invocation') {
+                    const callId = part.toolInvocation.toolCallId;
+
+                    // if AI decides the request requires confirmation
+                    if (part.toolInvocation.toolName === 'askForConfirmation') {
+                    switch (part.toolInvocation.state) {
+                        case 'partial-call':
+                            return (
+                                <div key={callId} className="p-2 bg-gray-100 border border-gray-300 rounded">
+                                Preparing confirmation dialog...
+                                </div>
+                            );
+                        case 'call':
+                            return (
+                            <div key={callId} className="p-2 bg-yellow-50 border border-yellow-200 rounded">
+                                {(part.toolInvocation.args as { message: string }).message}
+                                <div className="mt-2">
+                                <button
+                                    onClick={() =>
+                                    addToolResult({
+                                        toolCallId: callId,
+                                        result: 'Yes, confirmed.',
+                                    })
+                                    }
+                                    className="mr-2 px-3 py-1 bg-green-500 text-white rounded"
+                                >
+                                    Yes
+                                </button>
+                                <button
+                                    onClick={() =>
+                                    addToolResult({
+                                        toolCallId: callId,
+                                        result: 'No, denied',
+                                    })
+                                    }
+                                >
+                                    No
+                                </button>
+                                </div>
+                            </div>
+                            );
+                        case 'result':
+                            return (
+                                <div key={callId} className="p-2 bg-gray-50 border border-gray-200 rounded">
+                                    Confirmation result: {part.toolInvocation.result}
+                                </div>
+                            );
+                        }
+                    }
+
+                  // if AI decides it needs weather info
+                    if (part.toolInvocation.toolName === 'getWeatherInformation') {
+                        switch (part.toolInvocation.state) {
+                            case 'partial-call':
+                                return (
+                                    <div key={callId} className="p-2 bg-gray-100 border border-gray-300 rounded">
+                                    Preparing weather report...
+                                    </div>
+                                );
+                            case 'call':
+                                return (
+                                <div key={callId} className="p-2 bg-blue-50 border border-blue-200 rounded">
+                                    Getting weather information for {(part.toolInvocation.args as {city: string}).city}...
+                                </div>
+                                );
+                            case 'result':
+                                return (
+                                <div key={callId} className="p-2 bg-green-50 border border-green-200 rounded">
+                                    Weather in {(part.toolInvocation.args as {city: string}).city}: {part.toolInvocation.result}
+                                </div>
+                                );
+                            }
+                    }
+
+                    // AI decides it needs location info
+                    if (part.toolInvocation.toolName === 'getLocation') {
+                        switch (part.toolInvocation.state) {
+                            case 'partial-call':
+                                console.log('this is a partial call')
+                                return (
+                                    <div key={callId} className="p-2 bg-gray-100 border border-gray-300 rounded">
+                                    Retrieving location information...
+                                    </div>
+                                );
+                            case 'call':
+                                return <div key={callId}>Getting location...</div>;
+                            case 'result':
+                                return (
+                                <div key={callId}>
+                                    Location: {part.toolInvocation.result}
+                                </div>
+                        );
+                    }
+                    }
+                }
+                return null; // Handle any other part types
               })}
             {message.parts
               ?.filter(part => part.type === 'source')

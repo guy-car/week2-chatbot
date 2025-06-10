@@ -11,7 +11,6 @@ export async function createChat(): Promise<string> {
 }
 
 export async function loadChat(id: string): Promise<Message[]> {
-  console.log('hey I am loading')
   const file = await readFile(getChatFile(id), 'utf8')
   const messages = JSON.parse(file) as Message[];
   return messages
