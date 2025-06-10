@@ -1,0 +1,86 @@
+[
+  {
+    "id": "msgc-jojpTuhW5fJLGh0k",
+    "createdAt": "2025-06-10T00:15:30.200Z",
+    "role": "user",
+    "content": "hello",
+    "parts": [
+      {
+        "type": "text",
+        "text": "hello"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-5Zzf2UghQH4EFSeg",
+    "createdAt": "2025-06-10T00:15:32.371Z",
+    "content": "Hello! How can I assist you today? Are you looking for movie or show recommendations, or do you have something specific in mind?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Hello! How can I assist you today? Are you looking for movie or show recommendations, or do you have something specific in mind?"
+      }
+    ]
+  },
+  {
+    "id": "msgc-dRYaaANlS8yURIOV",
+    "createdAt": "2025-06-10T00:15:39.273Z",
+    "role": "user",
+    "content": "ca va?",
+    "parts": [
+      {
+        "type": "text",
+        "text": "ca va?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-cvmxTjSvYOR92lD2",
+    "createdAt": "2025-06-10T00:15:40.002Z",
+    "content": "Ça va bien, merci ! Et toi ? Comment puis-je t'aider aujourd'hui ?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Ça va bien, merci ! Et toi ? Comment puis-je t'aider aujourd'hui ?"
+      }
+    ]
+  },
+  {
+    "id": "msgc-Qqpl4rn7pp2eR1nm",
+    "createdAt": "2025-06-10T00:19:49.972Z",
+    "role": "user",
+    "content": "merci bien",
+    "parts": [
+      {
+        "type": "text",
+        "text": "merci bien"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-EbQRwxQ9Ssexe5vd",
+    "createdAt": "2025-06-10T00:19:51.255Z",
+    "content": "De rien ! Si tu as des questions ou si tu cherches des recommandations de films, séries ou autres, n'hésite pas à me le faire savoir !",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "De rien ! Si tu as des questions ou si tu cherches des recommandations de films, séries ou autres, n'hésite pas à me le faire savoir !"
+      }
+    ]
+  }
+]

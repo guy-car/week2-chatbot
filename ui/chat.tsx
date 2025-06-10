@@ -1,4 +1,3 @@
-// ui/chat.tsx (or components/chat.tsx)
 'use client';
 
 import { type Message, useChat } from '@ai-sdk/react';
