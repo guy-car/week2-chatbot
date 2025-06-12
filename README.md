@@ -31,3 +31,22 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+
+EASIEST (Low hanging fruit):
+Top right log in/out button
+Loading states during sign-in/chat creation
+Error handling for failed auth/chat operations
+
+MODERATE (Some complexity but straightforward):
+
+Email/password login
+Dark/light theme toggle
+Delete individual chats
+
+HARDER (Requires database changes & significant logic):
+
+Associate chats with specific users
+User-specific chat history
+Load previous chats on lobby
+Rename/edit chat titles
