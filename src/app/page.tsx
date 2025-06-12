@@ -1,8 +1,6 @@
 // app/page.tsx
-import { createChat } from 'tools/chat-store';
-import { redirect } from 'next/navigation';
+import { LandingPage } from './_components/landing-page';
 
 export default async function Page() {
-  const id = await createChat();
-  redirect(`/chat/${id}`);
+  return <LandingPage />
 }
