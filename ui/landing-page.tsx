@@ -11,13 +11,14 @@ export function LandingPage() {
 
     const { data: chats, isLoading } = api.chat.getAll.useQuery();
 
+    const createChatMutation = api.chat.create.useMutation()
+
     const handleNewChat = async () => {
         try {
-            const response = await fetch('/api/chat/new', { method: 'POST' });
-            const { chatId } = await response.json() as { chatId: string };
-            router.push(`/chat/${chatId}`);
+            const result = await createChatMutation.mutateAsync()
+            router.push(`/chat/${result.chatId}`)
         } catch (error) {
-            console.error('Failed to create chat:', error);
+            console.error('Failed to create chat:', error)
         }
     }
 
