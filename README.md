@@ -34,7 +34,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 
 
 EASIEST (Low hanging fruit):
-Top right log in/out button
 Loading states during sign-in/chat creation
 Error handling for failed auth/chat operations
 
@@ -50,3 +49,5 @@ Associate chats with specific users
 User-specific chat history
 Load previous chats on lobby
 Rename/edit chat titles
+
+Tomorrow side bar with chat hitory only accessible to specific users
