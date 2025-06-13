@@ -1,5 +1,5 @@
 // app/page.tsx
-import { LandingPage } from './_components/landing-page';
+import { LandingPage } from '../../ui/landing-page';
 
 export default async function Page() {
   return <LandingPage />
