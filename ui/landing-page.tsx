@@ -21,24 +21,6 @@ export function LandingPage() {
         }
     }
 
-    const chatListEl = () => {
-        if (isLoading) {
-            return <p>Loading chats...</p>
-        } 
-        if (chats) {
-            return (
-                <div>
-                    <ul>
-                        {chats.map((chat) => (
-                            <li key={chat.id}>{chat.id}</li>
-                        ))}
-                    </ul>
-                </div>
-            )
-        }
-        return <p>No chats found</p>;
-    }
-
     const unknownUserEl = () => {
         return (
             <div>
@@ -52,15 +34,15 @@ export function LandingPage() {
 
     const loggedInUserEl = () => {
         return (
-            <div>
+            <div className='flex'>
                 <AppSidebar /> {/* Added here temporarily */}
-                <div className='pl-4'>
-                    <h1>Welcome back, {session?.user.name}!</h1>
-                    <button onClick={handleNewChat}> Start new chat</button>
+                <div className='flex-1 pl-4'>
+                    <div className='pl-4'>
+                        <h1>Welcome back, {session?.user.name}!</h1>
+                        <button onClick={handleNewChat}> Start new chat</button>
+                    </div>
                 </div>
                 <div>
-                    <h1>List of all previous chats</h1>
-                    {chatListEl()}
                 </div>
             </div>
         )
