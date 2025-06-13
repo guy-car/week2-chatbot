@@ -51,3 +51,21 @@ Load previous chats on lobby
 Rename/edit chat titles
 
 Tomorrow side bar with chat hitory only accessible to specific users
+
+___ note for claude later
+
+Future Refactor to Option 3 (Server-Side):
+
+Move sidebar back to layout.tsx
+Use server components to fetch chat data
+Pattern: await api.chat.list() in server component instead of useQuery() hook
+Reference instructor's example about server-side approach
+Will need session handling at server level
+
+Key files to modify for Option 3:
+
+app/layout.tsx - add server-side data fetching
+_components/chat-sidebar.tsx - convert to server component
+May need auth session handling in layout
+
+Why it failed at layout level: tRPC client hooks need provider initialization, but server-side calls don't have this limitation.

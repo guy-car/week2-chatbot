@@ -2,23 +2,22 @@
 
 import { useRouter } from 'next/navigation';
 import { useSession, signIn } from '~/lib/auth-client';
-import { createChat } from 'tools/chat-store';
 import { api } from "~/trpc/react";
+import { AppSidebar } from "~/app/_components/chat-sidebar";
 
 export function LandingPage() {
     const { data: session } = useSession()
     const router = useRouter()
 
-    const { data: chats, isLoading } = api.chat.getAll.useQuery();
-
-    const createChatMutation = api.chat.create.useMutation()
+    const { data: chats, isLoading } = api.chat.getAll.useQuery()
+    const createChatMutation = api.chat.create.useMutation();
 
     const handleNewChat = async () => {
         try {
-            const result = await createChatMutation.mutateAsync()
-            router.push(`/chat/${result.chatId}`)
+            const result = await createChatMutation.mutateAsync();
+            router.push(`/chat/${result.chatId}`);
         } catch (error) {
-            console.error('Failed to create chat:', error)
+            console.error('Failed to create chat:', error);
         }
     }
 
@@ -37,6 +36,7 @@ export function LandingPage() {
                 </div>
             )
         }
+        return <p>No chats found</p>;
     }
 
     const unknownUserEl = () => {
@@ -53,6 +53,7 @@ export function LandingPage() {
     const loggedInUserEl = () => {
         return (
             <div>
+                <AppSidebar /> {/* Added here temporarily */}
                 <div className='pl-4'>
                     <h1>Welcome back, {session?.user.name}!</h1>
                     <button onClick={handleNewChat}> Start new chat</button>
