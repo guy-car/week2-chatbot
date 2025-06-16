@@ -5,9 +5,9 @@ import { Geist } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { Header } from '~/app/_components/header'
+import { HeaderServer } from '~/app/_components/server/HeaderServer'
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
-import AppSidebar from "~/app/_components/chat-sidebar";  // Default import
+import AppSidebar from "~/app/_components/server/chat-sidebar";  // Default import
 import { auth } from "~/lib/auth"; // server side Better-Auth instance
 
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <div className="flex justify-between items-center p-4 border-b">
           <SidebarTrigger />
           <div className="flex-1">
-            <Header />
+            <HeaderServer />
           </div>
         </div>
         <div className="p-4">
@@ -50,7 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   const loggedOutLayout = (
     <div>
-      <Header />
+      <HeaderServer />
       <main className="p-4">
 
         {children}

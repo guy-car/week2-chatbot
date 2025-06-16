@@ -21,7 +21,6 @@ export default async function AppSidebar() {
   const session = await auth.api.getSession({
     headers: await headers()
   });
-  console.log(session)
   if (!session) return null
 
   const chats = await api.chat.getAll();

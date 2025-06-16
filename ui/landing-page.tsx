@@ -1,6 +1,6 @@
 'use server'
 
-import AppSidebar from "~/app/_components/chat-sidebar"; // Direct import
+import AppSidebar from "~/app/_components/server/chat-sidebar"; // Direct import
 import { NewChatComponent } from './NewChatComponent';
 
 export async function LandingPage() {
