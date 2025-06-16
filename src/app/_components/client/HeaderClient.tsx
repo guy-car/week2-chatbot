@@ -10,12 +10,16 @@ interface HeaderClientProps {
 }
 
 export function HeaderClient({ user }: HeaderClientProps) {
+    const handleSignOut = async () => {
+        await signOut()
+        window.location.reload()
+    }
     if (user) {
         return (
             <>
                 <span>Logged in as {user.name}</span>
                 <button
-                    onClick={() => void signOut()}
+                    onClick={handleSignOut}
                     className='px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600'
                 >
                     Logout

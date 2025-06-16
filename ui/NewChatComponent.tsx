@@ -33,8 +33,12 @@ export function NewChatComponent() {
             <div>
                 <div className='flex-1 pl-4'>
                     <div className='pl-4'>
-                        <h1>Welcome back, {session?.user.name}!</h1>
-                        <button onClick={handleNewChat}> Start new chat</button>
+                        <h1
+                            className='text-xl font-bold'
+                        >Welcome back, {session?.user.name}!</h1>
+                        <button
+                            className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+                            onClick={handleNewChat}> Start new chat</button>
                     </div>
                 </div>
                 <div>
