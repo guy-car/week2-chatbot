@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation';
-import { useSession, signIn } from '~/lib/auth-client';
+import { useSession } from '~/lib/auth-client';
 import { api } from "~/trpc/react";
 
 export function NewChatComponent() {
@@ -24,9 +24,6 @@ export function NewChatComponent() {
         return (
             <div>
                 <h1>Welcome to the movie recommendation chatbot</h1>
-                <button onClick={() => signIn.social({ provider: 'github' })}>
-                    Sign in with GitHub
-                </button>
             </div>
         )
     }
