@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';

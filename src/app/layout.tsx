@@ -2,10 +2,13 @@ import "~/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { Header } from '~/app/_components/header'
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
+import AppSidebar from "~/app/_components/chat-sidebar";  // Default import
+import { auth } from "~/lib/auth"; // server side Better-Auth instance
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -18,22 +21,52 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
+  const isLoggedIn = !!session?.user;
+
+  const loggedInLayout = (
+    <SidebarProvider>
+      <AppSidebar />
+      <main className="flex-1">
+        <div className="flex justify-between items-center p-4 border-b">
+          <SidebarTrigger />
+          <div className="flex-1">
+            <Header />
+          </div>
+        </div>
+        <div className="p-4">
+          {/* Only wrap the content that needs TRPC client */}
+
+          {children}
+
+        </div>
+      </main>
+    </SidebarProvider>
+  );
+
+  const loggedOutLayout = (
+    <div>
+      <Header />
+      <main className="p-4">
+
+        {children}
+
+      </main>
+    </div>
+  );
+
   return (
     <html lang="en" className={`${geist.variable}`}>
-      <body>
-        <TRPCReactProvider>
-          <SidebarProvider>
-            <main>
-              <SidebarTrigger />
-              <Header />
-              {children}
-            </main>
-          </SidebarProvider>
-        </TRPCReactProvider>
-      </body>
+      <TRPCReactProvider>
+
+        <body>
+          {isLoggedIn ? loggedInLayout : loggedOutLayout}
+        </body>
+      </TRPCReactProvider>
     </html>
   );
 }
