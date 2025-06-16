@@ -1,6 +1,9 @@
+'use server'
 // components/app-sidebar.tsx
+
+
 import { MessageSquare } from "lucide-react"
-import { api } from "~/trpc/react"
+import { api } from "~/trpc/server"
 import {
   Sidebar,
   SidebarContent,
@@ -11,13 +14,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar"
+import { auth } from "~/lib/auth";
+import { headers } from "next/headers";
 
-export function AppSidebar() {
+export default async function AppSidebar() {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+  console.log(session)
+  if (!session) return null
 
-console.log('api object:', api);
-  console.log('api.chat:', api.chat);
-  
-  const { data: chats, isLoading } = api.chat.getAll.useQuery()
+  const chats = await api.chat.getAll();
 
   return (
     <Sidebar>

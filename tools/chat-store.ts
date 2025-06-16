@@ -1,3 +1,5 @@
+'use server'
+
 import { generateId } from 'ai';
 import { type Message } from 'ai';
 import { db } from "~/server/db"
