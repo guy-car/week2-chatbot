@@ -23,7 +23,13 @@ export default function Chat({
     handleInputChange, handleSubmit,
     stop, reload,
     addToolResult } = useChat({
-      api: '/api/chat-with-chips',
+      api: '/api/chat-non-streaming',
+      onError: (error) => {
+        console.log('useChat error:', error);
+      },
+      onFinish: (message) => {
+        console.log('useChat finished:', message);
+      },
       id,
       initialMessages,
       maxSteps: 5,
