@@ -42,11 +42,38 @@ export default function Chat({
       size: 16,
     }),
   })
-  const handleChipClick = async (chipText: string) => {
-    try {
-      await append({ role: 'user', content: chipText });
-    } catch (error) {
-      console.error('Failed to send message:', error);
+  const extractMovieTitle = (chipText: string) => {
+    // Look for pattern "Add [anything] to watchlist"
+    const match = /Add (.+?) to watchlist/i.exec(chipText);
+    return match ? match[1].trim() : chipText; // fallback to full chip text
+  };
+  const addToWatchlist = (movieTitle: string) => {
+    const existing = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    if (!existing.includes(movieTitle)) {
+      existing.push(movieTitle);
+      localStorage.setItem('watchlist', JSON.stringify(existing));
+      return true; // successfully added
+    }
+    return false; // already exists
+  };
+  const handleChipClick = (chipText: string) => {
+    // Check if this is a watchlist chip
+    if (chipText.toLowerCase().includes('to watchlist')) {
+      // Handle watchlist logic
+      const movieTitle = extractMovieTitle(chipText);
+      const success = addToWatchlist(movieTitle);
+
+      if (success) {
+        console.log(`Added "${movieTitle}" to watchlist!`); // temp notification
+      } else {
+        console.log(`"${movieTitle}" is already in your watchlist`); // temp notification
+      }
+    } else {
+      // Handle regular chips (send as message)
+      void append({
+        role: 'user',
+        content: chipText
+      });
     }
   };
 
