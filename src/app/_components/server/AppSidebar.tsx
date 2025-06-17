@@ -37,7 +37,7 @@ export default async function AppSidebar() {
         {/* Group for sidebar labels and items */}
         <SidebarGroup>
           {/* Sidebar Group Label */}
-          <SidebarGroupLabel className="text-xl">The Genie`s Side Bar</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xl color">The Genie`s Side Bar</SidebarGroupLabel>
           <SidebarGroupContent>
             {/* Menu for navigation items */}
             <SidebarMenu>
@@ -98,3 +98,4 @@ export default async function AppSidebar() {
       </SidebarContent>
     </Sidebar>
   );
+}

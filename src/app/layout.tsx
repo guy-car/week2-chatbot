@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { headers } from "next/headers";
+import { Toaster } from 'react-hot-toast'
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { HeaderServer } from '~/app/_components/server/HeaderServer'
@@ -64,6 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <TRPCReactProvider>
         <body>
           {isLoggedIn ? loggedInLayout : loggedOutLayout}
+          <Toaster />
         </body>
       </TRPCReactProvider>
     </html>

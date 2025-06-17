@@ -3,6 +3,7 @@
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
 import { Loader2 } from "lucide-react";
+import clsx from 'clsx'
 
 function Spinner() {
   return (
@@ -108,7 +109,10 @@ export default function Chat({
                             {chips.map((chip, chipIndex) => (
                               <button
                                 key={chipIndex}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200"
+                                className={`px-3 py-1 rounded-full text-sm hover:bg-opacity-80 ${chip.toLowerCase().includes('to watchlist')
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  }`}
                                 onClick={() => handleChipClick(chip)}
                               >
                                 {chip}
