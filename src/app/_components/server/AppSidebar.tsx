@@ -1,8 +1,8 @@
-'use server'
+
 // components/app-sidebar.tsx
 
-
 import { MessageSquare } from "lucide-react"
+import Link from "next/link"
 import { api } from "~/trpc/server"
 import {
   Sidebar,
@@ -35,10 +35,10 @@ export default async function AppSidebar() {
               {chats?.map((chat) => (
                 <SidebarMenuItem key={chat.id}>
                   <SidebarMenuButton asChild>
-                    <a href={`/chat/${chat.id}`}>
+                    <Link href={`/chat/${chat.id}`}>
                       <MessageSquare />
-                      <span>{chat.id}</span>
-                    </a>
+                      <span>{chat.title ?? `Chat ${chat.id.slice(0, 8)}`}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

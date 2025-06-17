@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { TRPCReactProvider } from "~/trpc/react";
 import { HeaderServer } from '~/app/_components/server/HeaderServer'
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
-import AppSidebar from "~/app/_components/server/chat-sidebar";  // Default import
+import AppSidebar from "~/app/_components/server/AppSidebar";  // Default import
 import { auth } from "~/lib/auth"; // server side Better-Auth instance
 
 export const metadata: Metadata = {
