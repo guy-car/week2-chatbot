@@ -3,6 +3,7 @@
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
 import { Loader2 } from "lucide-react";
+import toast from 'react-hot-toast'
 
 function Spinner() {
   return (
@@ -43,18 +44,23 @@ export default function Chat({
     }),
   })
   const extractMovieTitle = (chipText: string) => {
-    // Look for pattern "Add [anything] to watchlist"
     const match = /Add (.+?) to watchlist/i.exec(chipText);
-    return match ? match[1].trim() : chipText; // fallback to full chip text
+    const title = match ? match[1].trim() : chipText;
+    console.log('Extracted title from:', chipText, '→', title);
+    return title;
   };
   const addToWatchlist = (movieTitle: string) => {
     const existing = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    console.log('Existing watchlist:', existing);
+    console.log('Trying to add:', movieTitle);
+    console.log('Includes check:', existing.includes(movieTitle));
+
     if (!existing.includes(movieTitle)) {
       existing.push(movieTitle);
       localStorage.setItem('watchlist', JSON.stringify(existing));
-      return true; // successfully added
+      return true;
     }
-    return false; // already exists
+    return false;
   };
   const handleChipClick = (chipText: string) => {
     // Check if this is a watchlist chip
@@ -62,11 +68,12 @@ export default function Chat({
       // Handle watchlist logic
       const movieTitle = extractMovieTitle(chipText);
       const success = addToWatchlist(movieTitle);
+      console.log('success is: ', success)
 
       if (success) {
-        console.log(`Added "${movieTitle}" to watchlist!`); // temp notification
+        toast.success(`Added "${movieTitle}" to watchlist!`);
       } else {
-        console.log(`"${movieTitle}" is already in your watchlist`); // temp notification
+        toast.error(`"${movieTitle}" is already in your watchlist`);
       }
     } else {
       // Handle regular chips (send as message)
@@ -108,7 +115,10 @@ export default function Chat({
                             {chips.map((chip, chipIndex) => (
                               <button
                                 key={chipIndex}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200"
+                                className={`px-3 py-1 rounded-full text-sm hover:bg-opacity-80 ${chip.toLowerCase().includes('to watchlist')
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  }`}
                                 onClick={() => handleChipClick(chip)}
                               >
                                 {chip}
