@@ -57,7 +57,6 @@ Chat UI:
 - Add to watch list chip is green
 - Show notification after movie was added to watch list (Toaster)
 
-
 **DONE** Side bar:
 - change name
 - Link for watch list and watch history
@@ -72,3 +71,4 @@ Chat history:
 - keywords about content instead of just date
 - display 10 most recents
 - add button to see all history
+
