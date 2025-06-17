@@ -12,7 +12,7 @@ interface HeaderClientProps {
 export function HeaderClient({ user }: HeaderClientProps) {
     const handleSignOut = async () => {
         await signOut()
-        window.location.reload()
+        window.location.href = '/'
     }
     if (user) {
         return (
