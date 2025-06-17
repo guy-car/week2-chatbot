@@ -21,33 +21,36 @@ export default function Chat({
   const { messages,
     input, status, error,
     handleInputChange, handleSubmit,
-    stop, reload,
-    addToolResult } = useChat({
-      api: '/api/chat-non-streaming',
-      onError: (error) => {
-        console.log('useChat error:', error);
-      },
-      onFinish: (message) => {
-        console.log('useChat finished:', message);
-      },
-      id,
-      initialMessages,
-      maxSteps: 5,
-      sendExtraMessageFields: true,
-      experimental_prepareRequestBody({ messages, id }) {
-        return { message: messages[messages.length - 1], id };
-      },
-      generateId: createIdGenerator({
-        prefix: 'msgc',
-        size: 16,
-      }),
-      async onToolCall({ toolCall }) {
-        if (toolCall.toolName === 'getLocation') {
-          const cities = ['New York', 'Los Angeles', 'Chicago', 'San Francisco'];
-          return cities[Math.floor(Math.random() * cities.length)];
-        }
-      },
-    });
+    stop, reload, append
+  } = useChat({
+    api: '/api/chat-with-chips',
+    onError: (error) => {
+      console.log('useChat error:', error);
+    },
+    onFinish: (message) => {
+      // console.log('useChat finished:', message);
+    },
+    id,
+    initialMessages,
+    maxSteps: 5,
+    sendExtraMessageFields: true,
+    experimental_prepareRequestBody({ messages, id }) {
+      return { message: messages[messages.length - 1], id };
+    },
+    generateId: createIdGenerator({
+      prefix: 'msgc',
+      size: 16,
+    }),
+  })
+  const handleChipClick = async (chipText: string) => {
+    try {
+      await append({ role: 'user', content: chipText });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+  };
+
+
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -79,7 +82,7 @@ export default function Chat({
                               <button
                                 key={chipIndex}
                                 className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200"
-                                onClick={() => console.log('Clicked chip:', chip)}
+                                onClick={() => handleChipClick(chip)}
                               >
                                 {chip}
                               </button>
