@@ -1,7 +1,4 @@
-
-// components/app-sidebar.tsx
-
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Bookmark, History, Home } from "lucide-react"
 import Link from "next/link"
 import { api } from "~/trpc/server"
 import {
@@ -25,19 +22,72 @@ export default async function AppSidebar() {
 
   const chats = await api.chat.getAll();
 
+  const formatChatDate = (createdAt: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(new Date(createdAt));
+  };
+
   return (
-    <Sidebar>
+    <Sidebar className='pt-10'>
+      {/* Sidebar Content Area */}
       <SidebarContent>
+        {/* Group for sidebar labels and items */}
         <SidebarGroup>
-          <SidebarGroupLabel>Chat History</SidebarGroupLabel>
+          {/* Sidebar Group Label */}
+          <SidebarGroupLabel className="text-xl">The Genie`s Side Bar</SidebarGroupLabel>
           <SidebarGroupContent>
+            {/* Menu for navigation items */}
             <SidebarMenu>
-              {chats?.map((chat) => (
+              {/* Menu Item: Home */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/">
+                    <Home />
+                    <span className="text-xl">Home</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Menu Item: Watchlist */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/watchlist">
+                    <Bookmark />
+                    <span className="text-xl">Watchlist</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Menu Item: Watch History */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/history">
+                    <History />
+                    <span className="text-xl">Watch History</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Group for recent chats */}
+        <SidebarGroup>
+          {/* Sidebar Group Label */}
+          <SidebarGroupLabel className="text-xl">Recent chats</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {/* Menu for recent chats */}
+            <SidebarMenu>
+              {/* Loop through chats */}
+              {chats?.slice(0, 10).map((chat) => (
                 <SidebarMenuItem key={chat.id}>
                   <SidebarMenuButton asChild>
                     <Link href={`/chat/${chat.id}`}>
                       <MessageSquare />
-                      <span>{chat.title ?? `Chat ${chat.id.slice(0, 8)}`}</span>
+                      <span className="text-xl">{chat.title ?? formatChatDate(chat.createdAt)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -47,5 +97,4 @@ export default async function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
-}
+  );

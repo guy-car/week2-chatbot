@@ -50,22 +50,22 @@ User-specific chat history
 Load previous chats on lobby
 Rename/edit chat titles
 
-Tomorrow side bar with chat hitory only accessible to specific users
+____
 
-___ note for claude later
 
-Future Refactor to Option 3 (Server-Side):
+Chat UI:
+- Add to watch list chip is green
+- Show notification after movie was added to watch list (Toaster)
 
-Move sidebar back to layout.tsx
-Use server components to fetch chat data
-Pattern: await api.chat.list() in server component instead of useQuery() hook
-Reference instructor's example about server-side approach
-Will need session handling at server level
+Side bar:
+- change name
+- Link for watch list and watch history
+- Collapsable history of previous chats or only display 10
 
-Key files to modify for Option 3:
+Watch history:
+- create it
+- add logic similar to addToWatchlist
 
-app/layout.tsx - add server-side data fetching
-_components/chat-sidebar.tsx - convert to server component
-May need auth session handling in layout
-
-Why it failed at layout level: tRPC client hooks need provider initialization, but server-side calls don't have this limitation.
+Chat naming:
+- display timestamp (date)
+- keywords about content
