@@ -1,9 +1,11 @@
 import { openai } from '@ai-sdk/openai';
-import { appendResponseMessages, 
-  streamText, 
-  createIdGenerator, 
-  appendClientMessage, 
-  type Message } from 'ai';
+import {
+  appendResponseMessages,
+  streamText,
+  createIdGenerator,
+  appendClientMessage,
+  type Message
+} from 'ai';
 import { saveChat, loadChat } from 'tools/chat-store';
 import { z } from 'zod';
 import { errorHandler } from '~/lib/utils';
@@ -19,7 +21,7 @@ export async function POST(req: Request) {
   };
 
   const previousMessages = await loadChat(id);
-  
+
   const messages = appendClientMessage({
     messages: previousMessages,
     message,
@@ -34,32 +36,7 @@ export async function POST(req: Request) {
       prefix: 'msgs',
       size: 16,
     }),
-    tools: {
-      // server-side tool with execute function:
-      getWeatherInformation: {
-        description: 'show the weather in a given city to the user',
-        parameters: z.object({ city: z.string() }),
-        execute: async ({}: { city: string }) => {
-          const weatherOptions = ['sunny', 'cloudy', 'rainy', 'snowy', 'windy'];
-          return weatherOptions[
-            Math.floor(Math.random() * weatherOptions.length)
-          ];
-        },
-      },
-      // client-side tool that starts user interaction:
-      askForConfirmation: {
-        description: 'Ask the user for confirmation.',
-        parameters: z.object({
-          message: z.string().describe('The message to ask for confirmation.'),
-        }),
-      },
-      // client-side tool that is automatically executed on the client:
-      getLocation: {
-        description:
-          'Get the user location. Always ask for confirmation before using this tool.',
-        parameters: z.object({}),
-      },
-    },
+    tools: {},
     async onFinish({ response }) {
       await saveChat({
         id,
@@ -71,11 +48,11 @@ export async function POST(req: Request) {
     },
   });
 
-    // consume the stream to ensure it runs to completion & triggers onFinish
+  // consume the stream to ensure it runs to completion & triggers onFinish
   // even when the client response is aborted:
   void result.consumeStream(); // no await
 
-return result.toDataStreamResponse({
-  getErrorMessage: errorHandler,
-})
+  return result.toDataStreamResponse({
+    getErrorMessage: errorHandler,
+  })
 }
