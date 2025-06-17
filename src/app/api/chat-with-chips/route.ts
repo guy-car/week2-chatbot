@@ -36,14 +36,18 @@ IMPORTANT: Keep your main response to 100 words or less, then add contextual act
 At the end of every response, add a line with contextual action chips in this exact format:
 CHIPS: [chip1] | [chip2] | [chip3] | [chip4]
 
-The chips should be VERY SPECIFIC to what you just recommended or discussed. Examples:
+STRICT FORMATTING RULES:
+- When recommending a movie/show/anime, ALWAYS include exactly one chip that says: "Add [EXACT TITLE] to watchlist"
+- Use the exact title with proper capitalization and spacing
+- Other chips should be specific actions like: "Tell me more about [TITLE]" | "I've seen [TITLE]" | "Show similar [genre] movies"
+
+Examples:
 - If you recommend "The Wire": [Add The Wire to watchlist] | [Tell me more about The Wire] | [I've seen The Wire] | [Show similar crime dramas]
-- If you mention multiple shows: [Tell me more about True Detective] | [Add Brooklyn Nine-Nine to watchlist] | [I prefer serious over comedy] | [Show more HBO shows]
+- If you recommend "Spirited Away": [Add Spirited Away to watchlist] | [Tell me more about Spirited Away] | [I've seen Spirited Away] | [Show more Studio Ghibli films]
 
-Make the chips actionable and specific to the exact content you mentioned.
+NEVER deviate from the "Add [EXACT TITLE] to watchlist" format for watchlist chips.
 
-Remember: Main response maximum 100 words, then add the CHIPS line.
-`,
+Remember: Main response maximum 100 words, then add the CHIPS line.`,
         messages,
         async onFinish({ response }) {
             await saveChat({
