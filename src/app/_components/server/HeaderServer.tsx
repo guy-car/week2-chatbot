@@ -9,9 +9,8 @@ export async function HeaderServer() {
 
   return (
     <header className='w-full border-b p-4'>
-      <div className='flex justify-between items-center max-w-7xl mx-auto'>
-        <h1 className='text-xl font-bold'>Movie Chatbot</h1>
-        <div className='flex items-center gap-4'>
+      <div className='max-w-7xl mx-auto'>
+        <div className=' gap-4'>
           <HeaderClient user={session?.user ?? null} />
         </div>
       </div>
