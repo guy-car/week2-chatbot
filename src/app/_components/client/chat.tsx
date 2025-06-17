@@ -23,6 +23,7 @@ export default function Chat({
     handleInputChange, handleSubmit,
     stop, reload,
     addToolResult } = useChat({
+      api: '/api/chat-with-chips',
       id,
       initialMessages,
       maxSteps: 5,
@@ -54,7 +55,36 @@ export default function Chat({
               ?.filter(part => part.type !== 'source')
               .map((part, index) => {
                 if (part.type === 'text') {
-                  return <div key={index}>{part.text}</div>;
+                  const text = part.text;
+
+                  // Check if this text contains chips
+                  if (text.includes('CHIPS:')) {
+                    const [mainText, chipsText] = text.split('CHIPS:');
+                    const chips = chipsText?.trim()
+                      .split('|')
+                      .map(chip => chip.trim().replace(/\[|\]/g, ''));
+
+                    return (
+                      <div key={index}>
+                        <div>{mainText?.trim()}</div>
+                        {chips && chips.length > 0 && (
+                          <div className="flex gap-2 mt-2">
+                            {chips.map((chip, chipIndex) => (
+                              <button
+                                key={chipIndex}
+                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200"
+                                onClick={() => console.log('Clicked chip:', chip)}
+                              >
+                                {chip}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  return <div key={index}>{text}</div>;
                 }
 
                 // if AI decided to use a tool:
