@@ -1,8 +1,8 @@
 'use server'
 
-import { NewChatComponent } from './NewChatComponent';
+import { NewChatComponent } from '../client/NewChatComponent';
 
-export async function LandingPage() {
+export async function HomePage() {
 
     return (
         <div>

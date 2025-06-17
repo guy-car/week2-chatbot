@@ -120,8 +120,8 @@ export default function Chat({
         <button
           type="submit"
           className={`px-6 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${status !== 'ready'
-              ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
+            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+            : 'bg-blue-500 text-white hover:bg-blue-600'
             }`}
           disabled={status !== 'ready'}
         >
