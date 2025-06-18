@@ -3,6 +3,7 @@
 
 import { ThumbsUp, ThumbsDown, Eye, Bookmark, MessageCircle } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
+import { toast } from 'react-hot-toast'
 
 interface MovieCardProps {
     movie: {
@@ -17,6 +18,42 @@ interface MovieCardProps {
 export function MovieCard({ movie }: MovieCardProps) {
     const year = movie.release_date?.substring(0, 4)
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
+
+    const handleAddToWatchlist = () => {
+        const existing = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as string[]
+        if (!existing.includes(movie.title)) {
+            existing.push(movie.title)
+            localStorage.setItem('watchlist', JSON.stringify(existing))
+            toast.success(`Added "${movie.title}" to watchlist`)
+        } else {
+            toast.error(`"${movie.title}" is already in your watchlist`)
+        }
+    }
+
+    const handleMarkAsWatched = () => {
+        const watched = JSON.parse(localStorage.getItem('watchHistory') ?? '[]') as string[]
+        if (!watched.includes(movie.title)) {
+            watched.push(movie.title)
+            localStorage.setItem('watchHistory', JSON.stringify(watched))
+            toast.success(`Marked "${movie.title}" as watched`)
+        } else {
+            toast(`"${movie.title}" is already in your watch history`)
+        }
+    }
+
+    const handleLike = () => {
+        // For now, just toast. Later we'll save this preference
+        toast.success(`You liked "${movie.title}"`)
+    }
+
+    const handleDislike = () => {
+        toast.success(`You disliked "${movie.title}"`)
+    }
+
+    const handleMoreInfo = () => {
+        // This will need to be passed from parent
+        toast('More info feature coming soon!')
+    }
 
     return (
         <div className="flex flex-col items-center">
@@ -37,49 +74,56 @@ export function MovieCard({ movie }: MovieCardProps) {
                     <div className="absolute inset-0 pointer-events-none">
                         {/* Top row - buttons 1 and 2 */}
                         <div className="absolute top-4 left-4 right-4 flex justify-between pointer-events-auto">
+                            {/* Add to Watchlist */}
                             <button
                                 className={buttonClasses}
                                 style={{ width: 'var(--button-size)', height: 'var(--button-size)' }}
                                 data-tooltip-id="movie-actions"
                                 data-tooltip-content="Add to Watchlist"
+                                onClick={handleAddToWatchlist}
                             >
                                 <Bookmark className="w-5 h-5 text-white" />
                             </button>
+                            {/* Mark as watched */}
                             <button
                                 className={buttonClasses}
                                 style={{ width: 'var(--button-size)', height: 'var(--button-size)' }}
                                 data-tooltip-id="movie-actions"
-                                data-tooltip-content="Add to Watchlist"
+                                data-tooltip-content="Mark as watched"
+                                onClick={handleMarkAsWatched}
                             >
                                 <Eye className="w-5 h-5 text-white" />
                             </button>
                         </div>
 
-                        {/* Center - More info button - FIXED */}
+                        {/* More info */}
                         <button
                             className={`${buttonClasses} absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto`}
                             style={{ width: 'var(--button-size)', height: 'var(--button-size)' }}
                             data-tooltip-id="movie-actions"
-                            data-tooltip-content="Add to Watchlist"
+                            data-tooltip-content="More info"
+                            onClick={handleMoreInfo}
                         >
                             <MessageCircle className="w-6 h-6 text-white" />
                         </button>
-
-                        {/* Bottom row - buttons 3 and 4 */}
                         <div className="absolute bottom-4 left-4 right-4 flex justify-between pointer-events-auto">
+                            {/* Like */}
                             <button
                                 className={buttonClasses}
                                 style={{ width: 'var(--button-size)', height: 'var(--button-size)' }}
                                 data-tooltip-id="movie-actions"
-                                data-tooltip-content="Add to Watchlist"
+                                data-tooltip-content="Like"
+                                onClick={handleLike}
                             >
                                 <ThumbsUp className="w-5 h-5 text-white" />
                             </button>
+                            {/* Dislike */}
                             <button
                                 className={buttonClasses}
                                 style={{ width: 'var(--button-size)', height: 'var(--button-size)' }}
                                 data-tooltip-id="movie-actions"
-                                data-tooltip-content="Add to Watchlist"
+                                data-tooltip-content="Dislike"
+                                onClick={handleDislike}
                             >
                                 <ThumbsDown className="w-5 h-5 text-white" />
                             </button>
