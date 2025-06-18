@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm"
 
 export async function createChat(userId: string): Promise<string> {
   const id = generateId(); // generate a unique chat ID
-  await db.insert(chats).values({ 
+  await db.insert(chats).values({
     id,
     userId
   }); // create chat record in database
@@ -20,10 +20,10 @@ export async function loadChat(id: string): Promise<Message[]> {
     .select()
     .from(messages)
     .where(eq(messages.chat_id, id));
-  
+
   return result.map(row => ({
     id: row.id,
-    content: row.content?? '', // handle potential null
+    content: row.content ?? '', // handle potential null
     role: row.role as 'system' | 'user' | 'assistant' | 'data', // type assertion
     createdAt: row.createdAt,
     // Note: we don't include chat_id since Message interface doesn't have it
@@ -37,20 +37,27 @@ export async function saveChat({
   id: string;
   messages: Message[];
 }): Promise<void> {
-  // First, delete existing messages for this chat
-  await db.delete(messages).where(eq(messages.chat_id, id));
-  
-  // Then insert all the new messages
-  if (messageList.length > 0) {
+  // Get existing message IDs
+  const existingMessages = await db
+    .select({ id: messages.id })
+    .from(messages)
+    .where(eq(messages.chat_id, id));
+
+  const existingIds = new Set(existingMessages.map(m => m.id));
+
+  // Filter to only new messages
+  const newMessages = messageList.filter(msg => !existingIds.has(msg.id));
+
+  // Insert only new messages
+  if (newMessages.length > 0) {
     await db.insert(messages).values(
-      messageList.map(msg => ({
+      newMessages.map(msg => ({
         id: msg.id,
         chat_id: id,
         role: msg.role,
         content: msg.content,
         createdAt: msg.createdAt ? new Date(msg.createdAt) : new Date(),
       }))
-      
-    );
+    ).onConflictDoNothing(); // Add this if your DB supports it
   }
 }
