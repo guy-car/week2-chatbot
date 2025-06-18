@@ -52,10 +52,11 @@ Rename/edit chat titles
 
 ____
 
-
+**DONE**
 Chat UI:
 - Add to watch list chip is green
 - Show notification after movie was added to watch list (Toaster)
+
 
 **DONE** Side bar:
 - change name
@@ -72,3 +73,10 @@ Chat history:
 - display 10 most recents
 - add button to see all history
 
+Data persistence:
+- switch from local storage to Supabase
+
+TMDB API:
+- make calls
+- get a nide movie card when a movie is recommended
+- display movie cards in watch history / list

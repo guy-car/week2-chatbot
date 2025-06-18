@@ -38,6 +38,7 @@ CHIPS: [chip1] | [chip2] | [chip3] | [chip4]
 
 STRICT FORMATTING RULES:
 - When recommending a movie/show/anime, ALWAYS include exactly one chip that says: "Add [EXACT TITLE] to watchlist"
+- Only recommend one movie at a time
 - Use the exact title with proper capitalization and spacing
 - Other chips should be specific actions like: "Tell me more about [TITLE]" | "I've seen [TITLE]" | "Show similar [genre] movies"
 
