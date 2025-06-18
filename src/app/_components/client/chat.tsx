@@ -5,33 +5,8 @@ import { createIdGenerator } from 'ai';
 import { Loader2 } from "lucide-react";
 import toast from 'react-hot-toast'
 
-// Simple Movie Poster Component
-function MoviePoster({ movieData }) {
-  // Handle case where there's no poster
-  if (!movieData.poster_url) {
-    return (
-      <div className="my-4 w-48 h-72 bg-gray-200 rounded-lg flex items-center justify-center">
-        <span className="text-gray-500">No poster available</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="my-4">
-      <img
-        src={movieData.poster_url}
-        alt={movieData.title}
-        className="w-48 h-auto rounded-lg shadow-md"
-        onError={(e) => {
-          // Fallback if image fails to load
-          e.target.onerror = null;
-          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300"%3E%3Crect width="200" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%236b7280"%3ENo Image%3C/text%3E%3C/svg%3E';
-        }}
-      />
-      <p className="mt-2 text-sm text-gray-600">{movieData.title}</p>
-    </div>
-  );
-}
+import { useState, useEffect, useRef } from 'react'
+import { MovieCardsSection, type MovieData } from './MovieCardsSection'
 
 function Spinner() {
   return (
@@ -109,15 +84,44 @@ export default function Chat({
     }
   };
 
+  const [recommendedMovies, setRecommendedMovies] = useState<MovieData[]>([])
 
+  useEffect(() => {
+    const movies: MovieData[] = []
+
+    // Go through all messages and extract movie data from tool invocations
+    messages.forEach(message => {
+      message.parts?.forEach(part => {
+        if (
+          part.type === 'tool-invocation' &&
+          part.toolInvocation.toolName === 'media_lookup' &&
+          part.toolInvocation.state === 'result' &&
+          !part.toolInvocation.result.error
+        ) {
+          movies.push(part.toolInvocation.result)
+        }
+      })
+    })
+
+    setRecommendedMovies(movies)
+  }, [messages])
+
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [messages])
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold mb-6">Chat {id ? `(${id.slice(0, 8)}...)` : ''}</h1>
-
-      <div className="h-96 border border-gray-300 p-4 mb-4 overflow-y-auto bg-gray-50 rounded-lg">
+      <div
+        ref={chatContainerRef}
+        className="h-64 border border-gray-300 p-6 mb-6 overflow-y-auto bg-gray-50 rounded-lg">
         {messages.map(message => (
-          <div key={message.id} className="mb-3">
+          <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-base'}`}>
             <strong>{message.role === 'user' ? 'User: ' : 'AI: '}</strong>
             {message.parts
               ?.filter(part => part.type !== 'source')
@@ -158,39 +162,39 @@ export default function Chat({
                   return <div key={index}>{text}</div>;
                 }
 
-                // Handle tool invocations
-                else if (part.type === 'tool-invocation') {
-                  const invocation = part.toolInvocation;
+                // // Handle tool invocations
+                // else if (part.type === 'tool-invocation') {
+                //   const invocation = part.toolInvocation;
 
-                  // Check if it's our media_lookup tool and it has completed
-                  if (invocation.toolName === 'media_lookup' && invocation.state === 'result') {
-                    const movieData = invocation.result;
+                //   // Check if it's our media_lookup tool and it has completed
+                //   if (invocation.toolName === 'media_lookup' && invocation.state === 'result') {
+                //     const movieData = invocation.result;
 
-                    // Check if there's an error in the result
-                    if (movieData.error) {
-                      return (
-                        <div key={index} className="my-2 text-sm text-red-600">
-                          Failed to load movie details
-                        </div>
-                      );
-                    }
+                //     // Check if there's an error in the result
+                //     if (movieData.error) {
+                //       return (
+                //         <div key={index} className="my-2 text-sm text-red-600">
+                //           Failed to load movie details
+                //         </div>
+                //       );
+                //     }
 
-                    // Render the movie poster
-                    return <MoviePoster key={index} movieData={movieData} />;
-                  }
+                //     // Render the movie poster
+                //     return <MoviePoster key={index} movieData={movieData} />;
+                //   }
 
-                  // Show loading state if tool is still running
-                  else if (invocation.toolName === 'media_lookup' && invocation.state === 'pending') {
-                    return (
-                      <div key={index} className="my-2 flex items-center space-x-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm text-gray-500">Looking up movie details...</span>
-                      </div>
-                    );
-                  }
+                //   // Show loading state if tool is still running
+                //   else if (invocation.toolName === 'media_lookup' && invocation.state === 'pending') {
+                //     return (
+                //       <div key={index} className="my-2 flex items-center space-x-2">
+                //         <Loader2 className="h-4 w-4 animate-spin" />
+                //         <span className="text-sm text-gray-500">Looking up movie details...</span>
+                //       </div>
+                //     );
+                //   }
 
-                  return null;
-                }
+                //   return null;
+                // }
 
                 return null;
               })}
@@ -208,7 +212,7 @@ export default function Chat({
           </div>
         ))}
       </div>
-
+      <MovieCardsSection movies={recommendedMovies} />
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <div className="text-red-700 mb-2">An error occurred.</div>
