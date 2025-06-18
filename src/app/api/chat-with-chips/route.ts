@@ -2,12 +2,10 @@ import { openai } from '@ai-sdk/openai';
 import {
     appendResponseMessages,
     streamText,
-    createIdGenerator,
     appendClientMessage,
     type Message
 } from 'ai';
 import { saveChat, loadChat } from 'tools/chat-store';
-import { z } from 'zod';
 import { errorHandler } from '~/lib/utils';
 
 // Allow streaming responses up to 30 seconds

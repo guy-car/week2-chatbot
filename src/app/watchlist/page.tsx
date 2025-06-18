@@ -6,7 +6,7 @@ export default function WatchlistPage() {
     const [movies, setMovies] = useState<string[]>([]);
 
     useEffect(() => {
-        const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+        const watchlist = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as string[];
         setMovies(watchlist);
     }, []);
 

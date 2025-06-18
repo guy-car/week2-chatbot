@@ -1,7 +1,6 @@
 // src/app/api/chat-with-object/route.ts
 import { openai } from '@ai-sdk/openai';
 import {
-    appendResponseMessages,
     streamObject,
     createIdGenerator,
     appendClientMessage,
@@ -9,7 +8,6 @@ import {
 } from 'ai';
 import { saveChat, loadChat } from 'tools/chat-store';
 import { z } from 'zod';
-import { errorHandler } from '~/lib/utils';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -72,7 +70,7 @@ Remember:
 - Make chips actionable and specific to continue the conversation`,
         messages,
         schema: responseSchema,
-        async onFinish({ object, response }) {
+        async onFinish({ object }) {
             // Create a message from the structured object for chat history
             const assistantMessage: Message = {
                 id: createIdGenerator({ prefix: 'msg', size: 16 })(),
