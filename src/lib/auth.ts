@@ -6,7 +6,11 @@ export const auth = betterAuth({
   baseURL: process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
-
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://week2-chatbot.vercel.app",
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : [])
+  ],
   database: drizzleAdapter(db, {
     provider: "pg"
   }),
