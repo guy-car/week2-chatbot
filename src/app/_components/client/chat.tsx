@@ -43,7 +43,7 @@ export default function Chat({
 
       // Try to parse the structured response and log movieTitle
       try {
-        const structuredResponse: StructuredResponse = JSON.parse(message.content);
+        const structuredResponse: StructuredResponse = JSON.parse(message.content) as StructuredResponse;
         if (structuredResponse.movieTitle) {
           console.log('🎬 Movie title for TMDB:', structuredResponse.movieTitle);
         }
@@ -72,7 +72,7 @@ export default function Chat({
   };
 
   const addToWatchlist = (movieTitle: string) => {
-    const existing = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    const existing = JSON.parse(localStorage.getItem('watchlist') || '[]') as string[];
     console.log('Existing watchlist:', existing);
     console.log('Trying to add:', movieTitle);
     console.log('Includes check:', existing.includes(movieTitle));
@@ -110,7 +110,7 @@ export default function Chat({
   // Helper function to parse structured response
   const parseStructuredResponse = (content: string): StructuredResponse | null => {
     try {
-      return JSON.parse(content);
+      return JSON.parse(content) as StructuredResponse;
     } catch (e) {
       // Fallback for non-structured messages or malformed JSON
       return null;
