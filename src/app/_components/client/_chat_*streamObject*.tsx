@@ -15,6 +15,13 @@ function Spinner() {
   );
 }
 
+// Type for our structured response
+interface StructuredResponse {
+  text: string;
+  chips: string[];
+  movieTitle?: string;
+}
+
 export default function Chat({
   id,
   initialMessages,
@@ -25,12 +32,24 @@ export default function Chat({
     handleInputChange, handleSubmit,
     stop, reload, append
   } = useChat({
-    api: '/api/chat-with-chips',
+    api: '/api/chat-with-object',
+    streamProtocol: 'text',  // Changed API endpoint
     onError: (error) => {
       console.log('useChat error:', error);
     },
     onFinish: (message) => {
-      // console.log('useChat finished:', message);
+      // This is where we could add TMDB API call later
+      console.log('useChat finished:', message);
+
+      // Try to parse the structured response and log movieTitle
+      try {
+        const structuredResponse: StructuredResponse = JSON.parse(message.content) as StructuredResponse;
+        if (structuredResponse.movieTitle) {
+          console.log('🎬 Movie title for TMDB:', structuredResponse.movieTitle);
+        }
+      } catch (e) {
+        console.log('Could not parse structured response:', e);
+      }
     },
     id,
     initialMessages,
@@ -44,14 +63,16 @@ export default function Chat({
       size: 16,
     }),
   })
+
   const extractMovieTitle = (chipText: string) => {
     const match = /Add (.+?) to watchlist/i.exec(chipText);
     const title = match ? match[1].trim() : chipText;
     console.log('Extracted title from:', chipText, '→', title);
     return title;
   };
+
   const addToWatchlist = (movieTitle: string) => {
-    const existing = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    const existing = JSON.parse(localStorage.getItem('watchlist') || '[]') as string[];
     console.log('Existing watchlist:', existing);
     console.log('Trying to add:', movieTitle);
     console.log('Includes check:', existing.includes(movieTitle));
@@ -63,6 +84,7 @@ export default function Chat({
     }
     return false;
   };
+
   const handleChipClick = (chipText: string) => {
     // Check if this is a watchlist chip
     if (chipText.toLowerCase().includes('to watchlist')) {
@@ -85,7 +107,15 @@ export default function Chat({
     }
   };
 
-
+  // Helper function to parse structured response
+  const parseStructuredResponse = (content: string): StructuredResponse | null => {
+    try {
+      return JSON.parse(content) as StructuredResponse;
+    } catch (e) {
+      // Fallback for non-structured messages or malformed JSON
+      return null;
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -99,47 +129,59 @@ export default function Chat({
               ?.filter(part => part.type !== 'source')
               .map((part, index) => {
                 if (part.type === 'text') {
-                  const text = part.text;
+                  const text = message.content;
 
-                  // Check if this text contains chips
-                  if (text.includes('CHIPS:')) {
-                    const [mainText, chipsText] = text.split('CHIPS:');
-                    const chips = chipsText?.trim()
-                      .split('|')
-                      .map(chip => chip.trim().replace(/\[|\]/g, ''));
+                  // Try to parse as structured response (for assistant messages)
+                  if (message.role === 'assistant') {
+                    console.log('🔍 Debug - Full message:', message);
+                    console.log('🔍 Debug - message.parts:', message.parts);
+                    console.log('🔍 Debug - part.text:', text);
 
-                    return (
-                      <div key={index}>
-                        <div>{mainText?.trim()}</div>
-                        {chips && chips.length > 0 && (
-                          <div className="flex gap-2 mt-2">
-                            {chips.map((chip, chipIndex) => (
-                              <button
-                                key={chipIndex}
-                                className={`px-3 py-1 rounded-full text-sm hover:bg-opacity-80 ${chip.toLowerCase().includes('to watchlist')
-                                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                  }`}
-                                onClick={() => handleChipClick(chip)}
-                              >
-                                {chip}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
+                    const structuredResponse = parseStructuredResponse(text);
+                    console.log('🔍 Debug - parsed response:', structuredResponse);
+
+                    if (!structuredResponse) {
+                      return <div key={index}>AI is thinking...</div>;
+                    }
+
+                    if (structuredResponse) {
+                      // Render structured response
+                      return (
+                        <div key={index}>
+                          {/* Main text */}
+                          <div>{structuredResponse.text}</div>
+                          {/* Chips */}
+                          {structuredResponse.chips && structuredResponse.chips.length > 0 && (
+                            <div className="flex gap-2 mt-2">
+                              {structuredResponse.chips.map((chip, chipIndex) => (
+                                <button
+                                  key={chipIndex}
+                                  className={`px-3 py-1 rounded-full text-sm hover:bg-opacity-80 ${chip.toLowerCase().includes('to watchlist')
+                                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                    }`}
+                                  onClick={() => handleChipClick(chip)}
+                                >
+                                  {chip}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
                   }
 
+                  // Fallback for non-structured text (user messages or malformed responses)
                   return <div key={index}>{text}</div>;
                 }
 
-                // if AI decided to use a tool:
+                // Handle tool invocations if needed
                 else if (part.type === 'tool-invocation') {
                   const callId = part.toolInvocation.toolCallId;
-
+                  return <div key={index}>Tool call: {callId}</div>;
                 }
-                return null; // Handle any other part types
+                return null;
               })}
             {message.parts
               ?.filter(part => part.type === 'source')
