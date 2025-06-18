@@ -125,7 +125,7 @@
   }
 }
 
-@keyframes breathe {
+/* @keyframes breathe {
 
   0%,
   100% {
@@ -141,8 +141,7 @@
   animation: breathe 3s ease-in-out infinite;
 }
 
-/* Force opacity when parent is hovered */
 .group:hover .breathe {
   animation: none !important;
   opacity: 1 !important;
-}
+} */
