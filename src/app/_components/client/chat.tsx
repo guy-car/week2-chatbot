@@ -3,8 +3,35 @@
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
 import { Loader2 } from "lucide-react";
-
 import toast from 'react-hot-toast'
+
+// Simple Movie Poster Component
+function MoviePoster({ movieData }) {
+  // Handle case where there's no poster
+  if (!movieData.poster_url) {
+    return (
+      <div className="my-4 w-48 h-72 bg-gray-200 rounded-lg flex items-center justify-center">
+        <span className="text-gray-500">No poster available</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-4">
+      <img
+        src={movieData.poster_url}
+        alt={movieData.title}
+        className="w-48 h-auto rounded-lg shadow-md"
+        onError={(e) => {
+          // Fallback if image fails to load
+          e.target.onerror = null;
+          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300"%3E%3Crect width="200" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%236b7280"%3ENo Image%3C/text%3E%3C/svg%3E';
+        }}
+      />
+      <p className="mt-2 text-sm text-gray-600">{movieData.title}</p>
+    </div>
+  );
+}
 
 function Spinner() {
   return (
@@ -25,7 +52,7 @@ export default function Chat({
     handleInputChange, handleSubmit,
     stop, reload, append
   } = useChat({
-    api: '/api/chat-with-media-lookup-tool',
+    api: '/api/chat-tmdb-tool',
     onError: (error) => {
       console.log('useChat error:', error);
     },
@@ -52,7 +79,6 @@ export default function Chat({
   };
   const addToWatchlist = (movieTitle: string) => {
     const existing = JSON.parse(localStorage.getItem('watchlist') || '[]');
-
 
     if (!existing.includes(movieTitle)) {
       existing.push(movieTitle);
@@ -132,12 +158,41 @@ export default function Chat({
                   return <div key={index}>{text}</div>;
                 }
 
-                // if AI decided to use a tool:
+                // Handle tool invocations
                 else if (part.type === 'tool-invocation') {
-                  const callId = part.toolInvocation.toolCallId;
+                  const invocation = part.toolInvocation;
 
+                  // Check if it's our media_lookup tool and it has completed
+                  if (invocation.toolName === 'media_lookup' && invocation.state === 'result') {
+                    const movieData = invocation.result;
+
+                    // Check if there's an error in the result
+                    if (movieData.error) {
+                      return (
+                        <div key={index} className="my-2 text-sm text-red-600">
+                          Failed to load movie details
+                        </div>
+                      );
+                    }
+
+                    // Render the movie poster
+                    return <MoviePoster key={index} movieData={movieData} />;
+                  }
+
+                  // Show loading state if tool is still running
+                  else if (invocation.toolName === 'media_lookup' && invocation.state === 'pending') {
+                    return (
+                      <div key={index} className="my-2 flex items-center space-x-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm text-gray-500">Looking up movie details...</span>
+                      </div>
+                    );
+                  }
+
+                  return null;
                 }
-                return null; // Handle any other part types
+
+                return null;
               })}
             {message.parts
               ?.filter(part => part.type === 'source')
