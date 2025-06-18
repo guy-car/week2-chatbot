@@ -3,9 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from '~/server/db';
 
 export const auth = betterAuth({
-  baseURL: process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  baseURL: process.env.AUTH_BASE_URL ?? "http://localhost:3000",
   trustedOrigins: [
     "http://localhost:3000",
     "https://week2-chatbot.vercel.app",
