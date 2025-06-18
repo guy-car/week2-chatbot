@@ -16,8 +16,7 @@ interface MovieCardProps {
 
 export function MovieCard({ movie }: MovieCardProps) {
     const year = movie.release_date?.substring(0, 4)
-    const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 breathe"
-
+    const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
 
     return (
         <div className="flex flex-col items-center">
