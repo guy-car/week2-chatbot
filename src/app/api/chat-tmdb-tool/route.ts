@@ -6,7 +6,6 @@ import {
   appendClientMessage,
   type Message
 } from 'ai';
-import { log } from 'console';
 import { saveChat, loadChat } from 'tools/chat-store';
 import { z } from 'zod';
 import { errorHandler } from '~/lib/utils';

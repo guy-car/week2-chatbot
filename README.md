@@ -64,19 +64,56 @@ Chat UI:
 - only display 10 chats
 - display timestamp (date)
 
+___
+
+Make custom tools:
+
+Return to stream text
+
+Chain optional tool for media look up
+
+and then onFinish we do an llm all for media chips
+
+Media look up:
+- when you recommend a movie, do a media look up on TMDB using Search / Multi - then we need to filter that by keeping the exact title match and most popular
+
+We want a different LLM call just dedicated to conversational chips with granular prompt guidance for the kind of chips we want
+
+___
+
+**DONE** UI:
+make chat wider
+have 3 sections (see sketch)
+
+Make movie posters clickable:
+- add to watch list
+- add to history
+- "say more" - question mark symbol?
+- maybe a thumbs up or down
+
+Chips:
+- contextual conversational chips (bring them back)
+- make custom API call for that (onFinish?)
+
 Watch history:
 - create it
 - add logic similar to addToWatchlist
 
+Chat names:
+- come up with solution
+
 Chat history:
-- keywords about content instead of just date
 - display 10 most recents
 - add button to see all history
 
 Data persistence:
 - switch from local storage to Supabase
 
-TMDB API:
-- make calls
-- get a nide movie card when a movie is recommended
-- display movie cards in watch history / list
+Auth:
+- add sign up form for email
+
+Overal UI character:
+- Colors
+- themed animation
+- logo?
+

@@ -31,7 +31,7 @@ export default function Chat({
     onError: (error) => {
       console.log('useChat error:', error);
     },
-    onFinish: (message) => {
+    onFinish: (_message) => {
       // console.log('useChat finished:', message);
     },
     id,
@@ -48,12 +48,13 @@ export default function Chat({
   })
   const extractMovieTitle = (chipText: string) => {
     const match = /Add (.+?) to watchlist/i.exec(chipText);
-    const title = match ? match[1].trim() : chipText;
+    const title = match?.[1] ? match[1].trim() : chipText;
 
     return title;
   };
   const addToWatchlist = (movieTitle: string) => {
-    const existing = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    const existing = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as string[];
+
 
     if (!existing.includes(movieTitle)) {
       existing.push(movieTitle);
@@ -95,10 +96,12 @@ export default function Chat({
         if (
           part.type === 'tool-invocation' &&
           part.toolInvocation.toolName === 'media_lookup' &&
-          part.toolInvocation.state === 'result' &&
-          !part.toolInvocation.result.error
+          part.toolInvocation.state === 'result'
         ) {
-          movies.push(part.toolInvocation.result)
+          const result = part.toolInvocation.result as MovieData & { error?: string }
+          if (!result.error) {
+            movies.push(result)
+          }
         }
       })
     })
