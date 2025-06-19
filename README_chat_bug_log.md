@@ -19,12 +19,6 @@ The perfect spell for your mood is Chef's Table (2015), where culinary stars red
 ___
 **Movies without a poster don't show clickable links**
 
-
-___
-**Not finding certain posters**
-Chef (2014) with Favreau didn't display a poster
-yet it exists on TMDB and has a poster
-
 ___
 **Chips not always contextually relevant after user changes topic**
 Case:
@@ -38,9 +32,17 @@ Explore more classic food scenes
 Darker themes in food-related films
 Iconic food moments in older movies
 
+
+###########
+FIXED
 ___
 **Showing wrong movies when movies with similar names exist**
 Case:
 AI:
 If you're in the mood for a film, "Ghost in the Shell" (1995) is a must-see, known for its stunning animation and thought-provoking narrative.
 Poster shown: Ghost in the Shell (2017)
+
+___
+**Not finding certain posters**
+Chef (2014) with Favreau didn't display a poster
+yet it exists on TMDB and has a poster

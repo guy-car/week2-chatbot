@@ -10,6 +10,23 @@ import { saveChat, loadChat } from 'tools/chat-store';
 import { z } from 'zod';
 import { errorHandler } from '~/lib/utils';
 
+interface TMDBSearchResult {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path?: string;
+  release_date?: string;
+  first_air_date?: string;
+  vote_average: number;
+  overview: string;
+  media_type: 'movie' | 'tv' | 'person';
+  popularity: number;
+}
+
+interface TMDBSearchResponse {
+  results?: TMDBSearchResult[];
+}
+
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
@@ -47,6 +64,11 @@ RESPONSE RULES:
 - No image URLs or markdown
 - no Emojis
 
+When recommending movies/shows:
+- Always include the year when you know it (e.g., "Ghost in the Shell (1995)")
+- This helps ensure the correct version is found
+- For remakes or movies with common titles, the year is especially important
+
 MANDATORY TOOL USAGE:
 When you recommend any specific movie, TV show, or documentary by name, you MUST ALWAYS call the media_lookup tool for it. This is not optional.
 
@@ -72,57 +94,98 @@ Remember: You're not just recommending movies - you're granting wishes for the p
         }),
         execute: async ({ title }: { title: string }) => {
           try {
-            // Using multi search - searches movies, TV, and people, sorted by popularity
-            console.log("Im calling the movie look up tool")
-            console.log('TMDB API Key:', process.env.TMDB_API_KEY);
+            console.log(`🔍 Searching for: "${title}"`);
+
             const searchUrl = `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(title)}&include_adult=false&language=en-US&page=1`;
-            console.log(`Search URL: ${searchUrl}`)
             const options = {
               method: 'GET',
               headers: {
                 'accept': 'application/json',
-                'Authorization': `Bearer ${process.env.TMDB_API_KEY}`, // Add your API key here
+                'Authorization': `Bearer ${process.env.TMDB_API_KEY}`,
               },
             };
-            const searchResponse = await fetch(searchUrl, options)
-            const searchData = await searchResponse.json() as {
-              results?: Array<{
-                id: number;
-                title?: string;
-                name?: string;
-                poster_path?: string;
-                release_date?: string;
-                first_air_date?: string;
-                vote_average: number;
-                overview: string;
-                media_type: 'movie' | 'tv' | 'person';
-              }>;
-            };
-            console.log("Search response data: ", searchData)
+
+            const searchResponse = await fetch(searchUrl, options);
+            const searchData = await searchResponse.json() as TMDBSearchResponse;
 
             if (!searchData.results || searchData.results.length === 0) {
               return { error: 'No results found' };
             }
 
-            // Take the first result (most popular match)
-            const item = searchData.results[0];
-            if (!item || (item.media_type !== 'movie' && item.media_type !== 'tv')) {
-              return { error: 'No movie or TV show found' };
-            }
+            // Smart selection with proper typing
+            const selectBestMatch = (results: TMDBSearchResult[]): TMDBSearchResult | null => {
+              // Extract year if the AI included it in the title
+              const yearMatch = /\((\d{4})\)/.exec(title);
+              const searchYear = yearMatch ? parseInt(yearMatch[1]) : null;
+              const cleanTitle = title.replace(/\s*\(\d{4}\)/, '').trim();
 
-            // Filter to only movies and TV shows (exclude people)
-            if (item.media_type !== 'movie' && item.media_type !== 'tv') {
-              return { error: 'No movie or TV show found' };
+              console.log(`🎯 Looking for: "${cleanTitle}" ${searchYear ? `(${searchYear})` : ''}`);
+
+              const scored = results
+                .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
+                .map(item => {
+                  let score = 0;
+                  const itemTitle = item.title ?? item.name ?? '';
+                  const itemYear = parseInt(
+                    item.release_date?.substring(0, 4) ??
+                    item.first_air_date?.substring(0, 4) ?? '0'
+                  );
+
+                  // Exact title match (case-insensitive)
+                  if (itemTitle.toLowerCase() === cleanTitle.toLowerCase()) {
+                    score += 50;
+                  }
+                  // Partial title match
+                  else if (itemTitle.toLowerCase().includes(cleanTitle.toLowerCase())) {
+                    score += 20;
+                  }
+
+                  // Year matching (if provided)
+                  if (searchYear && itemYear) {
+                    if (itemYear === searchYear) {
+                      score += 30; // Exact year match
+                    } else {
+                      const yearDiff = Math.abs(itemYear - searchYear);
+                      score -= yearDiff * 2; // Penalize by year difference
+                    }
+                  }
+
+                  // Popularity bonus (normalized)
+                  score += Math.min(item.popularity / 100, 10);
+
+                  // Prefer movies over TV for ambiguous searches
+                  if (item.media_type === 'movie') score += 5;
+
+                  console.log(`  📊 ${itemTitle} (${itemYear}): score=${score}`);
+
+                  return { item, score };
+                });
+
+              // Sort by score descending
+              scored.sort((a, b) => b.score - a.score);
+
+              if (scored.length > 0 && scored[0]) {
+                console.log(`✅ Selected: ${scored[0].item.title ?? scored[0].item.name}`);
+                return scored[0].item;
+              }
+
+              return null;
+            };
+
+            const item = selectBestMatch(searchData.results);
+
+            if (!item) {
+              return { error: 'No suitable movie or TV show found' };
             }
 
             return {
               id: item.id,
-              title: item.title ?? item.name,
+              title: item.title ?? item.name ?? '',
               poster_url: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
               release_date: item.release_date ?? item.first_air_date,
               rating: item.vote_average,
               overview: item.overview,
-              media_type: item.media_type
+              media_type: item.media_type as 'movie' | 'tv'
             };
 
           } catch (error) {
