@@ -9,6 +9,7 @@ import {
 import { saveChat, loadChat } from 'tools/chat-store';
 import { z } from 'zod';
 import { errorHandler } from '~/lib/utils';
+import { api } from "~/trpc/server"
 
 interface TMDBSearchResult {
   id: number;
@@ -27,6 +28,26 @@ interface TMDBSearchResponse {
   results?: TMDBSearchResult[];
 }
 
+function generateChatTitle(message: string): string {
+  // Remove extra whitespace and trim
+  const cleaned = message.trim().replace(/\s+/g, ' ');
+
+  // Take first 40 chars, try to break at word boundary
+  if (cleaned.length <= 40) {
+    return cleaned;
+  }
+
+  const truncated = cleaned.substring(0, 40);
+  const lastSpace = truncated.lastIndexOf(' ');
+
+  // If we found a space in the last 10 chars, break there
+  if (lastSpace > 30) {
+    return truncated.substring(0, lastSpace) + '...';
+  }
+
+  return truncated + '...';
+}
+
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
@@ -43,10 +64,20 @@ export async function POST(req: Request) {
 
   const previousMessages = await loadChat(id);
 
+  const isFirstUserMessage = !previousMessages.some(msg => msg.role === 'user');
+
   const messages = appendClientMessage({
     messages: previousMessages,
     message,
   });
+
+  // If it's the first user message, update the chat title
+  if (isFirstUserMessage && message.role === 'user') {
+    const title = generateChatTitle(message.content);
+    api.chat.updateTitle({ chatId: id, title }).catch(err => {
+      console.error('Failed to update chat title:', err);
+    });
+  }
 
   const result = streamText({
     model: openai('gpt-4o'),
