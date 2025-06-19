@@ -13,9 +13,10 @@ interface MovieCardProps {
         release_date?: string
         media_type: 'movie' | 'tv'
     }
+    onMoreInfo?: (movieId: number, mediaType: 'movie' | 'tv', title: string) => void
 }
 
-export function MovieCard({ movie }: MovieCardProps) {
+export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     const year = movie.release_date?.substring(0, 4)
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
 
@@ -51,8 +52,11 @@ export function MovieCard({ movie }: MovieCardProps) {
     }
 
     const handleMoreInfo = () => {
-        // This will need to be passed from parent
-        toast('More info feature coming soon!')
+        if (onMoreInfo) {
+            onMoreInfo(movie.id, movie.media_type, movie.title)
+        } else {
+            toast('More info feature coming soon!')
+        }
     }
 
     return (
