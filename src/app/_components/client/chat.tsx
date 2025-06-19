@@ -132,25 +132,55 @@ export default function Chat({
   };
 
   useEffect(() => {
-    const movies: MovieData[] = []
+    console.log('🔍 Movie extraction running, total messages:', messages.length);
 
-    // Go through all messages and extract movie data from tool invocations
-    messages.forEach(message => {
-      message.parts?.forEach(part => {
-        if (
-          part.type === 'tool-invocation' &&
-          part.toolInvocation.toolName === 'media_lookup' &&
-          part.toolInvocation.state === 'result'
-        ) {
-          const result = part.toolInvocation.result as MovieData & { error?: string }
-          if (!result.error) {
-            movies.push(result)
-          }
-        }
-      })
-    })
+    // Find the last assistant message
+    const lastAssistantMessage = messages
+      .slice()
+      .reverse()
+      .find(msg => msg?.role === 'assistant');
 
-    setRecommendedMovies(movies)
+    if (!lastAssistantMessage) {
+      console.log('❌ No assistant message found');
+      setRecommendedMovies([]);
+      return;
+    }
+
+    console.log('✅ Found last assistant message:', {
+      content: lastAssistantMessage.content?.substring(0, 100) + '...',
+      partsCount: lastAssistantMessage.parts?.length || 0,
+      partTypes: lastAssistantMessage.parts?.map(p => p.type) || []
+    });
+
+    // Extract movies in the ORDER they appear in parts
+    const extractedMovies: MovieData[] = [];
+
+    lastAssistantMessage.parts?.forEach((part, index) => {
+      console.log(`📦 Part ${index}:`, part.type);
+
+      if (part.type === 'tool-invocation') {
+        console.log(`🔧 Tool invocation details:`, {
+          toolName: part.toolInvocation.toolName,
+          state: part.toolInvocation.state,
+          hasResult: !!part.toolInvocation.result,
+          hasError: !!part.toolInvocation.result?.error
+        });
+      }
+
+      if (
+        part.type === 'tool-invocation' &&
+        part.toolInvocation.toolName === 'media_lookup' &&
+        part.toolInvocation.state === 'result' &&
+        part.toolInvocation.result &&
+        !part.toolInvocation.result.error
+      ) {
+        extractedMovies.push(part.toolInvocation.result as MovieData);
+        console.log(`✅ Added movie:`, part.toolInvocation.result.title);
+      }
+    });
+
+    console.log(`🎬 Total movies extracted: ${extractedMovies.length}`);
+    setRecommendedMovies(extractedMovies.slice(0, 3));
   }, [messages])
 
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -208,41 +238,6 @@ export default function Chat({
 
                   return <div key={index}>{text}</div>;
                 }
-
-                // // Handle tool invocations
-                // else if (part.type === 'tool-invocation') {
-                //   const invocation = part.toolInvocation;
-
-                //   // Check if it's our media_lookup tool and it has completed
-                //   if (invocation.toolName === 'media_lookup' && invocation.state === 'result') {
-                //     const movieData = invocation.result;
-
-                //     // Check if there's an error in the result
-                //     if (movieData.error) {
-                //       return (
-                //         <div key={index} className="my-2 text-sm text-red-600">
-                //           Failed to load movie details
-                //         </div>
-                //       );
-                //     }
-
-                //     // Render the movie poster
-                //     return <MoviePoster key={index} movieData={movieData} />;
-                //   }
-
-                //   // Show loading state if tool is still running
-                //   else if (invocation.toolName === 'media_lookup' && invocation.state === 'pending') {
-                //     return (
-                //       <div key={index} className="my-2 flex items-center space-x-2">
-                //         <Loader2 className="h-4 w-4 animate-spin" />
-                //         <span className="text-sm text-gray-500">Looking up movie details...</span>
-                //       </div>
-                //     );
-                //   }
-
-                //   return null;
-                // }
-
                 return null;
               })}
             {message.parts
