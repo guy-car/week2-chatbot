@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from 'react'
 import { MovieCardsSection, type MovieData } from './MovieCardsSection'
 import { ConversationChips } from './ConversationChips'
 import { type Chip } from '~/app/types'
+import { useChatTitle } from '~/app/_hooks/useChatTitle'
 
 function Spinner() {
   return (
@@ -23,6 +24,8 @@ export default function Chat({
   id,
   initialMessages,
 }: { id?: string | undefined; initialMessages?: Message[] } = {}) {
+
+  // ========== HOOKS SECTION START ==========
 
   const { messages,
     input, status, error,
@@ -100,78 +103,12 @@ export default function Chat({
       prefix: 'msgc',
       size: 16,
     }),
-  })
+  }) // <-- useChat ends here
+
+  useChatTitle(id ?? '', messages);
 
   const [recommendedMovies, setRecommendedMovies] = useState<MovieData[]>([])
   const [conversationChips, setConversationChips] = useState<Chip[]>([])
-
-  const generateChips = async (lastUserMsg: string, lastAssistantMsg: string): Promise<void> => {
-    const mentionedMovies = recommendedMovies.filter(movie =>
-      lastAssistantMsg.includes(movie.title)
-    );
-
-    try {
-      const response = await fetch('/api/generate-chips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lastUserMessage: lastUserMsg,
-          lastAssistantMessage: lastAssistantMsg,
-          recommendedMovies: mentionedMovies.map(m => ({
-            title: m.title,
-            release_date: m.release_date
-          }))
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to generate chips');
-
-      const data = await response.json() as { chips: Chip[] };
-      setConversationChips(data.chips);
-    } catch (error) {
-      console.error('Failed to generate chips:', error);
-      setConversationChips([]);
-    }
-  }
-
-  const extractMovieTitle = (chipText: string) => {
-    const match = /Add (.+?) to watchlist/i.exec(chipText);
-    const title = match?.[1] ? match[1].trim() : chipText;
-
-    return title;
-  };
-  const addToWatchlist = (movieTitle: string) => {
-    const existing = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as string[];
-
-
-    if (!existing.includes(movieTitle)) {
-      existing.push(movieTitle);
-      localStorage.setItem('watchlist', JSON.stringify(existing));
-      return true;
-    }
-    return false;
-  };
-  const handleChipClick = (chipText: string) => {
-    // Check if this is a watchlist chip
-    if (chipText.toLowerCase().includes('to watchlist')) {
-      // Handle watchlist logic
-      const movieTitle = extractMovieTitle(chipText);
-      const success = addToWatchlist(movieTitle);
-
-
-      if (success) {
-        toast.success(`Added "${movieTitle}" to watchlist!`);
-      } else {
-        toast.error(`"${movieTitle}" is already in your watchlist`);
-      }
-    } else {
-      // Handle regular chips (send as message)
-      void append({
-        role: 'user',
-        content: chipText
-      });
-    }
-  };
 
   useEffect(() => {
     console.log('🔍 Movie extraction running, total messages:', messages.length);
@@ -225,17 +162,62 @@ export default function Chat({
     setRecommendedMovies(extractedMovies.slice(0, 3));
   }, [messages])
 
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
     }
   }, [messages])
 
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  // ========== HOOKS SECTION END ==========
+
+
+  // ========== COMPONENT LOGIC SECTION START ==========
+
+  const extractMovieTitle = (chipText: string) => {
+    const match = /Add (.+?) to watchlist/i.exec(chipText);
+    const title = match?.[1] ? match[1].trim() : chipText;
+
+    return title;
+  };
+  const addToWatchlist = (movieTitle: string) => {
+    const existing = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as string[];
+
+
+    if (!existing.includes(movieTitle)) {
+      existing.push(movieTitle);
+      localStorage.setItem('watchlist', JSON.stringify(existing));
+      return true;
+    }
+    return false;
+  };
+  const handleChipClick = (chipText: string) => {
+    // Check if this is a watchlist chip
+    if (chipText.toLowerCase().includes('to watchlist')) {
+      // Handle watchlist logic
+      const movieTitle = extractMovieTitle(chipText);
+      const success = addToWatchlist(movieTitle);
+
+
+      if (success) {
+        toast.success(`Added "${movieTitle}" to watchlist!`);
+      } else {
+        toast.error(`"${movieTitle}" is already in your watchlist`);
+      }
+    } else {
+      // Handle regular chips (send as message)
+      void append({
+        role: 'user',
+        content: chipText
+      });
+    }
+  };
+
+  // ========== COMPONENT LOGIC SECTION END ==========
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold mb-6">Chat {id ? `(${id.slice(0, 8)}...)` : ''}</h1>
       <div
         ref={chatContainerRef}
         className="h-64 border border-gray-300 p-6 mb-6 overflow-y-auto bg-gray-50 rounded-lg">
