@@ -91,16 +91,22 @@ have 3 sections (see sketch)
 - "say more" - question mark symbol?
 - maybe a thumbs up or down
 
-Chips:
+**DONE** Chips:
 - contextual conversational chips (bring them back)
 - make custom API call for that (onFinish?)
 
 Watch history:
-- create it
-- add logic similar to addToWatchlist
+- we need to actually add movies
+
+Collector feel:
+- make watchlist and watch history page sexy (just show posters for now like in chat)
+    NTH:
+    - add animations or improve the toaster notifications so it's more satisfying to add movie to watchlist / mark as seen
 
 Chat names:
-- come up with solution
+- generate name based on beginning of convo 
+    NTH:
+    - ueser can rename chat names
 
 Chat history:
 - display 10 most recents
@@ -115,7 +121,15 @@ Auth:
 - google ez sign up
 
 Overal UI character:
+- improve look of chips
 - Colors
 - themed animation
 - logo?
 
+Bugs:
+- User asked for animes - ai responds with good animes - user asks for more work by same director as one of the previous suggestions - AI gives more work from director that don't include animes
+- Wrong movies show up when searching by title (another movie by the same name)
+- Chips not showing up after first message
+- Poster selection should only show 3 posters maximum
+- More recent poster suggestions should be on the left side
+- Movie poster should display the latest recommendations from AI (sometimes AI will recommend more movies but posters won't update and will still reflect previous recommendations)
