@@ -21,6 +21,7 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
 
     const handleAddToWatchlist = () => {
+        toast.dismiss()
         const existing = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as any[];
         const alreadyExists = existing.some(item => item.id === movie.id);
 
@@ -38,6 +39,7 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     }
 
     const handleMarkAsWatched = () => {
+        toast.dismiss()
         const watched = JSON.parse(localStorage.getItem('watchHistory') ?? '[]') as any[];
         const alreadyWatched = watched.some(item => item.id === movie.id);
 
@@ -61,15 +63,18 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     }
 
     const handleLike = () => {
+        toast.dismiss()
         // For now, just toast. Later we'll save this preference
         toast.success(`You liked "${movie.title}"`)
     }
 
     const handleDislike = () => {
+        toast.dismiss()
         toast.success(`You disliked "${movie.title}"`)
     }
 
     const handleMoreInfo = () => {
+        toast.dismiss()
         if (onMoreInfo) {
             onMoreInfo(movie.id, movie.media_type, movie.title)
         } else {
