@@ -1,13 +1,13 @@
-// /app/api/generate-chips/route.ts
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
-// Define types
+// Update the interface to include conversation context
 interface ChipRequest {
     lastUserMessage: string;
     lastAssistantMessage: string;
-    recommendedMovies?: Array<{ title: string }>;
+    recommendedMovies?: Array<{ title: string; release_date?: string }>;
+    conversationContext?: Array<{ role: string; content: string }>;
 }
 
 const chipsSchema = z.object({
@@ -23,15 +23,28 @@ const chipsSchema = z.object({
 
 export async function POST(req: Request) {
     const body = await req.json() as ChipRequest;
-    const { lastUserMessage, lastAssistantMessage, recommendedMovies } = body;
+    const { lastUserMessage, lastAssistantMessage, recommendedMovies, conversationContext } = body;
+
+    // Detect if there's been a topic change
+    const hasTopicChanged = conversationContext && conversationContext.length >= 2 &&
+        conversationContext[conversationContext.length - 2]?.role === 'user';
+
+    const recentContext = conversationContext
+        ? conversationContext.slice(-4).map(m => `${m.role}: ${m.content}`).join('\n')
+        : '';
 
     const chipGenerationPrompt = `You are Watch Genie, a witty and insightful film recommendation assistant. Your role is to help users keep exploring new movie directions — especially when they're not sure what to watch. Think like a friend who knows hidden gems and remembers that one perfect scene from a movie you mentioned three years ago.
+
+${hasTopicChanged ? 'IMPORTANT: The user has just changed topics. Generate chips relevant to the NEW topic, not the previous conversation.' : ''}
 
 You've just seen:
 * The **user's message** about what they're in the mood for
 * The **assistant's response**, which includes 1–3 specific movie suggestions
 * Optionally, metadata about those movies (genre, director, year, etc.)
 * An evolving profile of the user's known tastes
+
+**Recent conversation context:**
+${recentContext}
 
 Now your job is to generate up to **5 contextual "exploration chips"** — clickable UI elements that help the user keep going.
 
@@ -42,6 +55,7 @@ Now your job is to generate up to **5 contextual "exploration chips"** — click
 * Avoid genre labels unless necessary
 * Focus on ideas, moods, creators, questions, or tonal shifts
 * Channel the *Watch Genie* personality: playful, insightful, surprising, and truly attuned to the user
+${hasTopicChanged ? '* CRITICAL: Focus ONLY on the current topic. Ignore previous topics from the conversation.' : ''}
 
 Chips may serve different purposes. Here are the **chip types** (include the type label with each chip):
 * \`broaden\`: a parallel suggestion path or nearby theme

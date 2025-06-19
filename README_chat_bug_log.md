@@ -32,6 +32,23 @@ Explore more classic food scenes
 Darker themes in food-related films
 Iconic food moments in older movies
 
+__
+
+User:
+Helloooooo I want some bang bang action with hot girls
+AI:
+Your wish for some exhilarating action with fierce heroines is granted! Dive into the stylish chaos of Atomic Blonde (2017), where an undercover MI6 agent takes on Cold War Berlin with breathtaking combat. For a wild ride, Mad Max: Fury Road (2015) offers a post-apocalyptic thrill with strong female leads fighting for survival. And don't miss the iconic Kill Bill: Vol. 1 (2003), where vengeance is served with a side of stunning martial arts. Enjoy the adrenaline rush!
+User:
+ok not bad
+AI:
+I sense you're in the mood for some thrilling action! The perfect spell for your mood is "Atomic Blonde" (2017). It features stunning visuals, intense fight scenes, and a captivating performance by Charlize Theron. Another great choice is "Mad Max: Fury Road" (2015), which is a high-octane ride with fierce characters and breathtaking action. Enjoy the adrenaline rush! Let me check those titles for you.
+"Atomic Blonde" (2017) is a thrilling ride with Charlize Theron as an undercover MI6 agent navigating Cold War Berlin. It's packed with stylish action and intrigue. On the other hand, "Mad Max: Fury Road" (2015) offers a breathtaking post-apocalyptic adventure, featuring fierce characters and relentless action. Both films will surely satisfy your craving for excitement! Enjoy your viewing!
+
+
+
+__
+Movie posters should horizontally centered in container - if 2 posters it's aligned to the left
+
 
 ###########
 FIXED

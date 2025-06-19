@@ -31,11 +31,15 @@ interface TMDBSearchResponse {
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  console.log('🚀 New request received at:', new Date().toISOString());
 
   const { message, id } = await req.json() as {
     message: Message,
     id: string
   };
+
+  console.log('📨 Message content:', message.content);
+  console.log('📨 Message role:', message.role);
 
   const previousMessages = await loadChat(id);
 
@@ -45,7 +49,8 @@ export async function POST(req: Request) {
   });
 
   const result = streamText({
-    model: openai('gpt-4o-mini'),
+    model: openai('gpt-4o'),
+    temperature: 0.8,
     system: `You are Watch Genie, a magical movie enthusiast who grants perfect viewing wishes. You have an uncanny ability to sense exactly what someone needs to watch at any given moment.
 
 PERSONALITY:
@@ -55,14 +60,20 @@ PERSONALITY:
 - Express genuine enthusiasm about great films
 
 RESPONSE RULES:
+- Separate each movie recommendation with a line break
+- NO markdown, NO bullets, NO numbers, NO ** formatting
+- Just clean text with line breaks between movies
 - Recommend 1-3 titles maximum per response
 - Keep responses under 100 words
 - Write conversationally, with occasional magical flair
 - Include title and year naturally (e.g., "The perfect spell for your mood is Inception (2010)")
 - Focus on the emotional experience - how the film will make them feel
-- No bullet points, lists, or formatted text
+
 - No image URLs or markdown
 - no Emojis
+- IMPORTANT: do not recommend the same movie twice
+- **CRITICAL: Vary your opening phrases. Never use "The perfect spell for your mood is" repeatedly**
+- **When users ask follow-ups, acknowledge their question naturally before responding**
 
 When recommending movies/shows:
 - Always include the year when you know it (e.g., "Ghost in the Shell (1995)")
@@ -77,15 +88,22 @@ Examples:
 - If you write "The Bear (2022)" → MUST call media_lookup with title: "The Bear"
 - If you write "check out Inception" → MUST call media_lookup with title: "Inception"
 
-NEVER skip the tool call. The tool provides important data for the user interface.
-
-Remember: You're not just recommending movies - you're granting wishes for the perfect viewing experience.`,
+NEVER skip the tool call. The tool provides important data for the user interface.`,
     messages,
     toolCallStreaming: true,
     experimental_generateMessageId: createIdGenerator({
       prefix: 'msgs',
       size: 16,
     }),
+    onChunk: ({ chunk }) => {
+      console.log('🔵 Chunk type:', chunk.type);
+      if (chunk.type === 'text') {
+        console.log('📝 Text chunk:', chunk.text);
+      }
+      if (chunk.type === 'tool-call') {
+        console.log('🔧 Tool call chunk:', chunk.toolName);
+      }
+    },
     tools: {
       media_lookup: {
         description: 'MANDATORY: Call this for every movie/TV show/documentary you recommend by name. Examples: If you mention "Chef\'s Table", call with title: "Chef\'s Table". Never skip this step.',
@@ -196,6 +214,11 @@ Remember: You're not just recommending movies - you're granting wishes for the p
       }
     },
     async onFinish({ response }) {
+      console.log('✅ Stream finished');
+      console.log('📊 Total messages:', response.messages.length);
+      console.log('📊 Message parts:', response.messages.map(m =>
+        m.parts?.map(p => ({ type: p.type, hasText: !!(p).text }))
+      ));
       await saveChat({
         id,
         messages: appendResponseMessages({
