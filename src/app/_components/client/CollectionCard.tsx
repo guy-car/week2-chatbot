@@ -25,10 +25,12 @@ export function CollectionCard({
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70"
 
     const handleLike = () => {
+        toast.dismiss()
         toast.success(`You liked "${movie.title}"`)
     }
 
     const handleDislike = () => {
+        toast.dismiss()
         toast.success(`You disliked "${movie.title}"`)
     }
 

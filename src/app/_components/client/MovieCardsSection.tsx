@@ -58,7 +58,7 @@ export function MovieCardsSection({ movies }: MovieCardsSectionProps) {
                 className={`border-t border-b border-gray-300 bg-gray-50 py-6 mb-6 transition-all duration-500 ease-in-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
                     }`}
             >
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+                <div className="flex flex-wrap justify-center gap-6">
                     {movies.map((movie) => (
                         <MovieCard
                             key={movie.id}
