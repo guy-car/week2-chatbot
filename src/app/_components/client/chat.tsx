@@ -34,22 +34,64 @@ export default function Chat({
       console.log('useChat error:', error);
     },
     onFinish: (message) => {
-      // Cast messages to the correct type
-      const typedMessages = messages as Message[];
+      void (async () => {
+        // Extract movies from THIS specific message
+        const moviesFromThisResponse: MovieData[] = [];
 
-      // Now find the last user message with proper typing
-      const lastUserMsg = typedMessages
-        .filter((m): m is Message & { role: 'user' } => m.role === 'user')
-        .pop();
+        message.parts?.forEach(part => {
+          if (
+            part.type === 'tool-invocation' &&
+            part.toolInvocation.toolName === 'media_lookup' &&
+            part.toolInvocation.state === 'result' &&
+            'result' in part.toolInvocation &&
+            part.toolInvocation.result &&
+            !(part.toolInvocation.result).error
+          ) {
+            moviesFromThisResponse.push(part.toolInvocation.result as MovieData);
+          }
+        });
 
-      // Type guard to ensure both exist and are strings
-      if (lastUserMsg?.content && message.role === 'assistant' && message.content) {
-        void generateChips(lastUserMsg.content, message.content);
-      }
+        // Get the last user message
+        const lastUserMsg = messages
+          .filter((m): m is Message => m.role === 'user')
+          .pop();
+
+        if (lastUserMsg?.content && message.role === 'assistant' && message.content) {
+          // Get conversation context
+          const recentMessages = [...messages, message].slice(-6).map(m => ({
+            role: m.role,
+            content: m.content || ''
+          }));
+
+          try {
+            const response = await fetch('/api/generate-chips', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                lastUserMessage: lastUserMsg.content,
+                lastAssistantMessage: message.content,
+                recommendedMovies: moviesFromThisResponse.map(m => ({
+                  title: m.title,
+                  release_date: m.release_date
+                })),
+                conversationContext: recentMessages
+              })
+            });
+
+            if (!response.ok) throw new Error('Failed to generate chips');
+
+            const data = await response.json() as { chips: Chip[] };
+            setConversationChips(data.chips);
+          } catch (error) {
+            console.error('Failed to generate chips:', error);
+            setConversationChips([]);
+          }
+        }
+      })();
     },
     id,
     initialMessages,
-    maxSteps: 5,
+    maxSteps: 1,
     sendExtraMessageFields: true,
     experimental_prepareRequestBody({ messages, id }) {
       return { message: messages[messages.length - 1], id };
