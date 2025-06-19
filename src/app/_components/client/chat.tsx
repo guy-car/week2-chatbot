@@ -7,6 +7,8 @@ import toast from 'react-hot-toast'
 
 import { useState, useEffect, useRef } from 'react'
 import { MovieCardsSection, type MovieData } from './MovieCardsSection'
+import { ConversationChips } from './ConversationChips'
+import { type Chip } from '~/app/types'
 
 function Spinner() {
   return (
@@ -31,8 +33,19 @@ export default function Chat({
     onError: (error) => {
       console.log('useChat error:', error);
     },
-    onFinish: (_message) => {
-      // console.log('useChat finished:', message);
+    onFinish: (message) => {
+      // Cast messages to the correct type
+      const typedMessages = messages as Message[];
+
+      // Now find the last user message with proper typing
+      const lastUserMsg = typedMessages
+        .filter((m): m is Message & { role: 'user' } => m.role === 'user')
+        .pop();
+
+      // Type guard to ensure both exist and are strings
+      if (lastUserMsg?.content && message.role === 'assistant' && message.content) {
+        void generateChips(lastUserMsg.content, message.content);
+      }
     },
     id,
     initialMessages,
@@ -46,6 +59,39 @@ export default function Chat({
       size: 16,
     }),
   })
+
+  const [recommendedMovies, setRecommendedMovies] = useState<MovieData[]>([])
+  const [conversationChips, setConversationChips] = useState<Chip[]>([])
+
+  const generateChips = async (lastUserMsg: string, lastAssistantMsg: string): Promise<void> => {
+    const mentionedMovies = recommendedMovies.filter(movie =>
+      lastAssistantMsg.includes(movie.title)
+    );
+
+    try {
+      const response = await fetch('/api/generate-chips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lastUserMessage: lastUserMsg,
+          lastAssistantMessage: lastAssistantMsg,
+          recommendedMovies: mentionedMovies.map(m => ({
+            title: m.title,
+            release_date: m.release_date
+          }))
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate chips');
+
+      const data = await response.json() as { chips: Chip[] };
+      setConversationChips(data.chips);
+    } catch (error) {
+      console.error('Failed to generate chips:', error);
+      setConversationChips([]);
+    }
+  }
+
   const extractMovieTitle = (chipText: string) => {
     const match = /Add (.+?) to watchlist/i.exec(chipText);
     const title = match?.[1] ? match[1].trim() : chipText;
@@ -84,8 +130,6 @@ export default function Chat({
       });
     }
   };
-
-  const [recommendedMovies, setRecommendedMovies] = useState<MovieData[]>([])
 
   useEffect(() => {
     const movies: MovieData[] = []
@@ -216,6 +260,13 @@ export default function Chat({
         ))}
       </div>
       <MovieCardsSection movies={recommendedMovies} />
+      <ConversationChips
+        chips={conversationChips}
+        onChipClick={(text) => {
+          void append({ role: 'user', content: text })
+          setConversationChips([])
+        }}
+      />
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <div className="text-red-700 mb-2">An error occurred.</div>

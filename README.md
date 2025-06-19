@@ -85,7 +85,7 @@ ___
 make chat wider
 have 3 sections (see sketch)
 
-Make movie posters clickable:
+**DONE** Make movie posters clickable:
 - add to watch list
 - add to history
 - "say more" - question mark symbol?
@@ -108,9 +108,11 @@ Chat history:
 
 Data persistence:
 - switch from local storage to Supabase
+- movie posters should persist on refresh (store in chats?)
 
 Auth:
 - add sign up form for email
+- google ez sign up
 
 Overal UI character:
 - Colors
