@@ -20,6 +20,8 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
+    const router = useRouter()
+    const { addLikedMovie, addDislikedMovie } = useTasteProfile();
     const year = movie.release_date?.substring(0, 4)
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
 
@@ -55,14 +57,14 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
         }
     }
 
-    const handleLike = () => {
+    const handleLike = async () => {
         toast.dismiss()
-        tasteProfileService.addLikedMovie(movie)
+        await addLikedMovie(movie)
         toast.success(`You liked "${movie.title}"`)
     }
 
-    const handleDislike = () => {
-        tasteProfileService.addDislikedMovie(movie)
+    const handleDislike = async () => {
+        await addDislikedMovie(movie)
         toast.success(`You disliked "${movie.title}"`)
     }
 
