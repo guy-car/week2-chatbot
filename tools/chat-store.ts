@@ -5,13 +5,14 @@ import { type Message } from 'ai';
 import { db } from "~/server/db"
 import { chats, messages } from "~/server/db/schema"
 import { eq } from "drizzle-orm"
+import { extractToolResults, reconstructMessageParts } from './message-utils'
 
 export async function createChat(userId: string): Promise<string> {
-  const id = generateId(); // generate a unique chat ID
+  const id = generateId();
   await db.insert(chats).values({
     id,
     userId
-  }); // create chat record in database
+  });
   return id;
 }
 
@@ -19,14 +20,17 @@ export async function loadChat(id: string): Promise<Message[]> {
   const result = await db
     .select()
     .from(messages)
-    .where(eq(messages.chat_id, id));
+    .where(eq(messages.chatId, id));
 
   return result.map(row => ({
     id: row.id,
-    content: row.content ?? '', // handle potential null
-    role: row.role as 'system' | 'user' | 'assistant' | 'data', // type assertion
+    content: row.content ?? '',
+    role: row.role as 'system' | 'user' | 'assistant' | 'data',
     createdAt: row.createdAt,
-    // Note: we don't include chat_id since Message interface doesn't have it
+    // Reconstruct parts array if we have tool results
+    ...(row.toolResults && {
+      parts: reconstructMessageParts(row.content, row.toolResults)
+    })
   }));
 }
 
@@ -37,27 +41,32 @@ export async function saveChat({
   id: string;
   messages: Message[];
 }): Promise<void> {
-  // Get existing message IDs
   const existingMessages = await db
     .select({ id: messages.id })
     .from(messages)
-    .where(eq(messages.chat_id, id));
+    .where(eq(messages.chatId, id));
 
   const existingIds = new Set(existingMessages.map(m => m.id));
-
-  // Filter to only new messages
   const newMessages = messageList.filter(msg => !existingIds.has(msg.id));
 
-  // Insert only new messages
+  console.log('🔍 Saving messages with tool results:',
+    newMessages.map(msg => ({
+      id: msg.id,
+      role: msg.role,
+      toolResults: extractToolResults(msg)
+    }))
+  );
+
   if (newMessages.length > 0) {
     await db.insert(messages).values(
       newMessages.map(msg => ({
         id: msg.id,
-        chat_id: id,
+        chatId: id,
         role: msg.role,
         content: msg.content,
+        toolResults: extractToolResults(msg),
         createdAt: msg.createdAt ? new Date(msg.createdAt) : new Date(),
       }))
-    ).onConflictDoNothing(); // Add this if your DB supports it
+    ).onConflictDoNothing();
   }
 }

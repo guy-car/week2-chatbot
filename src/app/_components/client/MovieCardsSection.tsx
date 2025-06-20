@@ -4,15 +4,7 @@ import { useState, useEffect } from 'react'
 import { MovieCard } from './MovieCard'
 import { MovieDetailsModal } from './MovieDetailsModal'
 
-export interface MovieData {
-    id: number
-    title: string
-    poster_url: string | null
-    release_date?: string
-    rating?: number
-    overview?: string
-    media_type: 'movie' | 'tv'
-}
+import { type MovieData } from "~/app/types/index"
 
 interface MovieCardsSectionProps {
     movies: MovieData[]

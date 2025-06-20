@@ -1,41 +1,99 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
 import { sql } from "drizzle-orm";
-import { index, pgTableCreator, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  index,
+  pgTableCreator,
+  text,
+  timestamp,
+  boolean,
+  jsonb,
+  varchar,
+  pgEnum,
+  uniqueIndex,
+  real  // For rating as float
+} from "drizzle-orm/pg-core";
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
-export const createTable = pgTableCreator((name) => `week2-chatbot_${name}`);
+import { type MovieData } from "~/app/types/index"
 
-export const chats = createTable("chat", (d) => ({
-  id: d.varchar({ length: 256 }).primaryKey(),
-  title: d.varchar({ length: 512 }),
-  userId: d.text().notNull().references(() => user.id),
-  createdAt: d
-    .timestamp({ withTimezone: true })
+// Enums for type safety
+export const interactionTypeEnum = pgEnum('interaction_type', ['like', 'dislike', 'watchlist', 'watched']);
+export const collectionTypeEnum = pgEnum('collection_type', ['watchlist', 'history']);
+export const mediaTypeEnum = pgEnum('media_type', ['movie', 'tv']);
+
+export const createTable = pgTableCreator((name) => name);
+
+// Updated chats table - fix the consistency issue
+export const chats = createTable("chats", {  // Changed from "chat" to "chats" for consistency
+  id: text('id').primaryKey(),
+  title: varchar('title', { length: 512 }),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-}));
+}, (t) => [
+  index("chats_user_id_idx").on(t.userId)
+]);
 
-export const messages = createTable("messages", (d) => ({
-  id: d.varchar({ length: 256 }).primaryKey(),
-  chat_id: d.varchar({ length: 256 }).references(() => chats.id),
-  role: d.varchar({ length: 50 }),
-  content: d.text(),
-  createdAt: d
-    .timestamp({ withTimezone: true })
+// Messages with tool results
+export const messages = createTable("messages", {
+  id: text('id').primaryKey(),
+  chatId: text('chat_id').notNull().references(() => chats.id, { onDelete: 'cascade' }),
+  role: varchar('role', { length: 50 }).notNull(),
+  content: text('content').notNull(),
+  toolResults: jsonb('tool_results').$type<MovieData[]>(),  // Type hint for Drizzle
+  createdAt: timestamp('created_at', { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-}),
+}, (t) => [
+  index("messages_chat_id_idx").on(t.chatId)
+]);
 
-  (t) => [index("chat_id_idx").on(t.chat_id)]
+// User preferences
+export const userPreferences = createTable("user_preferences", {
+  userId: text('user_id').primaryKey().references(() => user.id, { onDelete: 'cascade' }),
+  favoriteGenres: text('favorite_genres'),
+  likedMovies: text('liked_movies'),
+  dislikedMovies: text('disliked_movies'),
+  preferences: text('preferences'),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
 
-);
+// User movies - now includes overview and rating
+export const userMovies = createTable("user_movies", {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  movieId: varchar('movie_id', { length: 50 }).notNull(),
+  title: text('title').notNull(),
+  posterUrl: text('poster_url'),
+  mediaType: mediaTypeEnum('media_type').notNull(),
+  releaseDate: text('release_date'),
+  rating: real('rating'),  // Added rating
+  overview: text('overview'),  // Added overview
+  collectionType: collectionTypeEnum('collection_type').notNull(),
+  addedAt: timestamp('added_at', { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}, (t) => [
+  index("user_movies_user_id_idx").on(t.userId),
+  index("user_movies_movie_id_idx").on(t.movieId),
+  // Prevent duplicate entries
+  uniqueIndex("user_movies_unique").on(t.userId, t.movieId, t.collectionType)
+]);
+
+// Movie interactions
+export const movieInteractions = createTable("movie_interactions", {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  movieId: varchar('movie_id', { length: 50 }).notNull(),
+  movieTitle: text('movie_title').notNull(),
+  interactionType: interactionTypeEnum('interaction_type').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}, (t) => [
+  index("movie_interactions_user_id_idx").on(t.userId)
+]);
 
 // Better-Auth schema
 
