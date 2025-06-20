@@ -12,6 +12,11 @@ import { errorHandler } from '~/lib/utils';
 import { api } from "~/trpc/server"
 import { generateChatTitle } from 'tools/message-utils';
 
+import { auth } from "~/lib/auth";
+import { headers } from "next/headers";
+import { db } from "~/server/db";
+import { tasteProfileService } from "~/app/_services/tasteProfile";
+
 interface TMDBSearchResult {
   id: number;
   title?: string;
@@ -35,11 +40,21 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   console.log('🚀 New request received at:', new Date().toISOString());
 
-  const { message, id, tasteProfile } = await req.json() as {
-    message: Message,
-    id: string,
-    tasteProfile?: string
+  // Get the authenticated user
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
+  const { messages: incomingMessages, id } = await req.json() as {
+    messages: Message[],
+    id: string
   };
+
+  const message = incomingMessages[incomingMessages.length - 1];
+
+  if (!message) {
+    return new Response('No message provided', { status: 400 });
+  }
 
   console.log('📨 Message content:', message.content);
   console.log('📨 Message role:', message.role);
@@ -61,14 +76,27 @@ export async function POST(req: Request) {
     });
   }
 
-
+  let tasteProfileSummary = '';
+  try {
+    if (session?.user?.id) {
+      console.log('Fetching profile for user:', session.user.id);
+      const profile = await tasteProfileService.getProfileForChat(session.user.id, db);
+      tasteProfileSummary = tasteProfileService.generateSummary(profile);
+      console.log('Profile summary:', tasteProfileSummary);
+    } else {
+      console.log('No authenticated user found');
+    }
+  } catch (error) {
+    console.error('Error fetching taste profile:', error);
+    // Continue without profile rather than crashing
+  }
 
   const result = streamText({
     model: openai('gpt-4o'),
     temperature: 0.8,
     system: `You are Watch Genie, a magical movie enthusiast who grants perfect viewing wishes. You have an uncanny ability to sense exactly what someone needs to watch at any given moment.
 
-${tasteProfile ? `\n${tasteProfile}\n` : ''}
+${tasteProfileSummary ? `\n${tasteProfileSummary}\n` : ''}
 
 PERSONALITY:
 - Warm and intuitive, like a friend who always knows the perfect movie
@@ -112,15 +140,6 @@ NEVER skip the tool call. The tool provides important data for the user interfac
       prefix: 'msgs',
       size: 16,
     }),
-    onChunk: ({ chunk }) => {
-      console.log('🔵 Chunk type:', chunk.type);
-      if (chunk.type === 'text') {
-        console.log('📝 Text chunk:', chunk.text);
-      }
-      if (chunk.type === 'tool-call') {
-        console.log('🔧 Tool call chunk:', chunk.toolName);
-      }
-    },
     tools: {
       media_lookup: {
         description: 'MANDATORY: Call this for every movie/TV show/documentary you recommend by name. Examples: If you mention "Chef\'s Table", call with title: "Chef\'s Table". Never skip this step.',
@@ -233,6 +252,7 @@ NEVER skip the tool call. The tool provides important data for the user interfac
     async onFinish({ response }) {
       console.log('✅ Stream finished');
       console.log('📊 Total messages:', response.messages.length);
+      console.log('📊 Last message:', JSON.stringify(response.messages[response.messages.length - 1], null, 2));
       console.log('📊 Message parts:', response.messages.map(m =>
         m.parts?.map(p => ({ type: p.type, hasText: !!(p).text }))
       ));

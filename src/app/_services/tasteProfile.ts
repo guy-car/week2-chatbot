@@ -2,13 +2,6 @@
 import { api } from "~/trpc/react";
 import type { Database } from "~/server/db"; // Import the database type
 
-interface TasteProfile {
-    favoriteGenres: string
-    likedMovies: string
-    dislikedMovies: string
-    preferences: string
-}
-
 export const tasteProfileService = {
     // For server-side usage in your chat API route
     async getProfileForChat(userId: string, db: Database) {
@@ -28,7 +21,12 @@ export const tasteProfileService = {
     },
 
     // Generate a summary for the LLM
-    generateSummary(profile: TasteProfile): string {
+    generateSummary(profile: {
+        favoriteGenres: string | null;
+        likedMovies: string | null;
+        dislikedMovies: string | null;
+        preferences: string | null;
+    }): string {
         const parts: string[] = [];
 
         if (profile.favoriteGenres) {
