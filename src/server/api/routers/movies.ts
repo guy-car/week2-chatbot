@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { movieInteractions, userPreferences } from "~/server/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { userMovies } from "~/server/db/schema";
 
 export const moviesRouter = createTRPCRouter({
     trackInteraction: protectedProcedure
@@ -43,8 +44,8 @@ export const moviesRouter = createTRPCRouter({
                         userId: ctx.user.id,
                         likedMovies: likedMovies.join(', '),
                         dislikedMovies: filteredDisliked.join(', '),
-                        favoriteGenres: currentPrefs?.favoriteGenres || '',
-                        preferences: currentPrefs?.preferences || '',
+                        favoriteGenres: currentPrefs?.favoriteGenres ?? '',
+                        preferences: currentPrefs?.preferences ?? '',
                     })
                     .onConflictDoUpdate({
                         target: userPreferences.userId,
@@ -68,8 +69,8 @@ export const moviesRouter = createTRPCRouter({
                         userId: ctx.user.id,
                         likedMovies: filteredLiked.join(', '),
                         dislikedMovies: dislikedMovies.join(', '),
-                        favoriteGenres: currentPrefs?.favoriteGenres || '',
-                        preferences: currentPrefs?.preferences || '',
+                        favoriteGenres: currentPrefs?.favoriteGenres ?? '',
+                        preferences: currentPrefs?.preferences ?? '',
                     })
                     .onConflictDoUpdate({
                         target: userPreferences.userId,
@@ -92,4 +93,107 @@ export const moviesRouter = createTRPCRouter({
                 limit: 50,
             });
         }),
+    addToWatchlist: protectedProcedure
+        .input(z.object({
+            movieId: z.string(),
+            title: z.string(),
+            posterUrl: z.string().nullable(),
+            mediaType: z.enum(['movie', 'tv']),
+            releaseDate: z.string().optional(),
+            rating: z.number().optional(),
+            overview: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.insert(userMovies).values({
+                id: crypto.randomUUID(),
+                userId: ctx.user.id,
+                movieId: input.movieId,
+                title: input.title,
+                posterUrl: input.posterUrl,
+                mediaType: input.mediaType,
+                releaseDate: input.releaseDate ?? null,
+                rating: input.rating ?? null,
+                overview: input.overview ?? null,
+                collectionType: 'watchlist',
+            });
+
+            return { success: true };
+        }),
+
+    removeFromWatchlist: protectedProcedure
+        .input(z.object({
+            movieId: z.string(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.delete(userMovies).where(
+                and(
+                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.movieId, input.movieId),
+                    eq(userMovies.collectionType, 'watchlist')
+                )
+            );
+
+            return { success: true };
+        }),
+
+    getWatchlist: protectedProcedure
+        .query(async ({ ctx }) => {
+            return await ctx.db.query.userMovies.findMany({
+                where: and(
+                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.collectionType, 'watchlist')
+                ),
+                orderBy: [desc(userMovies.addedAt)],
+            });
+        }),
+    markAsWatched: protectedProcedure
+        .input(z.object({
+            movieId: z.string(),
+            title: z.string(),
+            posterUrl: z.string().nullable(),
+            mediaType: z.enum(['movie', 'tv']),
+            releaseDate: z.string().optional(),
+            rating: z.number().optional(),
+            overview: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            // Add to history
+            await ctx.db.insert(userMovies).values({
+                id: crypto.randomUUID(),
+                userId: ctx.user.id,
+                movieId: input.movieId,
+                title: input.title,
+                posterUrl: input.posterUrl,
+                mediaType: input.mediaType,
+                releaseDate: input.releaseDate || null,
+                rating: input.rating || null,
+                overview: input.overview || null,
+                collectionType: 'history',
+            });
+
+            // Remove from watchlist if exists
+            await ctx.db.delete(userMovies).where(
+                and(
+                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.movieId, input.movieId),
+                    eq(userMovies.collectionType, 'watchlist')
+                )
+            );
+
+            return { success: true };
+        }),
+
+    getWatchHistory: protectedProcedure
+        .query(async ({ ctx }) => {
+            return await ctx.db.query.userMovies.findMany({
+                where: and(
+                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.collectionType, 'history')
+                ),
+                orderBy: [desc(userMovies.addedAt)],
+            });
+        }),
+
+
+
 });
