@@ -170,7 +170,9 @@ export default function Chat({
       ? savedMoviesForMessage
       : extractMoviesFromMessage(lastAssistantMessage);
 
-    setRecommendedMovies(extractedMovies.slice(0, 3));
+    if (extractedMovies.length > 0) {
+      setRecommendedMovies(extractedMovies.slice(0, 3));
+    };
   }, [messages, savedMovies]);
 
   useEffect(() => {
