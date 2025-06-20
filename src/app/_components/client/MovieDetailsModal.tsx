@@ -29,7 +29,6 @@ export function MovieDetailsModal({
     onClose,
     movieId,
     mediaType,
-    movieTitle
 }: MovieDetailsModalProps) {
     const [details, setDetails] = useState<MovieDetails | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -39,8 +38,8 @@ export function MovieDetailsModal({
             setIsLoading(true)
             fetch(`/api/movie-details?id=${movieId}&type=${mediaType}`)
                 .then(res => res.json())
-                .then(data => {
-                    if (data.error) {
+                .then((data: MovieDetails | { error: string }) => {
+                    if ('error' in data) {
                         throw new Error(data.error)
                     }
                     setDetails(data)

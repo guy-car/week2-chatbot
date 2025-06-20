@@ -42,10 +42,10 @@ export default function ProfilePage() {
     useEffect(() => {
         if (profile) {
             setEditedProfile({
-                favoriteGenres: profile.favoriteGenres || '',
-                likedMovies: profile.likedMovies || '',
-                dislikedMovies: profile.dislikedMovies || '',
-                preferences: profile.preferences || ''
+                favoriteGenres: profile.favoriteGenres ?? '',
+                likedMovies: profile.likedMovies ?? '',
+                dislikedMovies: profile.dislikedMovies ?? '',
+                preferences: profile.preferences ?? ''
             })
         }
     }, [profile])
@@ -61,10 +61,10 @@ export default function ProfilePage() {
         // Reset to original data
         if (profile) {
             setEditedProfile({
-                favoriteGenres: profile.favoriteGenres || '',
-                likedMovies: profile.likedMovies || '',
-                dislikedMovies: profile.dislikedMovies || '',
-                preferences: profile.preferences || ''
+                favoriteGenres: profile.favoriteGenres ?? '',
+                likedMovies: profile.likedMovies ?? '',
+                dislikedMovies: profile.dislikedMovies ?? '',
+                preferences: profile.preferences ?? ''
             })
         }
         setIsEditing(false)
@@ -85,7 +85,7 @@ export default function ProfilePage() {
         )
     }
 
-    const displayProfile = isEditing ? editedProfile : (profile || editedProfile)
+    const displayProfile = isEditing ? editedProfile : (profile ?? editedProfile)
 
     return (
         <div className="max-w-2xl mx-auto p-6">
@@ -125,7 +125,7 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={displayProfile.favoriteGenres}
+                        value={displayProfile.favoriteGenres ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, favoriteGenres: e.target.value })}
                         disabled={!isEditing}
                     />
@@ -141,7 +141,7 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={displayProfile.likedMovies}
+                        value={displayProfile.likedMovies ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, likedMovies: e.target.value })}
                         disabled={!isEditing}
                     />
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={displayProfile.dislikedMovies}
+                        value={displayProfile.dislikedMovies ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, dislikedMovies: e.target.value })}
                         disabled={!isEditing}
                     />
@@ -173,7 +173,7 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={displayProfile.preferences}
+                        value={displayProfile.preferences ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, preferences: e.target.value })}
                         disabled={!isEditing}
                     />

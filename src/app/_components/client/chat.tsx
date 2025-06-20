@@ -35,7 +35,7 @@ function extractMoviesFromMessage(message: Message): MovieData[] {
       part.toolInvocation.state === 'result' &&
       'result' in part.toolInvocation &&
       part.toolInvocation.result &&
-      !(part.toolInvocation.result).error
+      !('error' in part.toolInvocation.result)
     ) {
       movies.push(part.toolInvocation.result as MovieData);
     }
@@ -68,7 +68,7 @@ export default function Chat({
 
         // Get the last user message
         const lastUserMsg = messages
-          .filter((m): m is Message => m.role === 'user')
+          .filter(m => m.role === 'user')
           .pop();
 
         if (lastUserMsg?.content && message.role === 'assistant' && message.content) {
@@ -164,14 +164,11 @@ export default function Chat({
     console.log('🔍 Checking saved movies for message:', lastAssistantMessage.id);
     console.log('🗺️ Current saved movies map:', Array.from(savedMovies.entries()));
 
-    const savedMoviesForMessage = savedMovies.get(lastAssistantMessage.id);
-    const extractedMovies = savedMoviesForMessage?.length > 0
-      ? savedMoviesForMessage
-      : extractMoviesFromMessage(lastAssistantMessage);
-
-    if (extractedMovies.length > 0) {
+    const extractedMovies = extractMoviesFromMessage(lastAssistantMessage);
+    if (extractedMovies && extractedMovies.length > 0) {
+      console.log(`🎬 Total movies extracted: ${extractedMovies.length}`);
       setRecommendedMovies(extractedMovies.slice(0, 3));
-    };
+    }
   }, [messages, savedMovies]);
 
   useEffect(() => {
@@ -183,19 +180,6 @@ export default function Chat({
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
   // ========== HOOKS SECTION END ==========
-
-
-  // ========== COMPONENT LOGIC SECTION START ==========
-
-
-  const handleChipClick = (chipText: string) => {
-    void append({
-      role: 'user',
-      content: chipText
-    });
-  };
-
-  // ========== COMPONENT LOGIC SECTION END ==========
 
   const router = useRouter()
   const createChatMutation = api.chat.create.useMutation()
