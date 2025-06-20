@@ -15,6 +15,7 @@ import { WelcomeMessage } from './WelcomeMessage';
 
 import { useRouter } from 'next/navigation'
 import { api } from "~/trpc/react"
+import { log } from 'console';
 
 function Spinner() {
   return (
@@ -75,6 +76,7 @@ export default function Chat({
           }));
 
           try {
+
             const response = await fetch('/api/generate-chips', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -93,6 +95,7 @@ export default function Chat({
 
             const data = await response.json() as { chips: Chip[] };
             setConversationChips(data.chips);
+
           } catch (error) {
             console.error('Failed to generate chips:', error);
             setConversationChips([]);

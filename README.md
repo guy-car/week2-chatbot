@@ -118,8 +118,11 @@ Chat history:
 
 UI:
 - add new chat button on chat page
-- better sign up form on homepage
+- better sign up form on homepage (should have google sign up)
 - homepage when sign up show cards for each page: Watchlist, Watch history, taste profile
+- remove Watchlist, Watch history, taste profile from sidebar
+- make sidebar more obvious and by default not shown
+- add a randomly generated welcome message from the Genie for each new chat?
 
 Data persistence:
 - switch from local storage to Supabase
