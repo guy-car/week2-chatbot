@@ -6,16 +6,16 @@ import { Loader2 } from "lucide-react";
 import toast from 'react-hot-toast'
 
 import { useState, useEffect, useRef } from 'react'
-import { MovieCardsSection, type MovieData } from './MovieCardsSection'
+import { MovieCardsSection } from './MovieCardsSection'
+import type { MovieData } from '~/app/types'
 import { ConversationChips } from './ConversationChips'
 import { type Chip } from '~/app/types'
 import { useChatTitle } from '~/app/_hooks/useChatTitle'
-import { tasteProfileService } from '~/app/_services/tasteProfile'
 import { WelcomeMessage } from './WelcomeMessage';
 
 import { useRouter } from 'next/navigation'
 import { api } from "~/trpc/react"
-import { log } from 'console';
+import { loadMoviesForChat } from 'tools/chat-store';
 
 function Spinner() {
   return (
@@ -26,42 +26,46 @@ function Spinner() {
   );
 }
 
+function extractMoviesFromMessage(message: Message): MovieData[] {
+  const movies: MovieData[] = [];
+
+  message.parts?.forEach(part => {
+    if (
+      part.type === 'tool-invocation' &&
+      part.toolInvocation.toolName === 'media_lookup' &&
+      part.toolInvocation.state === 'result' &&
+      'result' in part.toolInvocation &&
+      part.toolInvocation.result &&
+      !(part.toolInvocation.result).error
+    ) {
+      movies.push(part.toolInvocation.result as MovieData);
+    }
+  });
+
+  return movies;
+}
+
 export default function Chat({
   id,
   initialMessages,
 }: { id?: string | undefined; initialMessages?: Message[] } = {}) {
 
+
   // ========== HOOKS SECTION START ==========
 
-  const { messages,
-    input, status, error,
-    handleInputChange, handleSubmit,
-    stop, reload, append
-  } = useChat({
+  const { messages, input, status, error, handleInputChange, handleSubmit, stop, reload, append } = useChat({
     api: '/api/chat-tmdb-tool',
     body: {
-      tasteProfile: tasteProfileService.generateSummary()
     },
+    id,
+    initialMessages,
     onError: (error) => {
       console.log('useChat error:', error);
     },
     onFinish: (message) => {
       void (async () => {
-        // Extract movies from THIS specific message
-        const moviesFromThisResponse: MovieData[] = [];
 
-        message.parts?.forEach(part => {
-          if (
-            part.type === 'tool-invocation' &&
-            part.toolInvocation.toolName === 'media_lookup' &&
-            part.toolInvocation.state === 'result' &&
-            'result' in part.toolInvocation &&
-            part.toolInvocation.result &&
-            !(part.toolInvocation.result).error
-          ) {
-            moviesFromThisResponse.push(part.toolInvocation.result as MovieData);
-          }
-        });
+        const moviesFromThisResponse = extractMoviesFromMessage(message);
 
         // Get the last user message
         const lastUserMsg = messages
@@ -103,28 +107,49 @@ export default function Chat({
         }
       })();
     },
-    id,
-    initialMessages,
     maxSteps: 1,
     sendExtraMessageFields: true,
-    experimental_prepareRequestBody({ messages, id }) {
-      return { message: messages[messages.length - 1], id };
-    },
     generateId: createIdGenerator({
       prefix: 'msgc',
       size: 16,
     }),
   }) // <-- useChat ends here
 
+  console.log('🎭 Chat state:', {
+    id,
+    messagesCount: messages.length,
+    firstMessage: messages[0]
+  });
+
+
   useChatTitle(id ?? '', messages);
 
   const [recommendedMovies, setRecommendedMovies] = useState<MovieData[]>([])
   const [conversationChips, setConversationChips] = useState<Chip[]>([])
+  const [savedMovies, setSavedMovies] = useState<Map<string, MovieData[]>>(new Map());
+
+  useEffect(() => {
+    if (id) {
+      void (async () => {
+        console.log('🔄 Loading saved movies for chat:', id);
+        const movieData = await loadMoviesForChat(id);
+        console.log('📦 Loaded movie data:', movieData);
+
+        const movieMap = new Map<string, MovieData[]>();
+        movieData.forEach(({ messageId, movies }) => {
+          movieMap.set(messageId, movies);
+        });
+
+        console.log('🗺️ Movie map:', Array.from(movieMap.entries()));
+        setSavedMovies(movieMap);
+      })();
+    }
+  }, [id]);
+
 
   useEffect(() => {
     console.log('🔍 Movie extraction running, total messages:', messages.length);
 
-    // Find the last assistant message
     const lastAssistantMessage = messages
       .slice()
       .reverse()
@@ -136,42 +161,17 @@ export default function Chat({
       return;
     }
 
-    console.log('✅ Found last assistant message:', {
-      content: lastAssistantMessage.content?.substring(0, 100) + '...',
-      partsCount: lastAssistantMessage.parts?.length || 0,
-      partTypes: lastAssistantMessage.parts?.map(p => p.type) || []
-    });
+    // First check if we have saved movies for this message
+    console.log('🔍 Checking saved movies for message:', lastAssistantMessage.id);
+    console.log('🗺️ Current saved movies map:', Array.from(savedMovies.entries()));
 
-    // Extract movies in the ORDER they appear in parts
-    const extractedMovies: MovieData[] = [];
+    const savedMoviesForMessage = savedMovies.get(lastAssistantMessage.id);
+    const extractedMovies = savedMoviesForMessage?.length > 0
+      ? savedMoviesForMessage
+      : extractMoviesFromMessage(lastAssistantMessage);
 
-    lastAssistantMessage.parts?.forEach((part, index) => {
-      console.log(`📦 Part ${index}:`, part.type);
-
-      if (part.type === 'tool-invocation') {
-        console.log(`🔧 Tool invocation details:`, {
-          toolName: part.toolInvocation.toolName,
-          state: part.toolInvocation.state,
-          hasResult: !!part.toolInvocation.result,
-          hasError: !!part.toolInvocation.result?.error
-        });
-      }
-
-      if (
-        part.type === 'tool-invocation' &&
-        part.toolInvocation.toolName === 'media_lookup' &&
-        part.toolInvocation.state === 'result' &&
-        part.toolInvocation.result &&
-        !part.toolInvocation.result.error
-      ) {
-        extractedMovies.push(part.toolInvocation.result as MovieData);
-        console.log(`✅ Added movie:`, part.toolInvocation.result.title);
-      }
-    });
-
-    console.log(`🎬 Total movies extracted: ${extractedMovies.length}`);
     setRecommendedMovies(extractedMovies.slice(0, 3));
-  }, [messages])
+  }, [messages, savedMovies]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -186,43 +186,12 @@ export default function Chat({
 
   // ========== COMPONENT LOGIC SECTION START ==========
 
-  const extractMovieTitle = (chipText: string) => {
-    const match = /Add (.+?) to watchlist/i.exec(chipText);
-    const title = match?.[1] ? match[1].trim() : chipText;
 
-    return title;
-  };
-  const addToWatchlist = (movieTitle: string) => {
-    const existing = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as string[];
-
-
-    if (!existing.includes(movieTitle)) {
-      existing.push(movieTitle);
-      localStorage.setItem('watchlist', JSON.stringify(existing));
-      return true;
-    }
-    return false;
-  };
   const handleChipClick = (chipText: string) => {
-    // Check if this is a watchlist chip
-    if (chipText.toLowerCase().includes('to watchlist')) {
-      // Handle watchlist logic
-      const movieTitle = extractMovieTitle(chipText);
-      const success = addToWatchlist(movieTitle);
-
-
-      if (success) {
-        toast.success(`Added "${movieTitle}" to watchlist!`);
-      } else {
-        toast.error(`"${movieTitle}" is already in your watchlist`);
-      }
-    } else {
-      // Handle regular chips (send as message)
-      void append({
-        role: 'user',
-        content: chipText
-      });
-    }
+    void append({
+      role: 'user',
+      content: chipText
+    });
   };
 
   // ========== COMPONENT LOGIC SECTION END ==========
@@ -244,57 +213,22 @@ export default function Chat({
         {messages.map(message => (
           <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-base'}`}>
             <strong>{message.role === 'user' ? 'User: ' : 'AI: '}</strong>
-            {message.parts
-              ?.filter(part => part.type !== 'source')
-              .map((part, index) => {
-                if (part.type === 'text') {
-                  const text = part.text;
-
-                  // Check if this text contains chips
-                  if (text.includes('CHIPS:')) {
-                    const [mainText, chipsText] = text.split('CHIPS:');
-                    const chips = chipsText?.trim()
-                      .split('|')
-                      .map(chip => chip.trim().replace(/\[|\]/g, ''));
-
-                    return (
-                      <div key={index}>
-                        <div>{mainText?.trim()}</div>
-                        {chips && chips.length > 0 && (
-                          <div className="flex gap-2 mt-2">
-                            {chips.map((chip, chipIndex) => (
-                              <button
-                                key={chipIndex}
-                                className={`px-3 py-1 rounded-full text-sm hover:bg-opacity-80 ${chip.toLowerCase().includes('to watchlist')
-                                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                  }`}
-                                onClick={() => handleChipClick(chip)}
-                              >
-                                {chip}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
+            {message.parts ? (
+              // Handle messages with parts (new messages)
+              message.parts
+                ?.filter(part => part.type === 'text')
+                .map((part, index) => {
+                  if (part.type === 'text') {
+                    const text = part.text;
+                    // ... your existing chip logic ...
+                    return <div key={index}>{text}</div>;
                   }
-
-                  return <div key={index}>{text}</div>;
-                }
-                return null;
-              })}
-            {message.parts
-              ?.filter(part => part.type === 'source')
-              .map(part => (
-                <span key={`source-${part.source.id}`}>
-                  [
-                  <a href={part.source.url} target="_blank" className="text-blue-500 hover:underline">
-                    {part.source.title ?? new URL(part.source.url).hostname}
-                  </a>
-                  ]
-                </span>
-              ))}
+                  return null;
+                })
+            ) : (
+              // Handle messages without parts (loaded from DB)
+              <div>{message.content}</div>
+            )}
           </div>
         ))}
       </div>

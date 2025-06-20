@@ -19,9 +19,7 @@ interface WelcomeMessageProps {
 }
 
 export function WelcomeMessage({ chatId }: WelcomeMessageProps) {
-    const welcomeMessage = useMemo(() => {
-        return WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)]
-    }, [chatId])
+    const welcomeMessage = WELCOME_MESSAGES[0];
 
     return (
         <div className="text-center py-12">

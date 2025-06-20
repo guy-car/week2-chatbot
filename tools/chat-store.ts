@@ -1,11 +1,13 @@
+
 'use server'
 
 import { generateId } from 'ai';
 import { type Message } from 'ai';
 import { db } from "~/server/db"
 import { chats, messages } from "~/server/db/schema"
-import { eq } from "drizzle-orm"
-import { extractToolResults, reconstructMessageParts } from './message-utils'
+import { eq, and, isNotNull } from "drizzle-orm"
+import { extractToolResults } from './message-utils'
+import type { MovieData } from "~/app/types/index"
 
 export async function createChat(userId: string): Promise<string> {
   const id = generateId();
@@ -16,6 +18,7 @@ export async function createChat(userId: string): Promise<string> {
   return id;
 }
 
+// just returns plain messages
 export async function loadChat(id: string): Promise<Message[]> {
   const result = await db
     .select()
@@ -27,10 +30,28 @@ export async function loadChat(id: string): Promise<Message[]> {
     content: row.content ?? '',
     role: row.role as 'system' | 'user' | 'assistant' | 'data',
     createdAt: row.createdAt,
-    // Reconstruct parts array if we have tool results
-    ...(row.toolResults && {
-      parts: reconstructMessageParts(row.content, row.toolResults)
+  }));
+}
+
+// load posters separately directly from db
+export async function loadMoviesForChat(chatId: string): Promise<{ messageId: string; movies: MovieData[] }[]> {
+  const result = await db
+    .select({
+      messageId: messages.id,
+      toolResults: messages.toolResults,
     })
+    .from(messages)
+    .where(
+      and(
+        eq(messages.chatId, chatId),
+        eq(messages.role, 'assistant'),
+        isNotNull(messages.toolResults)
+      )
+    );
+
+  return result.map(row => ({
+    messageId: row.messageId,
+    movies: (row.toolResults!) || []
   }));
 }
 
