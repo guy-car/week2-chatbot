@@ -1,7 +1,5 @@
 'use client'
 
-import { useMemo } from 'react'
-
 const WELCOME_MESSAGES = ["Let your curiosity speak. The Genie listens.",
     "Not all who wander are lost — some are just between films.",
     "Feeling indecisive? Whisper your mood and I’ll do the rest.",
@@ -19,7 +17,19 @@ interface WelcomeMessageProps {
 }
 
 export function WelcomeMessage({ chatId }: WelcomeMessageProps) {
-    const welcomeMessage = WELCOME_MESSAGES[0];
+    // Use chatId to generate a stable index (same chatId = same message)
+    const getStableIndex = (id: string) => {
+        let hash = 0;
+        for (let i = 0; i < id.length; i++) {
+            const char = id.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash) % WELCOME_MESSAGES.length;
+    };
+
+    const messageIndex = chatId ? getStableIndex(chatId) : 0;
+    const welcomeMessage = WELCOME_MESSAGES[messageIndex];
 
     return (
         <div className="text-center py-12">

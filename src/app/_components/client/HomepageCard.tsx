@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import type { MovieData } from '~/app/types'
 
 interface HomepageCardProps {
     title: string

@@ -25,7 +25,7 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
             await removeFromWatchlist(movieId);
             const movie = movies.find(m => m.id === movieId);
             toast.success(`Removed "${movie?.title}" from ${variant}`);
-        } catch (error) {
+        } catch {
             toast.error('Failed to remove movie');
         }
     }
@@ -34,7 +34,7 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
         try {
             await markAsWatched(movie);
             toast.success(`Moved "${movie.title}" to watch history`);
-        } catch (error) {
+        } catch {
             toast.error('Failed to mark as watched');
         }
     }

@@ -3,7 +3,6 @@
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
 import { Loader2 } from "lucide-react";
-import toast from 'react-hot-toast'
 
 import { useState, useEffect, useRef } from 'react'
 import { MovieCardsSection } from './MovieCardsSection'
