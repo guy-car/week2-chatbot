@@ -1,7 +1,7 @@
 import { auth } from "~/lib/auth";
 import { headers } from "next/headers";
 import { NewChatComponent } from '../client/NewChatComponent';
-import { Bookmark, History, User } from 'lucide-react'
+import { Bookmark, History } from 'lucide-react'
 import { HomepageCard } from '~/app/_components/client/HomepageCard'
 import { api } from "~/trpc/server";
 

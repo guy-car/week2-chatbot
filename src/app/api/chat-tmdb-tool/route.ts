@@ -170,7 +170,7 @@ NEVER skip the tool call. The tool provides important data for the user interfac
             const selectBestMatch = (results: TMDBSearchResult[]): TMDBSearchResult | null => {
               // Extract year if the AI included it in the title
               const yearMatch = /\((\d{4})\)/.exec(title);
-              const searchYear = yearMatch ? parseInt(yearMatch[1]) : null;
+              const searchYear = yearMatch?.[1] ? parseInt(yearMatch[1]) : null;
               const cleanTitle = title.replace(/\s*\(\d{4}\)/, '').trim();
 
               console.log(`🎯 Looking for: "${cleanTitle}" ${searchYear ? `(${searchYear})` : ''}`);
