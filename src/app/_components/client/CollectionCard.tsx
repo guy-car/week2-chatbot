@@ -5,6 +5,7 @@ import { Trash2, Eye, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-hot-toast'
 import type { MovieData } from './MovieCardsSection'
+import { tasteProfileService } from '~/app/_services/tasteProfile'
 
 interface CollectionCardProps {
     movie: MovieData & { addedAt?: string; watchedAt?: string }
@@ -26,11 +27,13 @@ export function CollectionCard({
 
     const handleLike = () => {
         toast.dismiss()
+        tasteProfileService.addLikedMovie(movie)
         toast.success(`You liked "${movie.title}"`)
     }
 
     const handleDislike = () => {
         toast.dismiss()
+        tasteProfileService.addDislikedMovie(movie)
         toast.success(`You disliked "${movie.title}"`)
     }
 

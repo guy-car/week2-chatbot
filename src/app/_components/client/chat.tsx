@@ -10,6 +10,11 @@ import { MovieCardsSection, type MovieData } from './MovieCardsSection'
 import { ConversationChips } from './ConversationChips'
 import { type Chip } from '~/app/types'
 import { useChatTitle } from '~/app/_hooks/useChatTitle'
+import { tasteProfileService } from '~/app/_services/tasteProfile'
+import { WelcomeMessage } from './WelcomeMessage';
+
+import { useRouter } from 'next/navigation'
+import { api } from "~/trpc/react"
 
 function Spinner() {
   return (
@@ -33,6 +38,9 @@ export default function Chat({
     stop, reload, append
   } = useChat({
     api: '/api/chat-tmdb-tool',
+    body: {
+      tasteProfile: tasteProfileService.generateSummary()
+    },
     onError: (error) => {
       console.log('useChat error:', error);
     },
@@ -216,8 +224,17 @@ export default function Chat({
 
   // ========== COMPONENT LOGIC SECTION END ==========
 
+  const router = useRouter()
+  const createChatMutation = api.chat.create.useMutation()
+
+  const handleNewChat = async () => {
+    const result = await createChatMutation.mutateAsync()
+    router.push(`/chat/${result.chatId}`)
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {messages.length === 0 && <WelcomeMessage chatId={id ?? ''} />}
       <div
         ref={chatContainerRef}
         className="h-64 border border-gray-300 p-6 mb-6 overflow-y-auto bg-gray-50 rounded-lg">
@@ -316,6 +333,16 @@ export default function Chat({
       )}
 
       <form onSubmit={handleSubmit} className="flex gap-3">
+
+        <button
+          type="button"
+          onClick={handleNewChat}
+          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+          title="Start new chat"
+        >
+          New chat
+        </button>
+
         <input
           name="prompt"
           value={input}
@@ -338,3 +365,4 @@ export default function Chat({
     </div>
   );
 }
+
