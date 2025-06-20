@@ -10,7 +10,7 @@ export async function HomePage() {
     if (!session) {
         return (
             <div className="text-center py-8">
-                <h1 className="text-2xl mb-4">Welcome to the movie recommendation chatbot</h1>
+                <h1 className="text-2xl mb-4">It really gets you</h1>
             </div>
         );
     }

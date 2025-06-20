@@ -1,4 +1,5 @@
-import { MessageSquare, Bookmark, History, Home } from "lucide-react"
+
+import { MessageSquare, Bookmark, History, Home, User } from "lucide-react"
 import Link from "next/link"
 import { api } from "~/trpc/server"
 import {
@@ -70,6 +71,18 @@ export default async function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/profile">
+                    <User />
+                    <span className="text-xl">Taste Profile</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Insert more above */}
+
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

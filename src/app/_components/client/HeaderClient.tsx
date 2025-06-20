@@ -43,7 +43,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
     return (
         <div className="flex justify-between items-center w-full">
             <Link href="/" className="text-xl font-bold hover:text-blue-600 transition-colors">
-                Movie Chatbot
+                Watch Genie
             </Link>
 
             <div className='flex items-center gap-4'>
