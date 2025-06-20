@@ -1,8 +1,10 @@
+// app/profile/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
 import { Save, Edit2, X } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { api } from "~/trpc/react"
 
 interface TasteProfile {
     favoriteGenres: string
@@ -12,42 +14,78 @@ interface TasteProfile {
 }
 
 export default function ProfilePage() {
-    const [profile, setProfile] = useState<TasteProfile>({
+    const [isEditing, setIsEditing] = useState(false)
+    const [editedProfile, setEditedProfile] = useState<TasteProfile>({
         favoriteGenres: '',
         likedMovies: '',
         dislikedMovies: '',
         preferences: ''
     })
-    const [isEditing, setIsEditing] = useState(false)
-    const [charCount, setCharCount] = useState(0)
-    const MAX_CHARS = 500
 
-    useEffect(() => {
-        const saved = localStorage.getItem('tasteProfile')
-        if (saved) {
-            setProfile(JSON.parse(saved))
+    // Fetch profile data
+    const { data: profile, isLoading, refetch } = api.preferences.get.useQuery()
+
+    // Update mutation
+    const updateProfile = api.preferences.update.useMutation({
+        onSuccess: () => {
+            toast.success('Taste profile saved!')
+            setIsEditing(false)
+            void refetch() // Refresh the data
+        },
+        onError: (error) => {
+            toast.error('Failed to save profile')
+            console.error('Profile update error:', error)
         }
-    }, [])
+    })
 
+    // Initialize edited profile when data loads
     useEffect(() => {
-        const total = Object.values(profile).join('').length
-        setCharCount(total)
+        if (profile) {
+            setEditedProfile({
+                favoriteGenres: profile.favoriteGenres || '',
+                likedMovies: profile.likedMovies || '',
+                dislikedMovies: profile.dislikedMovies || '',
+                preferences: profile.preferences || ''
+            })
+        }
     }, [profile])
 
+    const charCount = Object.values(editedProfile).join('').length
+    const MAX_CHARS = 500
+
     const handleSave = () => {
-        localStorage.setItem('tasteProfile', JSON.stringify(profile))
-        toast.success('Taste profile saved!')
-        setIsEditing(false)
+        updateProfile.mutate(editedProfile)
     }
 
     const handleCancel = () => {
-        // Reload saved data
-        const saved = localStorage.getItem('tasteProfile')
-        if (saved) {
-            setProfile(JSON.parse(saved))
+        // Reset to original data
+        if (profile) {
+            setEditedProfile({
+                favoriteGenres: profile.favoriteGenres || '',
+                likedMovies: profile.likedMovies || '',
+                dislikedMovies: profile.dislikedMovies || '',
+                preferences: profile.preferences || ''
+            })
         }
         setIsEditing(false)
     }
+
+    if (isLoading) {
+        return (
+            <div className="max-w-2xl mx-auto p-6">
+                <div className="animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+                    <div className="space-y-6">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="h-20 bg-gray-200 rounded"></div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    const displayProfile = isEditing ? editedProfile : (profile || editedProfile)
 
     return (
         <div className="max-w-2xl mx-auto p-6">
@@ -87,8 +125,8 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={profile.favoriteGenres}
-                        onChange={(e) => setProfile({ ...profile, favoriteGenres: e.target.value })}
+                        value={displayProfile.favoriteGenres}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, favoriteGenres: e.target.value })}
                         disabled={!isEditing}
                     />
                 </div>
@@ -103,8 +141,8 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={profile.likedMovies}
-                        onChange={(e) => setProfile({ ...profile, likedMovies: e.target.value })}
+                        value={displayProfile.likedMovies}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, likedMovies: e.target.value })}
                         disabled={!isEditing}
                     />
                 </div>
@@ -119,8 +157,8 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={profile.dislikedMovies}
-                        onChange={(e) => setProfile({ ...profile, dislikedMovies: e.target.value })}
+                        value={displayProfile.dislikedMovies}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, dislikedMovies: e.target.value })}
                         disabled={!isEditing}
                     />
                 </div>
@@ -135,8 +173,8 @@ export default function ProfilePage() {
                             ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                             : 'bg-gray-50 text-gray-600 cursor-not-allowed'
                             }`}
-                        value={profile.preferences}
-                        onChange={(e) => setProfile({ ...profile, preferences: e.target.value })}
+                        value={displayProfile.preferences}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, preferences: e.target.value })}
                         disabled={!isEditing}
                     />
                 </div>
@@ -145,14 +183,15 @@ export default function ProfilePage() {
                     <div className="flex gap-3">
                         <button
                             onClick={handleSave}
-                            disabled={charCount > MAX_CHARS}
+                            disabled={charCount > MAX_CHARS || updateProfile.isPending}
                             className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors"
                         >
                             <Save className="w-4 h-4" />
-                            Save Profile
+                            {updateProfile.isPending ? 'Saving...' : 'Save Profile'}
                         </button>
                         <button
                             onClick={handleCancel}
+                            disabled={updateProfile.isPending}
                             className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                             <X className="w-4 h-4" />
