@@ -1,3 +1,7 @@
+// app/_services/tasteProfileService.ts
+import { api } from "~/trpc/react";
+import type { Database } from "~/server/db"; // Import the database type
+
 interface TasteProfile {
     favoriteGenres: string
     likedMovies: string
@@ -5,97 +9,68 @@ interface TasteProfile {
     preferences: string
 }
 
-interface MovieInteraction {
-    id: number
-    title: string
-    liked: boolean
-    timestamp: string
-}
-
 export const tasteProfileService = {
-    // Get the current profile
-    getProfile(): TasteProfile {
-        const saved = localStorage.getItem('tasteProfile')
-        if (saved) {
-            return JSON.parse(saved)
-        }
-        return {
+    // For server-side usage in your chat API route
+    async getProfileForChat(userId: string, db: Database) {
+        const { userPreferences } = await import("~/server/db/schema");
+        const { eq } = await import("drizzle-orm");
+
+        const profile = await db.query.userPreferences.findFirst({
+            where: eq(userPreferences.userId, userId),
+        });
+
+        return profile ?? {
             favoriteGenres: '',
             likedMovies: '',
             dislikedMovies: '',
             preferences: ''
-        }
-    },
-
-    // Add a liked movie
-    addLikedMovie(movie: { id: number; title: string }) {
-        const profile = this.getProfile()
-        const likedList = profile.likedMovies ? profile.likedMovies.split(', ') : []
-
-        if (!likedList.includes(movie.title)) {
-            likedList.push(movie.title)
-            profile.likedMovies = likedList.join(', ')
-            localStorage.setItem('tasteProfile', JSON.stringify(profile))
-        }
-
-        // Also track in interactions
-        this.trackInteraction(movie.id, movie.title, true)
-    },
-
-    // Add a disliked movie
-    addDislikedMovie(movie: { id: number; title: string }) {
-        const profile = this.getProfile()
-        const dislikedList = profile.dislikedMovies ? profile.dislikedMovies.split(', ') : []
-
-        if (!dislikedList.includes(movie.title)) {
-            dislikedList.push(movie.title)
-            profile.dislikedMovies = dislikedList.join(', ')
-            localStorage.setItem('tasteProfile', JSON.stringify(profile))
-        }
-
-        // Also track in interactions
-        this.trackInteraction(movie.id, movie.title, false)
-    },
-
-    // Track individual interactions (for future analysis)
-    trackInteraction(id: number, title: string, liked: boolean) {
-        const interactions = JSON.parse(
-            localStorage.getItem('movieInteractions') ?? '[]'
-        ) as MovieInteraction[]
-
-        // Remove any previous interaction with this movie
-        const filtered = interactions.filter(i => i.id !== id)
-
-        filtered.push({
-            id,
-            title,
-            liked,
-            timestamp: new Date().toISOString()
-        })
-
-        localStorage.setItem('movieInteractions', JSON.stringify(filtered))
+        };
     },
 
     // Generate a summary for the LLM
-    generateSummary(): string {
-        const profile = this.getProfile()
-        const parts: string[] = []
+    generateSummary(profile: TasteProfile): string {
+        const parts: string[] = [];
 
         if (profile.favoriteGenres) {
-            parts.push(`Favorite genres: ${profile.favoriteGenres}`)
+            parts.push(`Favorite genres: ${profile.favoriteGenres}`);
         }
         if (profile.likedMovies) {
-            parts.push(`Liked movies: ${profile.likedMovies}`)
+            parts.push(`Liked movies: ${profile.likedMovies}`);
         }
         if (profile.dislikedMovies) {
-            parts.push(`Disliked movies: ${profile.dislikedMovies}`)
+            parts.push(`Disliked movies: ${profile.dislikedMovies}`);
         }
         if (profile.preferences) {
-            parts.push(`Preferences: ${profile.preferences}`)
+            parts.push(`Preferences: ${profile.preferences}`);
         }
 
         return parts.length > 0
             ? `User taste profile: ${parts.join('. ')}`
-            : ''
+            : '';
     }
-}
+};
+
+// Export hooks for React components
+export const useTasteProfile = () => {
+    const profile = api.preferences.get.useQuery();
+    const trackInteraction = api.movies.trackInteraction.useMutation();
+
+    return {
+        profile: profile.data,
+        isLoading: profile.isLoading,
+        addLikedMovie: async (movie: { id: number; title: string }) => {
+            await trackInteraction.mutateAsync({
+                movieId: movie.id.toString(),
+                movieTitle: movie.title,
+                interactionType: 'like',
+            });
+        },
+        addDislikedMovie: async (movie: { id: number; title: string }) => {
+            await trackInteraction.mutateAsync({
+                movieId: movie.id.toString(),
+                movieTitle: movie.title,
+                interactionType: 'dislike',
+            });
+        },
+    };
+};
