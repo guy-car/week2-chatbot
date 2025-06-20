@@ -5,6 +5,8 @@ import { ThumbsUp, ThumbsDown, Eye, Bookmark, MessageCircle } from 'lucide-react
 import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-hot-toast'
 import { tasteProfileService } from '~/app/_services/tasteProfile'
+import { useMovieCollections } from '~/app/_services/useMovieCollections'
+
 
 interface MovieCardProps {
     movie: {
@@ -21,45 +23,35 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     const year = movie.release_date?.substring(0, 4)
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
 
-    const handleAddToWatchlist = () => {
-        toast.dismiss()
-        const existing = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as any[];
-        const alreadyExists = existing.some(item => item.id === movie.id);
+    const { addToWatchlist, markAsWatched, watchlist, watchHistory } = useMovieCollections();
 
-        if (!alreadyExists) {
-            const movieData = {
-                ...movie,
-                addedAt: new Date().toISOString()
-            };
-            existing.push(movieData);
-            localStorage.setItem('watchlist', JSON.stringify(existing));
+    const handleAddToWatchlist = async () => {
+        toast.dismiss()
+
+        try {
+            await addToWatchlist(movie);
             toast.success(`Added "${movie.title}" to watchlist`);
-        } else {
-            toast.error(`"${movie.title}" is already in your watchlist`);
+        } catch (error) {
+            if (error.message === 'Already in watchlist') {
+                toast.error(`"${movie.title}" is already in your watchlist`);
+            } else {
+                toast.error('Failed to add to watchlist');
+            }
         }
     }
 
-    const handleMarkAsWatched = () => {
+    const handleMarkAsWatched = async () => {
         toast.dismiss()
-        const watched = JSON.parse(localStorage.getItem('watchHistory') ?? '[]') as any[];
-        const alreadyWatched = watched.some(item => item.id === movie.id);
 
-        if (!alreadyWatched) {
-            const movieData = {
-                ...movie,
-                watchedAt: new Date().toISOString()
-            };
-            watched.push(movieData);
-            localStorage.setItem('watchHistory', JSON.stringify(watched));
-
-            // Also remove from watchlist if it's there
-            const watchlist = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as any[];
-            const filtered = watchlist.filter(item => item.id !== movie.id);
-            localStorage.setItem('watchlist', JSON.stringify(filtered));
-
+        try {
+            await markAsWatched(movie);
             toast.success(`Marked "${movie.title}" as watched`);
-        } else {
-            toast(`"${movie.title}" is already in your watch history`);
+        } catch (error) {
+            if (error.message === 'Already watched') {
+                toast(`"${movie.title}" is already in your watch history`);
+            } else {
+                toast.error('Failed to mark as watched');
+            }
         }
     }
 
