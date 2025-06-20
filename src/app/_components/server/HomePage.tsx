@@ -41,7 +41,7 @@ export async function HomePage() {
                     title="Taste Profile"
                     href="/profile"
                     icon={<User className="w-8 h-8" />}
-                    storageKey="watchlist" // Using watchlist as a proxy for activity
+                    storageKey={null}
                     emptyMessage="Build your profile"
                 />
             </div>

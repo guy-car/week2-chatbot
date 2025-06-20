@@ -7,7 +7,6 @@ import type { MovieData } from './MovieCardsSection'
 
 interface HomepageCardProps {
     title: string
-    description: string
     href: string
     icon: React.ReactNode
     storageKey: 'watchlist' | 'watchHistory'
@@ -52,9 +51,8 @@ export function HomepageCard({
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600" />
                 )}
 
-                {/* Dark overlay */}
-                <div className="absolute inset-0 bg-gray bg-opacity-40" />
-
+                {/* Darker at top, lighter at bottom */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black via-black/70 to-black/40" />
                 {/* Content */}
                 <div className="relative h-full p-6 flex flex-col justify-between text-white">
                     <div>
