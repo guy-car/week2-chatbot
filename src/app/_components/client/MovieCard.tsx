@@ -4,8 +4,8 @@
 import { ThumbsUp, ThumbsDown, Eye, Bookmark, MessageCircle } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-hot-toast'
-import { tasteProfileService } from '~/app/_services/tasteProfile'
 import { useMovieCollections } from '~/app/_services/useMovieCollections'
+import { useTasteProfile } from '~/app/_services/tasteProfile'
 
 
 interface MovieCardProps {
@@ -20,7 +20,6 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
-    const router = useRouter()
     const { addLikedMovie, addDislikedMovie } = useTasteProfile();
     const year = movie.release_date?.substring(0, 4)
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
@@ -34,7 +33,7 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
             await addToWatchlist(movie);
             toast.success(`Added "${movie.title}" to watchlist`);
         } catch (error) {
-            if (error.message === 'Already in watchlist') {
+            if (error instanceof Error && error.message === 'Already in watchlist') {
                 toast.error(`"${movie.title}" is already in your watchlist`);
             } else {
                 toast.error('Failed to add to watchlist');
@@ -49,7 +48,7 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
             await markAsWatched(movie);
             toast.success(`Marked "${movie.title}" as watched`);
         } catch (error) {
-            if (error.message === 'Already watched') {
+            if (error instanceof Error && error.message === 'Already watched') {
                 toast(`"${movie.title}" is already in your watch history`);
             } else {
                 toast.error('Failed to mark as watched');

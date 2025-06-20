@@ -3,51 +3,41 @@
 import { useState } from 'react'
 import { CollectionCard } from './CollectionCard'
 import { MovieDetailsModal } from './MovieDetailsModal'
-import type { MovieData } from './MovieCardsSection'
+import type { MovieData } from '~/app/types'
 import { toast } from 'react-hot-toast'
+import { useMovieCollections } from '~/app/_services/useMovieCollections';
 
 interface MovieGridProps {
     movies: (MovieData & { addedAt?: string; watchedAt?: string })[]
     variant: 'watchlist' | 'history'
-    onUpdate: () => void  // Callback to refresh the list after changes
 }
 
-export function MovieGrid({ movies, variant, onUpdate }: MovieGridProps) {
+export function MovieGrid({ movies, variant }: MovieGridProps) {
     const [modalOpen, setModalOpen] = useState(false)
     const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null)
     const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
     const [selectedMovieTitle, setSelectedMovieTitle] = useState('')
 
-    const handleRemove = (movieId: number) => {
-        const storageKey = variant === 'watchlist' ? 'watchlist' : 'watchHistory'
-        const items = JSON.parse(localStorage.getItem(storageKey) ?? '[]') as any[]
-        const filtered = items.filter(item => item.id !== movieId)
-        localStorage.setItem(storageKey, JSON.stringify(filtered))
+    const { removeFromWatchlist, markAsWatched } = useMovieCollections();
 
-        const movie = movies.find(m => m.id === movieId)
-        toast.success(`Removed "${movie?.title}" from ${variant}`)
-        onUpdate()
-    }
-
-    const handleMarkWatched = (movie: MovieData) => {
-        // Add to history
-        const history = JSON.parse(localStorage.getItem('watchHistory') ?? '[]') as any[]
-        const movieData = {
-            ...movie,
-            watchedAt: new Date().toISOString()
+    const handleRemove = async (movieId: number) => {
+        try {
+            await removeFromWatchlist(movieId);
+            const movie = movies.find(m => m.id === movieId);
+            toast.success(`Removed "${movie?.title}" from ${variant}`);
+        } catch (error) {
+            toast.error('Failed to remove movie');
         }
-        history.push(movieData)
-        localStorage.setItem('watchHistory', JSON.stringify(history))
-
-        // Remove from watchlist
-        const watchlist = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as any[]
-        const filtered = watchlist.filter(item => item.id !== movie.id)
-        localStorage.setItem('watchlist', JSON.stringify(filtered))
-
-        toast.success(`Moved "${movie.title}" to watch history`)
-        onUpdate()
     }
 
+    const handleMarkWatched = async (movie: MovieData) => {
+        try {
+            await markAsWatched(movie);
+            toast.success(`Moved "${movie.title}" to watch history`);
+        } catch (error) {
+            toast.error('Failed to mark as watched');
+        }
+    }
     const handleMoreInfo = (movieId: number, mediaType: 'movie' | 'tv', title: string) => {
         setSelectedMovieId(movieId)
         setSelectedMediaType(mediaType)

@@ -2,8 +2,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { movieInteractions, userPreferences } from "~/server/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 import { userMovies } from "~/server/db/schema";
+
 
 export const moviesRouter = createTRPCRouter({
     trackInteraction: protectedProcedure
@@ -165,9 +166,9 @@ export const moviesRouter = createTRPCRouter({
                 title: input.title,
                 posterUrl: input.posterUrl,
                 mediaType: input.mediaType,
-                releaseDate: input.releaseDate || null,
-                rating: input.rating || null,
-                overview: input.overview || null,
+                releaseDate: input.releaseDate ?? null,
+                rating: input.rating ?? null,
+                overview: input.overview ?? null,
                 collectionType: 'history',
             });
 
@@ -194,6 +195,50 @@ export const moviesRouter = createTRPCRouter({
             });
         }),
 
+    getLatestMovies: protectedProcedure
+        .query(async ({ ctx }) => {
+            const [latestWatchlist, latestHistory] = await Promise.all([
+                ctx.db.query.userMovies.findFirst({
+                    where: and(
+                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.collectionType, 'watchlist')
+                    ),
+                    orderBy: [desc(userMovies.addedAt)],
+                }),
+                ctx.db.query.userMovies.findFirst({
+                    where: and(
+                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.collectionType, 'history')
+                    ),
+                    orderBy: [desc(userMovies.addedAt)],
+                })
+            ]);
 
+            const [watchlistCount, historyCount] = await Promise.all([
+                ctx.db.select({ count: count() })
+                    .from(userMovies)
+                    .where(and(
+                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.collectionType, 'watchlist')
+                    )),
+                ctx.db.select({ count: count() })
+                    .from(userMovies)
+                    .where(and(
+                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.collectionType, 'history')
+                    ))
+            ]);
+
+            return {
+                watchlist: {
+                    latest: latestWatchlist,
+                    count: watchlistCount[0]?.count ?? 0
+                },
+                history: {
+                    latest: latestHistory,
+                    count: historyCount[0]?.count ?? 0
+                }
+            };
+        }),
 
 });

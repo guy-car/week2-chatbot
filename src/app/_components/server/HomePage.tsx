@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NewChatComponent } from '../client/NewChatComponent';
 import { Bookmark, History, User } from 'lucide-react'
 import { HomepageCard } from '~/app/_components/client/HomepageCard'
+import { api } from "~/trpc/server";
 
 export async function HomePage() {
     const session = await auth.api.getSession({
@@ -17,15 +18,19 @@ export async function HomePage() {
         );
     }
 
+    // Fetch latest movies server-side
+    const latestMovies = await api.movies.getLatestMovies();
+
     return (
         <>
-            <NewChatComponent user={session.user} />;
+            <NewChatComponent user={session.user} />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6 mt-12">
                 <HomepageCard
                     title="Watchlist"
                     href="/watchlist"
                     icon={<Bookmark className="w-8 h-8" />}
-                    storageKey="watchlist"
+                    latestMovie={latestMovies.watchlist.latest}
+                    count={latestMovies.watchlist.count}
                     emptyMessage="No movies saved yet"
                 />
 
@@ -33,19 +38,12 @@ export async function HomePage() {
                     title="Watch History"
                     href="/history"
                     icon={<History className="w-8 h-8" />}
-                    storageKey="watchHistory"
+                    latestMovie={latestMovies.history.latest}
+                    count={latestMovies.history.count}
                     emptyMessage="No movies watched yet"
                 />
 
-                <HomepageCard
-                    title="Taste Profile"
-                    href="/profile"
-                    icon={<User className="w-8 h-8" />}
-                    storageKey={null}
-                    emptyMessage="Build your profile"
-                />
             </div>
-
         </>
     )
 }
