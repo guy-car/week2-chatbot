@@ -4,8 +4,8 @@
 import { Trash2, Eye, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-hot-toast'
-import type { MovieData } from './MovieCardsSection'
-import { tasteProfileService } from '~/app/_services/tasteProfile'
+import type { MovieData } from '~/app/types'
+import { useTasteProfile } from '~/app/_services/tasteProfile'
 
 interface CollectionCardProps {
     movie: MovieData & { addedAt?: string; watchedAt?: string }
@@ -22,18 +22,18 @@ export function CollectionCard({
     onMarkWatched,
     onMoreInfo
 }: CollectionCardProps) {
+    const { addLikedMovie, addDislikedMovie } = useTasteProfile();
     const year = movie.release_date?.substring(0, 4)
     const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70"
 
-    const handleLike = () => {
+    const handleLike = async () => {
         toast.dismiss()
-        tasteProfileService.addLikedMovie(movie)
+        await addLikedMovie(movie)
         toast.success(`You liked "${movie.title}"`)
     }
 
-    const handleDislike = () => {
-        toast.dismiss()
-        tasteProfileService.addDislikedMovie(movie)
+    const handleDislike = async () => {
+        await addDislikedMovie(movie)
         toast.success(`You disliked "${movie.title}"`)
     }
 
@@ -146,3 +146,4 @@ export function CollectionCard({
             )}
         </div>
     )
+}

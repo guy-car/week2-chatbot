@@ -1,26 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useMovieCollections } from '~/app/_services/useMovieCollections';
 import { MovieGrid } from '~/app/_components/client/MovieGrid';
-import type { MovieData } from '~/app/_components/client/MovieCardsSection';
+import type { MovieData } from '~/app/types';
 
 export default function WatchlistPage() {
-    const [movies, setMovies] = useState<(MovieData & { addedAt?: string })[]>([]);
+    const { watchlist, isLoading } = useMovieCollections();
 
-    const loadMovies = () => {
-        const watchlist = JSON.parse(localStorage.getItem('watchlist') ?? '[]') as (MovieData & { addedAt?: string })[];
-        // Sort by most recently added
-        watchlist.sort((a, b) => {
-            const dateA = a.addedAt ? new Date(a.addedAt).getTime() : 0;
-            const dateB = b.addedAt ? new Date(b.addedAt).getTime() : 0;
-            return dateB - dateA;
-        });
-        setMovies(watchlist);
-    };
+    // Transform database format to MovieData format
+    const movies: MovieData[] = watchlist.map(item => ({
+        id: parseInt(item.movieId),
+        title: item.title,
+        poster_url: item.posterUrl,
+        media_type: item.mediaType,
+        release_date: item.releaseDate ?? undefined,
+        rating: item.rating ?? undefined,
+        overview: item.overview ?? undefined,
+    }));
 
-    useEffect(() => {
-        loadMovies();
-    }, []);
+    if (isLoading) {
+        return (
+            <div className="max-w-7xl mx-auto p-6">
+                <h1 className="text-3xl font-bold mb-6">My Watchlist</h1>
+                <p className="text-gray-600">Loading your watchlist...</p>
+            </div>
+        );
+    }
 
     if (movies.length === 0) {
         return (
@@ -38,7 +43,6 @@ export default function WatchlistPage() {
             <MovieGrid
                 movies={movies}
                 variant="watchlist"
-                onUpdate={loadMovies}
             />
         </div>
     );

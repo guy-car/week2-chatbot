@@ -250,12 +250,6 @@ NEVER skip the tool call. The tool provides important data for the user interfac
       }
     },
     async onFinish({ response }) {
-      console.log('✅ Stream finished');
-      console.log('📊 Total messages:', response.messages.length);
-      console.log('📊 Last message:', JSON.stringify(response.messages[response.messages.length - 1], null, 2));
-      console.log('📊 Message parts:', response.messages.map(m =>
-        m.parts?.map(p => ({ type: p.type, hasText: !!(p).text }))
-      ));
       await saveChat({
         id,
         messages: appendResponseMessages({
