@@ -95,22 +95,31 @@ have 3 sections (see sketch)
 - contextual conversational chips (bring them back)
 - make custom API call for that (onFinish?)
 
+**DONE** 
 Watch history:
 - we need to actually add movies
 
+**DONE** 
 Collector feel:
 - make watchlist and watch history page sexy (just show posters for now like in chat)
     NTH:
     - add animations or improve the toaster notifications so it's more satisfying to add movie to watchlist / mark as seen
 
+**DONE** 
 Chat names:
 - generate name based on beginning of convo 
     NTH:
     - ueser can rename chat names
 
+**DONE** 
 Chat history:
 - display 10 most recents
 - add button to see all history
+
+UI:
+- add new chat button on chat page
+- better sign up form on homepage
+- homepage when sign up show cards for each page: Watchlist, Watch history, taste profile
 
 Data persistence:
 - switch from local storage to Supabase
@@ -125,6 +134,7 @@ Overal UI character:
 - Colors
 - themed animation
 - logo?
+- Logout button doesnt need to scream red
 
 Bugs:
 - User asked for animes - ai responds with good animes - user asks for more work by same director as one of the previous suggestions - AI gives more work from director that don't include animes
@@ -133,3 +143,4 @@ Bugs:
 - Poster selection should only show 3 posters maximum
 - More recent poster suggestions should be on the left side
 - Movie poster should display the latest recommendations from AI (sometimes AI will recommend more movies but posters won't update and will still reflect previous recommendations)
+

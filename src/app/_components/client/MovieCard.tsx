@@ -4,6 +4,7 @@
 import { ThumbsUp, ThumbsDown, Eye, Bookmark, MessageCircle } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-hot-toast'
+import { tasteProfileService } from '~/app/_services/tasteProfile'
 
 interface MovieCardProps {
     movie: {
@@ -64,12 +65,12 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
 
     const handleLike = () => {
         toast.dismiss()
-        // For now, just toast. Later we'll save this preference
+        tasteProfileService.addLikedMovie(movie)
         toast.success(`You liked "${movie.title}"`)
     }
 
     const handleDislike = () => {
-        toast.dismiss()
+        tasteProfileService.addDislikedMovie(movie)
         toast.success(`You disliked "${movie.title}"`)
     }
 

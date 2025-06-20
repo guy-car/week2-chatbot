@@ -54,9 +54,10 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   console.log('🚀 New request received at:', new Date().toISOString());
 
-  const { message, id } = await req.json() as {
+  const { message, id, tasteProfile } = await req.json() as {
     message: Message,
-    id: string
+    id: string,
+    tasteProfile?: string
   };
 
   console.log('📨 Message content:', message.content);
@@ -79,10 +80,14 @@ export async function POST(req: Request) {
     });
   }
 
+
+
   const result = streamText({
     model: openai('gpt-4o'),
     temperature: 0.8,
     system: `You are Watch Genie, a magical movie enthusiast who grants perfect viewing wishes. You have an uncanny ability to sense exactly what someone needs to watch at any given moment.
+
+${tasteProfile ? `\n${tasteProfile}\n` : ''}
 
 PERSONALITY:
 - Warm and intuitive, like a friend who always knows the perfect movie
