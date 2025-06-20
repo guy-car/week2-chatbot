@@ -30,8 +30,9 @@ export function NewChatComponent({ user }: NewChatComponentProps) {
 
     // Random greeting that stays consistent during the session
     const greeting = useMemo(() => {
-        return GENIE_GREETINGS[Math.floor(Math.random() * GENIE_GREETINGS.length)]
-    }, []);
+        const index = user.name ? user.name.charCodeAt(0) % GENIE_GREETINGS.length : 0
+        return GENIE_GREETINGS[index]
+    }, [user.name]);
 
     const handleNewChat = async () => {
         try {
@@ -51,7 +52,7 @@ export function NewChatComponent({ user }: NewChatComponentProps) {
                 {greeting}
             </p>
             <button
-                className='px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors'
+                className='px-6 py-3 bg-indigo-900 text-white rounded-lg hover:bg-indigo-700 transition-colors'
                 onClick={handleNewChat}
             >
                 Start new chat
