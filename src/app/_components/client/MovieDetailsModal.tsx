@@ -95,7 +95,7 @@ export function MovieDetailsModal({
                     ) : details ? (
                         /* Actual content */
                         <>
-                            <h2 className="text-2xl font-bold mb-4">{details.title}</h2>
+                            <h2 className="text-2xl font-bold mb-4 text-black">{details.title}</h2>
 
                             <div className="space-y-4">
                                 <div>

@@ -1,3 +1,5 @@
+
+
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
@@ -10,12 +12,6 @@ import { HeaderServer } from '~/app/_components/server/HeaderServer'
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
 import AppSidebar from "~/app/_components/server/AppSidebar";
 import { auth } from "~/lib/auth";
-
-const bebas = Bebas_Neue({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-bebas'
-})
 
 const poppins = Poppins({
   weight: ['400', '600', '700'],
