@@ -44,7 +44,7 @@ export default async function AppSidebar() {
             <SidebarMenu>
               {/* Menu Item: Home */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild >
                   <Link href="/">
                     <Home />
                     <span className="text-xl">Home</span>

@@ -6,8 +6,6 @@ const WELCOME_MESSAGES = ["Let your curiosity speak. The Genie listens.",
     "The screen is blank — until you speak your wish.",
     "What do you crave tonight: wonder, tension, or beauty?",
     "Speak freely. I specialize in unexpected delights.",
-    "Your next favorite film is already waiting. Let's find it.",
-    "The mood, the tone, the texture — tell me what moves you.",
     "Welcome back, seeker of stories. What realm shall we explore today?",
     "Every film is a doorway. Tell me what kind of world you wish to enter.",
 ]
@@ -33,7 +31,14 @@ export function WelcomeMessage({ chatId }: WelcomeMessageProps) {
 
     return (
         <div className="text-center py-12">
-            <p className="text-lg text-gray-600 max-w-md mx-auto">
+            <p className="text-4xl text-[#FFC559] max-w-md mx-auto font-['Savate'] font-[200] italic"
+                style={{
+                    textShadow: `
+       0 0 10px rgba(255, 197, 89, 0.8),
+       0 0 20px rgba(255, 197, 89, 0.6),
+       0 0 30px rgba(209, 136, 67, 0.4)
+     `
+                }}>
                 {welcomeMessage}
             </p>
         </div>

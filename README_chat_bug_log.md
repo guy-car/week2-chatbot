@@ -63,3 +63,4 @@ ___
 **Not finding certain posters**
 Chef (2014) with Favreau didn't display a poster
 yet it exists on TMDB and has a poster
+

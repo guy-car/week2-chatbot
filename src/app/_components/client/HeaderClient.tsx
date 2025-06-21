@@ -2,6 +2,7 @@
 
 import { signOut, signIn } from '~/lib/auth-client'
 import Link from 'next/link'
+import { magicButtonStyles } from '~/components/ui/button-magic'
 
 interface HeaderClientProps {
     user?: {
@@ -22,7 +23,7 @@ export function HeaderClient({ user }: HeaderClientProps) {
                     <span>Logged in as {user.name}</span>
                     <button
                         onClick={handleSignOut}
-                        className='px-4 py-2 bg-gray-800 text-white rounded hover:bg-red-600'
+                        className='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-500'
                     >
                         Logout
                     </button>
@@ -33,17 +34,20 @@ export function HeaderClient({ user }: HeaderClientProps) {
         return (
             <button
                 onClick={() => signIn.social({ provider: 'github' })}
-                className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+                className={magicButtonStyles.genie}
             >
-                Sign in with GitHub
+                Sign in
             </button>
         );
     }
 
     return (
         <div className="flex justify-between items-center w-full">
-            <Link href="/" className="text-xl font-bold hover:text-blue-600 transition-colors">
-                Watch Genie
+            <Link
+                href="/"
+                className="text-5xl font-bold bg-gradient-to-t from-[#adf1f0] to-[#FFC559] bg-clip-text text-transparent transition-all hover:brightness-110 text-glow-gold"
+            >
+                <h1>Watch Genie</h1>
             </Link>
 
             <div className='flex items-center gap-4'>
