@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <SidebarProvider>
       <AppSidebar />
       <main className="flex-1">
-        <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex justify-between items-center p-4 border-b bg-background sticky top-0 z-10">
           <SidebarTrigger />
           <div className="flex-1">
             <HeaderServer />

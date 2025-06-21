@@ -116,29 +116,6 @@ Chat history:
 - display 10 most recents
 - add button to see all history
 
-UI:
-- add new chat button on chat page
-- better sign up form on homepage (should have google sign up)
-- homepage when sign up show cards for each page: Watchlist, Watch history, taste profile
-- remove Watchlist, Watch history, taste profile from sidebar
-- make sidebar more obvious and by default not shown
-- add a randomly generated welcome message from the Genie for each new chat?
-
-Data persistence:
-- switch from local storage to Supabase
-- movie posters should persist on refresh (store in chats?)
-
-Auth:
-- add sign up form for email
-- google ez sign up
-
-Overal UI character:
-- improve look of chips
-- Colors
-- themed animation
-- logo?
-- Logout button doesnt need to scream red
-
 Bugs:
 - User asked for animes - ai responds with good animes - user asks for more work by same director as one of the previous suggestions - AI gives more work from director that don't include animes
 - Wrong movies show up when searching by title (another movie by the same name)
@@ -147,3 +124,23 @@ Bugs:
 - More recent poster suggestions should be on the left side
 - Movie poster should display the latest recommendations from AI (sometimes AI will recommend more movies but posters won't update and will still reflect previous recommendations)
 
+
+
+______
+
+_____
+
+FEATURES:
+Auth:
+- add sign up form for email
+- google ez sign up
+
+
+UI IMPROVEMENTS:
+- change text font size / appearance in chat view
+- improve look of chips
+- Colors
+- themed animation
+- logo?
+- better sign up form on homepage (should have google sign up)
+- remove AI is thunking and the red "stop ai button"

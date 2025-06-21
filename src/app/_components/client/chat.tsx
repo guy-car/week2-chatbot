@@ -214,7 +214,7 @@ export default function Chat({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full git max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {messages.length === 0 && <WelcomeMessage chatId={id ?? ''} />}
       <div
         ref={chatContainerRef}
