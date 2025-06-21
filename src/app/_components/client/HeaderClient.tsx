@@ -20,7 +20,6 @@ export function HeaderClient({ user }: HeaderClientProps) {
         if (user) {
             return (
                 <>
-                    <span>Logged in as {user.name}</span>
                     <button
                         onClick={handleSignOut}
                         className='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-500'
