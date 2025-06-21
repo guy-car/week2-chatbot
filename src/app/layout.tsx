@@ -61,9 +61,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 
   return (
-    <html lang="en" className={`${geist.variable}`}>
+    <html lang="en" className={`${geist.variable} dark`}>
       <TRPCReactProvider>
-        <body>
+        <body >
           {isLoggedIn ? loggedInLayout : loggedOutLayout}
           <Toaster />
         </body>

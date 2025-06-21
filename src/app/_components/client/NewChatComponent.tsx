@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { api } from "~/trpc/react";
 import { useMemo } from 'react';
+import { magicButtonStyles } from '~/components/ui/button-magic';
 
 const GENIE_GREETINGS = [
     "Let your curiosity speak. The Genie listens.",
@@ -52,7 +53,7 @@ export function NewChatComponent({ user }: NewChatComponentProps) {
                 {greeting}
             </p>
             <button
-                className='px-6 py-3 bg-indigo-900 text-white rounded-lg hover:bg-indigo-700 transition-colors'
+                className={magicButtonStyles.caramel}
                 onClick={handleNewChat}
             >
                 Start new chat

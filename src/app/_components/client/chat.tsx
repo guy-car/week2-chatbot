@@ -15,6 +15,8 @@ import { WelcomeMessage } from './WelcomeMessage';
 import { useRouter } from 'next/navigation'
 import { api } from "~/trpc/react"
 import { loadMoviesForChat } from 'tools/chat-store';
+import { cn } from "~/lib/utils"
+import { magicButtonStyles } from '~/components/ui/button-magic';
 
 function Spinner() {
   return (
@@ -194,7 +196,7 @@ export default function Chat({
       {messages.length === 0 && <WelcomeMessage chatId={id ?? ''} />}
       <div
         ref={chatContainerRef}
-        className="h-64 border border-gray-300 p-6 mb-6 overflow-y-auto bg-gray-50 rounded-lg">
+        className="h-64 border border-[#d18843] p-6 mb-6 overflow-y-auto bg-[#024845] rounded-lg">
         {messages.map(message => (
           <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-base'}`}>
             <strong>{message.role === 'user' ? 'User: ' : 'AI: '}</strong>
@@ -259,7 +261,7 @@ export default function Chat({
         <button
           type="button"
           onClick={handleNewChat}
-          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+          className={magicButtonStyles.success}
           title="Start new chat"
         >
           New chat
@@ -274,13 +276,15 @@ export default function Chat({
           disabled={status !== 'ready'}
         />
         <button
-          type="submit"
-          className={`px-6 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${status !== 'ready'
-            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-            : 'bg-blue-500 text-white hover:bg-blue-600'
-            }`}
+          className={cn(
+            "px-6 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2",
+            status !== 'ready'
+              ? "bg-gray-400 text-gray-200 cursor-not-allowed focus:ring-gray-400"
+              : [magicButtonStyles.caramel, "focus:ring-[#221745]"]
+          )}
           disabled={status !== 'ready'}
         >
+
           Send
         </button>
       </form>

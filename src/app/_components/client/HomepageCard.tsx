@@ -30,7 +30,7 @@ export function HomepageCard({
 }: HomepageCardProps) {
     return (
         <Link href={href} className="block group">
-            <div className="relative h-64 rounded-lg overflow-hidden shadow-lg transition-transform group-hover:scale-105">
+            <div className="relative h-80 rounded-lg overflow-hidden shadow-lg transition-transform group-hover:scale-105">
                 {/* Background image or gradient */}
                 {latestMovie?.posterUrl ? (
                     <div
@@ -64,7 +64,7 @@ export function HomepageCard({
                 </div>
 
                 {/* Hover effect */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#d18843] transform scale-x-0 group-hover:scale-x-100 transition-transform" />
             </div>
         </Link>
     )
