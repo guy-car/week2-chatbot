@@ -46,9 +46,9 @@ export function NewChatComponent({ user }: NewChatComponentProps) {
 
     return (
         <div className="text-center py-8">
-            <h1 className="text-2xl font-bold mb-2">
+            <h2 className="text-2xl font-bold mb-2">
                 Welcome back, {user.name}!
-            </h1>
+            </h2>
             <p className="text-lg text-gray-600 mb-6">
                 {greeting}
             </p>

@@ -126,11 +126,64 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Savate', sans-serif;
+    font-weight: 200;
+    /* Extra light */
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-poppins), sans-serif;
+    /* Poppins as default */
+    font-weight: 400;
+  }
+}
+
+h1,
+.display-font {
+  font-family: 'Savate', var(--font-poppins), sans-serif;
+  font-weight: 400;
+}
+
+.font-savate-light {
+  font-family: 'Savate', sans-serif;
+  font-weight: 200;
+}
+
+.font-savate-regular {
+  font-family: 'Savate', sans-serif;
+  font-weight: 400;
+}
+
+.font-savate-bold {
+  font-family: 'Savate', sans-serif;
+  font-weight: 700;
+}
+
+.mask-vignette {
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+}
+
+@layer utilities {
+  .glow-gold {
+    filter: drop-shadow(0 0 20px rgba(255, 197, 89, 0.6));
+  }
+
+  .glow-gold-subtle {
+    filter: drop-shadow(0 0 5px rgba(255, 197, 89, 0.6));
+  }
+
+  .glow-gold-strong {
+    filter: drop-shadow(0 0 10px rgba(255, 197, 89, 0.8)) drop-shadow(0 0 20px rgba(255, 197, 89, 0.6)) drop-shadow(0 0 30px rgba(209, 136, 67, 0.4));
+  }
+
+  .text-glow-gold {
+    text-shadow:
+      0 0 10px rgba(255, 197, 89, 0.8),
+      0 0 20px rgba(255, 197, 89, 0.6),
+      0 0 30px rgba(209, 136, 67, 0.4);
   }
 }
