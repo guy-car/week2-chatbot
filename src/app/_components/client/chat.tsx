@@ -196,10 +196,10 @@ export default function Chat({
       {messages.length === 0 && <WelcomeMessage chatId={id ?? ''} />}
       <div
         ref={chatContainerRef}
-        className="h-64 border border-[#d18843] p-6 mb-6 overflow-y-auto bg-[#024845] rounded-lg">
+        className="glow-gold h-64  p-6 mb-6 overflow-y-auto bg-[#229e9c70] rounded-lg">
         {messages.map(message => (
-          <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-base'}`}>
-            <strong>{message.role === 'user' ? 'User: ' : 'AI: '}</strong>
+          <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-xl'}`}>
+            <strong>{message.role === 'user' ? 'Me: ' : 'Genie '}</strong>
             {message.parts ? (
               // Handle messages with parts (new messages)
               message.parts
@@ -284,7 +284,6 @@ export default function Chat({
           )}
           disabled={status !== 'ready'}
         >
-
           Send
         </button>
       </form>

@@ -22,7 +22,7 @@ interface MovieCardProps {
 export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     const { addLikedMovie, addDislikedMovie } = useTasteProfile();
     const year = movie.release_date?.substring(0, 4)
-    const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-25 group-hover:opacity-100"
+    const buttonClasses = "bg-black bg-opacity-80 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70 opacity-40 group-hover:opacity-100"
 
     const { addToWatchlist, markAsWatched } = useMovieCollections();
 
@@ -79,7 +79,7 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     return (
         <div className="flex flex-col items-center">
             <div className="text-center mb-2 w-40 px-2 h-12 flex items-center justify-center">
-                <h3 className="font-semibold text-gray-800 line-clamp-2">
+                <h3 className="font-semibold text-gray-100 line-clamp-2">
                     {movie.title}{year && ` (${year})`}
                 </h3>
             </div>
