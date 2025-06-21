@@ -197,7 +197,7 @@ NEVER skip the tool call. The tool provides important data for the user interfac
                   // Year matching (if provided)
                   if (searchYear && itemYear) {
                     if (itemYear === searchYear) {
-                      score += 30; // Exact year match
+                      score += 60; // Exact year match
                     } else {
                       const yearDiff = Math.abs(itemYear - searchYear);
                       score -= yearDiff * 2; // Penalize by year difference
