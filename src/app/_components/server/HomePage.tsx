@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { auth } from "~/lib/auth";
 import { headers } from "next/headers";
 import { NewChatComponent } from '../client/NewChatComponent';

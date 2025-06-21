@@ -18,11 +18,33 @@ import { loadMoviesForChat } from 'tools/chat-store';
 import { cn } from "~/lib/utils"
 import { magicButtonStyles } from '~/components/ui/button-magic';
 
+const THINKING_MESSAGES = [
+  "Consulting the cosmic catalog...",
+  "Weaving threads of story and mood...",
+  "The Genie ponders your desire...",
+  "Sifting through realms of possibility...",
+  "Divining the perfect tale for you...",
+  "The stars align to reveal...",
+  "Summoning stories from the ether...",
+  "Your wish echoes in the vault of dreams...",
+  "Casting nets into the sea of cinema...",
+  "The oracle of entertainment awakens...",
+  "Translating your mood into moving pictures...",
+  "The wheel of fortune spins...",
+  "Brewing a potion of perfect picks...",
+  "Your taste profile glimmers in my crystal ball...",
+  "The archives whisper their secrets..."
+];
+
 function Spinner() {
+  const [message] = useState(() =>
+    THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)]
+  );
+
   return (
     <div className="flex items-center space-x-2">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      <span className="text-sm text-gray-600">AI is thinking...</span>
+      <Loader2 className="h-4 w-4 animate-spin text-[#FFC559] glow-gold-strong" />
+      <span className="text-sm text-[#FFC559] glow-gold-subtle">{message}</span>
     </div>
   );
 }
@@ -241,15 +263,15 @@ export default function Chat({
       )}
 
       {(status === 'submitted' || status === 'streaming') && (
-        <div className="mb-4 flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="mb-4 flex items-center justify-between p-3 bg-[#024845] border border-[#D18843] rounded-lg">
           <div className="flex items-center">
             {status === 'submitted' && <Spinner />}
-            {status === 'streaming' && <span className="text-sm text-gray-600">AI is responding...</span>}
+            {status === 'streaming' && <span className="text-sm text-[#FFC559] glow-gold-subtle">AI is responding...</span>}
           </div>
           <button
             type="button"
             onClick={() => stop()}
-            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+            className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
           >
             Stop
           </button>
