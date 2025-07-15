@@ -154,16 +154,16 @@ export default function Chat({
   useEffect(() => {
     if (id) {
       void (async () => {
-        console.log('🔄 Loading saved movies for chat:', id);
+        console.log('🔄 [Hypothesis] Loading saved movies for chat:', id);
         const movieData = await loadMoviesForChat(id);
-        console.log('📦 Loaded movie data:', movieData);
+        console.log('📦 [Hypothesis] Loaded movie data from DB:', movieData);
 
         const movieMap = new Map<string, MovieData[]>();
         movieData.forEach(({ messageId, movies }) => {
           movieMap.set(messageId, movies);
         });
 
-        console.log('🗺️ Movie map:', Array.from(movieMap.entries()));
+        console.log('🗺️ [Hypothesis] Constructed savedMovies map:', Array.from(movieMap.entries()));
         setSavedMovies(movieMap);
       })();
     }
@@ -171,28 +171,35 @@ export default function Chat({
 
 
   useEffect(() => {
-    console.log('🔍 Movie extraction running, total messages:', messages.length);
+    // New logic to display the 3 most recent movies from the entire chat
+    const allMoviesWithTimestamp: { movie: MovieData, createdAt: Date }[] = [];
 
-    const lastAssistantMessage = messages
-      .slice()
-      .reverse()
-      .find(msg => msg?.role === 'assistant');
+    messages.forEach(message => {
+      if (message.role === 'assistant') {
+        // Try extracting from live tool usage first
+        const liveMovies = extractMoviesFromMessage(message);
+        if (liveMovies.length > 0) {
+          liveMovies.forEach(movie => {
+            allMoviesWithTimestamp.push({ movie, createdAt: message.createdAt ?? new Date() });
+          });
+        } else {
+          // Fallback to saved movies for loaded messages
+          const saved = savedMovies.get(message.id);
+          if (saved) {
+            saved.forEach(movie => {
+              allMoviesWithTimestamp.push({ movie, createdAt: message.createdAt ?? new Date() });
+            });
+          }
+        }
+      }
+    });
 
-    if (!lastAssistantMessage) {
-      console.log('❌ No assistant message found');
-      setRecommendedMovies([]);
-      return;
-    }
+    // Sort by date descending and take the top 3
+    allMoviesWithTimestamp.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const latestMovies = allMoviesWithTimestamp.slice(0, 3).map(item => item.movie);
 
-    // First check if we have saved movies for this message
-    console.log('🔍 Checking saved movies for message:', lastAssistantMessage.id);
-    console.log('🗺️ Current saved movies map:', Array.from(savedMovies.entries()));
+    setRecommendedMovies(latestMovies);
 
-    const extractedMovies = extractMoviesFromMessage(lastAssistantMessage);
-    if (extractedMovies && extractedMovies.length > 0) {
-      console.log(`🎬 Total movies extracted: ${extractedMovies.length}`);
-      setRecommendedMovies(extractedMovies.slice(0, 3));
-    }
   }, [messages, savedMovies]);
 
   useEffect(() => {

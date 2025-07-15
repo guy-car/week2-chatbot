@@ -26,17 +26,19 @@ I just want people to be able to try the website as easily as possible.
 ####################
 
 Auth:
-- add password and email recovery --  src/lib/auth.ts has placeholder functions 
 
 UI:
 - consistency of colors 
 - better/different genie?
-- Dark/light theme toggle
-- Delete individual chats
-- different post option display (buttons over poster no-good)
+
+- different option display (buttons over poster no-good)
 - add emojis to chips (or display category name) - improve look in general
 - User / Genie messages should look different (different font or something)
+
 - Sidebar icon and background need work
+
+- Dark/light theme toggle
+- Delete individual chats
 
 UX:
 - Loading states during sign-in/chat creation
