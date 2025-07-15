@@ -53,6 +53,12 @@ This document tracks various bugs and unexpected behaviors discovered during cha
 -   **Hypothesis:** This may be due to prompt/AI configuration issues or a bug in how tool calls are parsed and structured before being sent to the backend.
 -   **Status:** Needs investigation. This formatting is inconsistent and may affect downstream logic that expects tool calls to be structured. 
 
+Other case:
+Me:
+A movie bout love and death
+Genie
+Ah, I sense you might enjoy "P.S. I Love You" (2007). It's a heartfelt journey about love, loss, and finding strength through memories. Your wish is my command, let me find more about it for you. media_lookup({title: "P.S. I Love You"})
+
 ---
 
 ### 8. Assistant Message ID Reuse/Overwriting

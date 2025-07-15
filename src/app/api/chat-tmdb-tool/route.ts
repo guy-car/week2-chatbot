@@ -16,6 +16,7 @@ import { auth } from "~/lib/auth";
 import { headers } from "next/headers";
 import { db } from "~/server/db";
 import { tasteProfileService } from "~/app/_services/tasteProfile";
+import { basePrompt, oneSentence_2024_07_17 } from '../prompts/promptExperiments';
 
 interface TMDBSearchResult {
   id: number;
@@ -91,65 +92,25 @@ export async function POST(req: Request) {
     // Continue without profile rather than crashing
   }
 
+  // Wrap the ID generator to log every generated ID
+  const idGen = createIdGenerator({
+    prefix: 'msgs',
+    size: 16,
+  });
+  const loggingIdGen = () => {
+    const id = idGen();
+    console.log('[ID GEN]', id);
+    return id;
+  };
+
   const result = streamText({
     model: openai('gpt-4o'),
     temperature: 0.8,
-    system: `You are Watch Genie, a magical movie enthusiast who grants perfect viewing wishes. You have an uncanny ability to sense exactly what someone needs to watch at any given moment.
-
-${tasteProfileSummary ? `\n${tasteProfileSummary}\n` : ''}
-
-PERSONALITY:
-- Warm and intuitive, like a friend who always knows the perfect movie
-- Occasionally playful with subtle magical references ("Your wish is my command", "I sense you need...", "The perfect spell for your mood is...")
-- Never overdo the genie theme - stay natural and conversational
-- Express genuine enthusiasm about great films
-
-RESPONSE RULES:
-- Separate each movie recommendation with a line break
-- NO markdown, NO bullets, NO numbers, NO ** formatting
-- Just clean text with line breaks between movies
-- Recommend 1-3 titles maximum per response
-- Keep responses under 100 words
-- Write conversationally, with occasional magical flair
-- Include title and year naturally (e.g., "Do you know about Inception (2010)?")
-- Focus on the emotional experience - how the film will make them feel
-
-- No image URLs or markdown
-- no Emojis
-- IMPORTANT: do not recommend the same movie twice
-- **CRITICAL: Vary your opening phrases. Never use "The perfect spell for your mood is" repeatedly**
-- **When users ask follow-ups, acknowledge their question naturally before responding**
-
-When recommending movies/shows:
-- Always include the year when you know it (e.g., "Ghost in the Shell (1995)")
-- This helps ensure the correct version is found
-- For remakes or movies with common titles, a year is especially important
-
-**CRITICAL TOOL PROTOCOL:**\n
-Your primary function is to recommend media and retrieve its details.\n
-A recommendation is ONLY complete if it includes a tool call to \`media_lookup\`.\n
-A response that mentions a movie in the text but does not include the corresponding \`media_lookup\` tool call is considered a failure.\n
-Do not use any markdown formatting like \`*\` or \`**\` around movie titles, as this will break the tool-calling system.\n\n
-
-**Correct Example:**\n
-User: "Suggest a sci-fi movie."\n
-Assistant: (Thinking) I'll suggest "Blade Runner 2049". I must call the tool.\n
-Assistant Response includes:\n
-1. Text: "You should watch Blade Runner 2049 (2017), it's a visual masterpiece."\n
-2. Tool Call: \`media_lookup({title: 'Blade Runner 2049'})\`\n\n
-
-**Failure Example:**\n
-Assistant Response includes:\n
-1. Text: "You should watch Blade Runner 2049 (2017)."\n
-2. Tool Call: (missing)\n\n
-
-ALWAYS ensure the tool call is present when you name a specific media title.`,
+    // Using basePrompt for now; see .docs/knowledge/chat-data-flow-state-report.md for rationale
+    system: basePrompt,
     messages,
     toolCallStreaming: true,
-    experimental_generateMessageId: createIdGenerator({
-      prefix: 'msgs',
-      size: 16,
-    }),
+    experimental_generateMessageId: loggingIdGen,
     tools: {
       media_lookup: {
         description: 'MANDATORY: Call this for every movie/TV show/documentary you recommend by name. Examples: If you mention "Chef\'s Table", call with title: "Chef\'s Table". Never skip this step.',
@@ -273,6 +234,9 @@ ALWAYS ensure the tool call is present when you name a specific media title.`,
         ...msg,
         parts: Array.isArray(msg.parts) ? msg.parts : undefined
       })));
+      // Log all assistant message IDs before saving
+      const assistantIds = allMessages.filter(msg => msg.role === 'assistant').map(msg => msg.id);
+      console.log('[SAVE] Assistant message IDs:', assistantIds);
       await saveChat({
         id,
         messages: allMessages,
