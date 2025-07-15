@@ -1,7 +1,8 @@
 'use client'
 
-import { signOut, signIn } from '~/lib/auth-client'
+import { signOut } from '~/lib/auth-client'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { magicButtonStyles } from '~/components/ui/button-magic'
 
 interface HeaderClientProps {
@@ -11,6 +12,8 @@ interface HeaderClientProps {
 }
 
 export function HeaderClient({ user }: HeaderClientProps) {
+    const pathname = usePathname()
+
     const handleSignOut = async () => {
         await signOut()
         window.location.href = '/'
@@ -19,24 +22,24 @@ export function HeaderClient({ user }: HeaderClientProps) {
     const renderAuthButtons = () => {
         if (user) {
             return (
-                <>
-                    <button
-                        onClick={handleSignOut}
-                        className='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-500'
-                    >
-                        Logout
-                    </button>
-                </>
+                <button
+                    onClick={handleSignOut}
+                    className='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-500'
+                >
+                    Logout
+                </button>
             );
         }
 
+        // Don't show auth buttons on auth pages
+        if (pathname.startsWith('/auth')) {
+            return null
+        }
+
         return (
-            <button
-                onClick={() => signIn.social({ provider: 'github' })}
-                className={magicButtonStyles.genie}
-            >
-                Sign in
-            </button>
+            <Link href="/auth/sign-in" className={magicButtonStyles.genie}>
+                Sign In
+            </Link>
         );
     }
 

@@ -12,6 +12,7 @@ import { HeaderServer } from '~/app/_components/server/HeaderServer'
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
 import AppSidebar from "~/app/_components/server/AppSidebar";
 import { auth } from "~/lib/auth";
+import { Providers } from "./providers";
 
 const poppins = Poppins({
   weight: ['400', '600', '700'],
@@ -72,10 +73,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
       </head>
       <body>
-        <TRPCReactProvider>
-          {isLoggedIn ? loggedInLayout : loggedOutLayout}
-          <Toaster />
-        </TRPCReactProvider>
+        <Providers>
+          <TRPCReactProvider>
+            {isLoggedIn ? loggedInLayout : loggedOutLayout}
+            <Toaster />
+          </TRPCReactProvider>
+        </Providers>
       </body>
     </html>
   );
