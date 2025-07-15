@@ -111,7 +111,7 @@ RESPONSE RULES:
 - Recommend 1-3 titles maximum per response
 - Keep responses under 100 words
 - Write conversationally, with occasional magical flair
-- Include title and year naturally (e.g., "The perfect spell for your mood is Inception (2010)")
+- Include title and year naturally (e.g., "Do you know about Inception (2010)?")
 - Focus on the emotional experience - how the film will make them feel
 
 - No image URLs or markdown
@@ -123,17 +123,27 @@ RESPONSE RULES:
 When recommending movies/shows:
 - Always include the year when you know it (e.g., "Ghost in the Shell (1995)")
 - This helps ensure the correct version is found
-- For remakes or movies with common titles, the year is especially important
+- For remakes or movies with common titles, a year is especially important
 
-MANDATORY TOOL USAGE:
-When you recommend any specific movie, TV show, or documentary by name, you MUST ALWAYS call the media_lookup tool for it. This is not optional.
+**CRITICAL TOOL PROTOCOL:**\n
+Your primary function is to recommend media and retrieve its details.\n
+A recommendation is ONLY complete if it includes a tool call to \`media_lookup\`.\n
+A response that mentions a movie in the text but does not include the corresponding \`media_lookup\` tool call is considered a failure.\n
+Do not use any markdown formatting like \`*\` or \`**\` around movie titles, as this will break the tool-calling system.\n\n
 
-Examples:
-- If you write "Chef's Table (2015)" → MUST call media_lookup with title: "Chef's Table"
-- If you write "The Bear (2022)" → MUST call media_lookup with title: "The Bear"
-- If you write "check out Inception" → MUST call media_lookup with title: "Inception"
+**Correct Example:**\n
+User: "Suggest a sci-fi movie."\n
+Assistant: (Thinking) I'll suggest "Blade Runner 2049". I must call the tool.\n
+Assistant Response includes:\n
+1. Text: "You should watch Blade Runner 2049 (2017), it's a visual masterpiece."\n
+2. Tool Call: \`media_lookup({title: 'Blade Runner 2049'})\`\n\n
 
-NEVER skip the tool call. The tool provides important data for the user interface.`,
+**Failure Example:**\n
+Assistant Response includes:\n
+1. Text: "You should watch Blade Runner 2049 (2017)."\n
+2. Tool Call: (missing)\n\n
+
+ALWAYS ensure the tool call is present when you name a specific media title.`,
     messages,
     toolCallStreaming: true,
     experimental_generateMessageId: createIdGenerator({
@@ -147,6 +157,7 @@ NEVER skip the tool call. The tool provides important data for the user interfac
           title: z.string().describe('The exact title as written in your response'),
         }),
         execute: async ({ title }: { title: string }) => {
+          console.log(`[TOOL_CALL_CONFIRMATION] media_lookup tool was called for title: "${title}"`);
           try {
             console.log(`🔍 Searching for: "${title}"`);
 
@@ -232,7 +243,7 @@ NEVER skip the tool call. The tool provides important data for the user interfac
               return { error: 'No suitable movie or TV show found' };
             }
 
-            return {
+            const movieResult = {
               id: item.id,
               title: item.title ?? item.name ?? '',
               poster_url: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
@@ -241,6 +252,10 @@ NEVER skip the tool call. The tool provides important data for the user interfac
               overview: item.overview,
               media_type: item.media_type as 'movie' | 'tv'
             };
+
+            console.log(`[TMDB_FETCH_SUCCESS] Found movie data to be sent to client:`, movieResult);
+
+            return movieResult;
 
           } catch (error) {
             console.error('TMDB API error:', error);

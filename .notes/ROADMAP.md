@@ -47,14 +47,23 @@ UX:
 DATABASE:
 - Rename/edit chat titles
 
+CHAT HISTORY
+- it takes to refresh the page so the current chat shows in the recent chat list. Like, if I'm on a chat (say it's called chat001) and I click new chat, I'm redirected to a new chat page with its own need ID, but chat001 doesn't show up in the sidebar / recentChats section. I need to refresh the page for that to happen
+
+POSTERS:
+- make a caroussel / enable users to scroll through all posters fetched during a chat
+- Sometimes shows more than 3 posters
+- text box above poster (in chat view) sometimes crops info (too small)
+
 Data flow
-- poster persistence
+- 
 - chips appearing after first message
 - posters should always be fetched when a movie is mentionned
 
 AI character:
 - too eager to give recommendations
 - repeats the same sentences / feels like a bot
+- structure responses more (right now it's a lot of text)
 
 ####################
 --------------------
