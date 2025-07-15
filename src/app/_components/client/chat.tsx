@@ -65,6 +65,7 @@ function extractMoviesFromMessage(message: Message): MovieData[] {
     }
   });
 
+  console.log('[CLIENT_EXTRACT_MOVIES] Extracted movies from live message part:', movies);
   return movies;
 }
 
@@ -130,20 +131,13 @@ export default function Chat({
         }
       })();
     },
-    maxSteps: 1,
+    maxSteps: 5,
     sendExtraMessageFields: true,
     generateId: createIdGenerator({
       prefix: 'msgc',
       size: 16,
     }),
   }) // <-- useChat ends here
-
-  console.log('🎭 Chat state:', {
-    id,
-    messagesCount: messages.length,
-    firstMessage: messages[0]
-  });
-
 
   useChatTitle(id ?? '', messages);
 
@@ -154,16 +148,14 @@ export default function Chat({
   useEffect(() => {
     if (id) {
       void (async () => {
-        console.log('🔄 [Hypothesis] Loading saved movies for chat:', id);
         const movieData = await loadMoviesForChat(id);
-        console.log('📦 [Hypothesis] Loaded movie data from DB:', movieData);
+        console.log('[CLIENT_LOAD_SAVED_MOVIES] Loaded movie data from DB for this chat:', movieData);
 
         const movieMap = new Map<string, MovieData[]>();
         movieData.forEach(({ messageId, movies }) => {
           movieMap.set(messageId, movies);
         });
 
-        console.log('🗺️ [Hypothesis] Constructed savedMovies map:', Array.from(movieMap.entries()));
         setSavedMovies(movieMap);
       })();
     }
@@ -198,6 +190,7 @@ export default function Chat({
     allMoviesWithTimestamp.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     const latestMovies = allMoviesWithTimestamp.slice(0, 3).map(item => item.movie);
 
+    console.log('[CLIENT_RENDER_MOVIES] Final list of movies being set for rendering:', latestMovies);
     setRecommendedMovies(latestMovies);
 
   }, [messages, savedMovies]);
