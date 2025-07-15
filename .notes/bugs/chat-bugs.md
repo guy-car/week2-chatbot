@@ -45,3 +45,23 @@ This document tracks various bugs and unexpected behaviors discovered during cha
 -   **Observation:** The AI's response format is inconsistent.
 -   **Hypothesis:** This is directly tied to tool usage. The more reliable tool usage has made the two-part response more common. The remaining inconsistency is now linked to the "Disappearing AI Message" bug, as the final saved state doesn't reflect the live state.
 -   **Status:** This is a symptom of other root causes. 
+
+---
+
+### 7. Tool Call Included as Plain Text (Weird Formatting)
+-   **Observation:** In some cases, the AI's response includes the tool call (e.g., `media_lookup({title: "Black Hawk Down"})`) as plain text within the message, rather than as a structured tool-invocation part.
+-   **Hypothesis:** This may be due to prompt/AI configuration issues or a bug in how tool calls are parsed and structured before being sent to the backend.
+-   **Status:** Needs investigation. This formatting is inconsistent and may affect downstream logic that expects tool calls to be structured. 
+
+Other case:
+Me:
+A movie bout love and death
+Genie
+Ah, I sense you might enjoy "P.S. I Love You" (2007). It's a heartfelt journey about love, loss, and finding strength through memories. Your wish is my command, let me find more about it for you. media_lookup({title: "P.S. I Love You"})
+
+---
+
+### 8. Assistant Message ID Reuse/Overwriting
+-   **Observation:** The assistant’s message is sometimes saved multiple times with the same id, but with different content and parts. This results in only the last version being persisted in the database, potentially causing earlier parts of a multi-part message to be lost.
+-   **Hypothesis:** The backend or client may be reusing the same message id for both the pre-tool and post-tool-call parts of the assistant’s response, leading to overwriting in the database.
+-   **Status:** Needs investigation. This could be a root cause of the disappearing message bug for multi-part AI responses. 
