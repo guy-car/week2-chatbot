@@ -64,3 +64,5 @@ ___
 Chef (2014) with Favreau didn't display a poster
 yet it exists on TMDB and has a poster
 
+- User asked for animes - ai responds with good animes - user asks for more work by same director as one of the previous suggestions - AI gives more work from director that don't include animes
+- Wrong movies show up when searching by title (another movie by the same name)
