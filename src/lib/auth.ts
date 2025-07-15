@@ -1,6 +1,15 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, type User } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from '~/server/db';
+import { db } from "~/server/db";
+import { sendEmail } from "./email";
+import VerificationEmail from "~/emails/VerificationEmail";
+import PasswordResetEmail from "~/emails/PasswordResetEmail";
+
+type EmailData = {
+  user: User;
+  url: string;
+  token: string;
+};
 
 export const auth = betterAuth({
   baseURL: process.env.AUTH_BASE_URL ?? "http://localhost:3000",
@@ -10,12 +19,24 @@ export const auth = betterAuth({
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : [])
   ],
   database: drizzleAdapter(db, {
-    provider: "pg"
+    provider: "pg",
   }),
   emailAndPassword: {
     enabled: true,
-    async sendVerificationEmail() {},
-    async sendResetPassword() {},
+    sendEmailVerification: async (data: EmailData) => {
+      await sendEmail({
+        to: data.user.email,
+        subject: "Verify your email address",
+        react: VerificationEmail({ url: data.url }),
+      });
+    },
+    sendResetPassword: async (data: EmailData) => {
+      await sendEmail({
+        to: data.user.email,
+        subject: "Reset your password",
+        react: PasswordResetEmail({ url: data.url }),
+      });
+    },
   },
   socialProviders: {
     github: {

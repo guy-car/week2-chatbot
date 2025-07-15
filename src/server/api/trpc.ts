@@ -12,6 +12,7 @@ import { ZodError } from "zod";
 
 import { db } from "~/server/db";
 import { auth } from "~/lib/auth";
+import { sql } from "drizzle-orm";
 
 /**
  * 1. CONTEXT
@@ -87,6 +88,8 @@ export const createTRPCRouter = t.router;
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore -- this is a private property but we need it
   if (t._config.isDev) {
     // artificial delay in dev
     const waitMs = Math.floor(Math.random() * 400) + 100;
@@ -100,6 +103,35 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 
   return result;
 });
+
+// This is a middleware that enforces the user is authenticated
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.user?.id) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  return next({
+    ctx: {
+      user: ctx.user,
+    },
+  });
+});
+
+// This is a middleware that sets the RLS user ID in a transaction
+const rlsMiddleware = t.middleware(async ({ ctx, next }) => {
+  // This middleware should only be used in protected procedures,
+  // so we can assume `ctx.user` is defined.
+  return await ctx.db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT set_config('rls.user_id', ${ctx.user!.id}, true)`);
+    return next({
+      ctx: {
+        ...ctx,
+        // Pass the transactional `db` instance to the procedure
+        db: tx,
+      },
+    });
+  });
+});
+
 
 /**
  * Public (unauthenticated) procedure
@@ -120,13 +152,5 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
-  .use(({ ctx, next }) => {
-    if (!ctx.user?.id) {
-      throw new TRPCError({ code: 'UNAUTHORIZED' })
-    }
-    return next({
-      ctx: {
-        user: ctx.user
-      }
-    })
-  });
+  .use(enforceUserIsAuthed)
+  .use(rlsMiddleware);

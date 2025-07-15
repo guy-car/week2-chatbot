@@ -26,9 +26,7 @@ I just want people to be able to try the website as easily as possible.
 ####################
 
 Auth:
-- add login form
-- add google sign
-- not logged in can still use?
+- add password and email recovery --  src/lib/auth.ts has placeholder functions 
 
 UI:
 - consistency of colors 
@@ -38,6 +36,7 @@ UI:
 - different post option display (buttons over poster no-good)
 - add emojis to chips (or display category name) - improve look in general
 - User / Genie messages should look different (different font or something)
+- Sidebar icon and background need work
 
 UX:
 - Loading states during sign-in/chat creation
