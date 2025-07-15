@@ -70,13 +70,24 @@ export async function saveChat({
   const existingIds = new Set(existingMessages.map(m => m.id));
   const newMessages = messageList.filter(msg => !existingIds.has(msg.id));
 
-  console.log('🔍 Saving messages with tool results:',
-    newMessages.map(msg => ({
-      id: msg.id,
-      role: msg.role,
-      toolResults: extractToolResults(msg)
-    }))
-  );
+  // Enhanced logging for assistant messages to debug multi-part structure
+  newMessages.forEach(msg => {
+    if (msg.role === 'assistant') {
+      // Extract all text parts
+      const textParts = Array.isArray((msg as any).parts)
+        ? (msg as any).parts.filter((p: any) => p.type === 'text').map((p: any) => p.text)
+        : [];
+      console.log('🧩 Assistant message structure:', {
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        textParts,
+        parts: Array.isArray((msg as any).parts) ? (msg as any).parts : undefined,
+        toolResults: extractToolResults(msg),
+        fullMsg: msg
+      });
+    }
+  });
 
   if (newMessages.length > 0) {
     await db.insert(messages).values(

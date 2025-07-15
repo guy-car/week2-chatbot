@@ -265,12 +265,17 @@ ALWAYS ensure the tool call is present when you name a specific media title.`,
       }
     },
     async onFinish({ response }) {
+      const allMessages = appendResponseMessages({
+        messages,
+        responseMessages: response.messages,
+      });
+      console.log('📝 [saveChat call] Full message array being saved:', allMessages.map(msg => ({
+        ...msg,
+        parts: Array.isArray(msg.parts) ? msg.parts : undefined
+      })));
       await saveChat({
         id,
-        messages: appendResponseMessages({
-          messages,
-          responseMessages: response.messages,
-        }),
+        messages: allMessages,
       });
     },
   });
