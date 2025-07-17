@@ -224,3 +224,94 @@ By implementing these changes, you will shift from a reactive, error-prone guess
 
 ---
 
+_**User**_
+
+@gen-summary 
+
+---
+
+_**Assistant**_
+
+```bash
+date
+```
+
+```
+➜  week2-chatbot git:(main) date
+Thu Jul 17 10:12:22 EDT 2025
+➜  week2-chatbot git:(main)
+```
+
+---
+
+```diff
+- 
++ # Chat Summary: Movie Poster Matching Logic Review
++ 
++ ## Original Request / Feature
++ - Review the logic and implementation behind movie poster selection in the chat assistant.
++ - Investigate why the poster shown sometimes does not match the movie mentioned by the AI.
++ - Research TMDB API and best practices to suggest improvements for higher match accuracy.
++ 
++ ## Challenges
++ - The current system uses a broad TMDB search and a custom scoring algorithm (`selectBestMatch`) to pick the best match, which is fragile.
++ - Popularity bias and lack of year information can cause the wrong movie (e.g., a remake or more popular title) to be selected.
++ - The AI sometimes omits the year, making disambiguation difficult.
++ 
++ ## Successes
++ - Identified the root cause: over-reliance on popularity and insufficient filtering by year/title.
++ - Located the relevant code and confirmed the scoring logic's weaknesses.
++ - Found that the TMDB API supports more precise search parameters (e.g., year filtering).
++ 
++ ## Methods Used That Did Not Work
++ - Relying on a single `search/multi` API call and post-processing with a scoring algorithm.
++ - Using popularity as a significant factor in the scoring, which can override correct but less popular matches.
++ 
++ ## Methods Used That Did Work
++ - Parsing the year from the AI's response and using it in the scoring (when available) improved accuracy, but only partially.
++ - Reviewing TMDB API documentation revealed better endpoints and parameters for targeted searches.
++ 
++ ## Recommended Changes (Not Yet Implemented)
++ - **Switch to Targeted API Calls:**
++   - Use `search/movie` with `primary_release_year` and `search/tv` with `first_air_date_year` when a year is available, instead of `search/multi`.
++   - This leverages TMDB's internal filtering for much higher precision.
++ - **Revise Scoring Algorithm:**
++   - Massively prioritize exact title matches and year matches.
++   - Reduce or eliminate popularity as a deciding factor when year/title match.
++   - Increase penalty for year mismatches when no year is provided.
++ - **Prompt Engineering:**
++   - Make it a critical, mandatory rule for the AI to always include the year in recommendations, explaining why it's necessary.
++ 
++ ## Description of (Potential) Code Changes
++ - Pseudocode for improved logic:
++ 
++ ```pseudo
++ if (year is present):
++     results = search_movie(title, year) + search_tv(title, year)
++     best_match = pick_exact_title_match(results)
++ else:
++     results = search_multi(title)
++     best_match = selectBestMatch(results) // with improved scoring
++ ```
++ - Update the system prompt to make year inclusion mandatory for the AI.
++ 
++ ---
++ This summary documents the review and recommendations for improving the movie poster matching logic in the chat assistant. No code changes have been made yet; these are research-backed suggestions for future implementation. 
+```
+
+---
+
+Your summary has been created at  
+`.notes/chat-summaries/07.17.25-1012-movie-poster-matching-logic-review.md`.
+
+It includes:
+- The original request and goals
+- Challenges and root causes
+- What worked and what didn’t
+- Research-backed recommendations for future improvements
+- Pseudocode for a more robust matching approach
+
+No code changes have been made yet—this is a documentation and planning artifact for future implementation. If you need a more detailed breakdown or want to proceed with coding, let me know!
+
+---
+
