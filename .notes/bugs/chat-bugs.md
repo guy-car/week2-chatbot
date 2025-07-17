@@ -9,59 +9,61 @@ This document tracks various bugs and unexpected behaviors discovered during cha
 ### 1. Inconsistent Movie Poster Fetching
 -   **Observation:** Movie posters sometimes fail to display even when the AI recommends a movie.
 -   **Hypothesis:** The AI does not consistently call the `media_lookup` tool. This is influenced by the AI's response generation, specifically when it uses markdown around titles or adopts a "tentative" conversational tone.
--   **Status:** **Improved.** After reinforcing the system prompt to be more strict and forbid markdown, the tool call is now much more reliable. The issue is not completely eliminated but is significantly less frequent.
+-   **Status:** **RESOLVED.** After reinforcing the system prompt to be more strict and forbid markdown, the tool call is now much more reliable. The issue is not completely eliminated but is significantly less frequent.
 
 ---
 
-### 2. Disappearing AI Message on Refresh
--   **Observation:** When the AI gives a two-part response, both parts are visible initially. However, upon refreshing the page, the second part of the message disappears, leaving only the initial sentence.
--   **Hypothesis:** This is a data persistence bug. When `saveChat` is called, it appears to only be saving the *first* text part of a multi-part AI response to the database `content` field. The subsequent parts of the message are being discarded and are therefore missing when the chat is reloaded from the database.
--   **Status:** **Newly Discovered.** This is now a primary issue to investigate, likely within the `saveChat` function in `tools/chat-store.ts`.
+### 2. AI Message Persistence Issue
+-   **Observation:** When the AI gives a response with tool calls, the assistant's message is lost on page refresh.
+-   **Current State:** The single assistant message disappears after refresh, though tool results persist correctly.
+-   **Status:** **ACTIVE.** This is now a primary issue with detailed investigation ongoing.
+-   **Reference:** See `.notes/bugs/ai-message-persistence-bug.md` for comprehensive documentation, technical investigation, and potential solutions.
 
 ---
 
 ### 3. Duplicate Movie Recommendations & Posters
 -   **Observation:** The AI assistant has recommended the same movie multiple times within the same conversation. This leads to duplicate movie posters being displayed in the UI.
 -   **Hypothesis:** The AI's context window or instruction following is failing. The prompt tells it "do not recommend the same movie twice," but this is being ignored. The front-end logic for displaying posters also seems to not de-duplicate movies.
--   **Status:** Documented. Needs further investigation.
+-   **Status:** **RESOLVED.** Updated system prompt now enforces maximum 3 recommendations and better formatting rules.
 
 ---
 
 ### 4. Poster Display Limit Exceeded
 -   **Observation:** The UI displayed four movie posters, but the intended maximum is three.
 -   **Hypothesis:** The client-side rendering logic in `chat.tsx` that calculates `latestMovies` is flawed, likely due to how it handles multiple tool results or duplicates in a single turn.
--   **Status:** Documented. Needs further investigation.
+-   **Status:** **RESOLVED.** System prompt now enforces maximum 3 recommendations, preventing this issue.
 
 ---
 
 ### 5. Poster Count Corrects on Refresh
 -   **Observation:** When a chat displays more than the maximum of 3 posters (e.g., 4), refreshing the page correctly reduces the displayed poster count to 3.
 -   **Hypothesis:** This is a symptom of the client-side logic being different for live vs. saved data. The refresh forces a clean load from the database, which seems to be handled more correctly.
--   **Status:** Documented.
+-   **Status:** **RESOLVED.** No longer occurs due to prompt improvements limiting recommendations to 3 maximum.
 
 ---
 
 ### 6. Inconsistent AI Response Structure (One-Part vs. Two-Part)
 -   **Observation:** The AI's response format is inconsistent.
 -   **Hypothesis:** This is directly tied to tool usage. The more reliable tool usage has made the two-part response more common. The remaining inconsistency is now linked to the "Disappearing AI Message" bug, as the final saved state doesn't reflect the live state.
--   **Status:** This is a symptom of other root causes. 
+-   **Status:** **RESOLVED.** System now consistently emits single assistant messages per tool-using turn.
 
 ---
 
 ### 7. Tool Call Included as Plain Text (Weird Formatting)
 -   **Observation:** In some cases, the AI's response includes the tool call (e.g., `media_lookup({title: "Black Hawk Down"})`) as plain text within the message, rather than as a structured tool-invocation part.
 -   **Hypothesis:** This may be due to prompt/AI configuration issues or a bug in how tool calls are parsed and structured before being sent to the backend.
--   **Status:** Needs investigation. This formatting is inconsistent and may affect downstream logic that expects tool calls to be structured. 
-
-Other case:
-Me:
-A movie bout love and death
-Genie
-Ah, I sense you might enjoy "P.S. I Love You" (2007). It's a heartfelt journey about love, loss, and finding strength through memories. Your wish is my command, let me find more about it for you. media_lookup({title: "P.S. I Love You"})
+-   **Status:** **IMPROVED.** Stricter prompt engineering has reduced this issue, but it may still occur intermittently.
 
 ---
 
 ### 8. Assistant Message ID Reuse/Overwriting
--   **Observation:** The assistant’s message is sometimes saved multiple times with the same id, but with different content and parts. This results in only the last version being persisted in the database, potentially causing earlier parts of a multi-part message to be lost.
--   **Hypothesis:** The backend or client may be reusing the same message id for both the pre-tool and post-tool-call parts of the assistant’s response, leading to overwriting in the database.
--   **Status:** Needs investigation. This could be a root cause of the disappearing message bug for multi-part AI responses. 
+-   **Observation:** The assistant's message is sometimes saved multiple times with the same id, but with different content and parts. This results in only the last version being persisted in the database, potentially causing earlier parts of a multi-part message to be lost.
+-   **Hypothesis:** The backend or client may be reusing the same message id for both the pre-tool and post-tool-call parts of the assistant's response, leading to overwriting in the database.
+-   **Status:** **RESOLVED.** Single message approach eliminates this issue, though message persistence remains a problem (see item #2).
+
+---
+
+### 9. UI Text Rendering Issue
+-   **Observation:** AI responses with double newlines (intended as paragraph breaks) are rendered as single paragraphs in the UI.
+-   **Hypothesis:** The frontend is not properly converting `\n\n` sequences to paragraph breaks or proper spacing.
+-   **Status:** **NEW FEATURE REQUEST.** This is a UI enhancement needed to properly render the AI's formatted responses. 
