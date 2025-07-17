@@ -2735,7 +2735,6 @@ _**Assistant**_
 
 
 
-
 ---
 
 ```diff
@@ -2993,7 +2992,6 @@ _**Assistant**_
 
 
 
-
 ---
 
 ```diff
@@ -3185,6 +3183,38 @@ Yes, everything that was removed from those files has been moved to the dedicate
 - **Next steps** (immediate, medium-term, long-term)
 
 So yes, all the detailed technical information, investigation findings, and comprehensive analysis that was removed from the other files is now properly documented in the dedicated bug file. The other files now serve as high-level summaries with clear cross-references to the detailed investigation.
+
+---
+
+_**User**_
+
+ok lastly
+@gen-commit to reflect our improvements of the media lookup tool
+
+---
+
+_**Assistant**_
+
+**Branch Name:**
+```
+gc/refactor/robust-tmdb-lookup
+```
+
+**Commit Message:**
+```
+Refactor TMDB movie lookup system for improved accuracy and reliability
+
+- Implement year-aware search with separate movie and TV endpoints
+- Add sophisticated scoring algorithm prioritizing exact title and year matches
+- Update tool schema to accept optional year parameter for backward compatibility
+- Replace multi-search fallback with targeted endpoint selection
+- Add comprehensive logging for debugging and monitoring
+- Create detailed documentation of the lookup system architecture
+- Resolve poster mismatch issues through improved disambiguation logic
+- Maintain backward compatibility while enabling more precise searches
+```
+
+This branch name reflects that we're refactoring the existing TMDB lookup functionality to make it more robust and reliable, while the commit message captures the key improvements we made to the system.
 
 ---
 
