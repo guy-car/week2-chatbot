@@ -15,9 +15,9 @@ This document tracks various bugs and unexpected behaviors discovered during cha
 
 ### 2. AI Message Persistence Issue
 -   **Observation:** When the AI gives a response with tool calls, the assistant's message is lost on page refresh.
--   **Current State:** The single assistant message disappears after refresh, though tool results persist correctly.
--   **Status:** **ACTIVE.** This is now a primary issue with detailed investigation ongoing.
--   **Reference:** See `.notes/bugs/ai-message-persistence-bug.md` for comprehensive documentation, technical investigation, and potential solutions.
+-   **Current State:** ~~The single assistant message disappears after refresh, though tool results persist correctly.~~ **RESOLVED (2024-07-17)**: Implemented proper message update handling in `saveChat` function.
+-   **Status:** ~~**ACTIVE.** This is now a primary issue with detailed investigation ongoing.~~ **RESOLVED**: The system now properly handles both new messages and updates to existing messages, ensuring both tool results and text content persist correctly.
+-   **Reference:** See `.notes/bugs/ai-message-persistence-bug.md` for comprehensive documentation, technical investigation **implemented solution**.
 
 ---
 
