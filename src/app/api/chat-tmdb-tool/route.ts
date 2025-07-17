@@ -16,7 +16,7 @@ import { auth } from "~/lib/auth";
 import { headers } from "next/headers";
 import { db } from "~/server/db";
 import { tasteProfileService } from "~/app/_services/tasteProfile";
-import { basePrompt, oneSentence_2024_07_17 } from '../prompts/promptExperiments';
+import { mediaLookupWithYear_2024_07_17_v3 } from '../prompts/promptExperiments';
 
 interface TMDBSearchResult {
   id: number;
@@ -57,8 +57,8 @@ export async function POST(req: Request) {
     return new Response('No message provided', { status: 400 });
   }
 
-  console.log('📨 Message content:', message.content);
-  console.log('📨 Message role:', message.role);
+  // Log the raw assistant message content for output inspection
+  // (Add this after the assistant generates its response, e.g., after result is available)
 
   const previousMessages = await loadChat(id);
 
@@ -107,117 +107,126 @@ export async function POST(req: Request) {
     model: openai('gpt-4o'),
     temperature: 0.8,
     // Using basePrompt for now; see .docs/knowledge/chat-data-flow-state-report.md for rationale
-    system: basePrompt,
+    system: mediaLookupWithYear_2024_07_17_v3,
     messages,
     toolCallStreaming: true,
     experimental_generateMessageId: loggingIdGen,
     tools: {
       media_lookup: {
-        description: 'MANDATORY: Call this for every movie/TV show/documentary you recommend by name. Examples: If you mention "Chef\'s Table", call with title: "Chef\'s Table". Never skip this step.',
+        description: 'MANDATORY: Call this for every movie/TV show/documentary you recommend by name. You MUST provide both the exact title and the year of release as separate parameters whenever possible. Examples: If you mention "Chef\'s Table (2015)", call with title: "Chef\'s Table", year: 2015. Never skip this step.',
         parameters: z.object({
           title: z.string().describe('The exact title as written in your response'),
+          year: z.number().describe('The year of release (e.g., 2015). REQUIRED for new logic, but optional for backward compatibility.' ).optional(),
         }),
-        execute: async ({ title }: { title: string }) => {
-          console.log(`[TOOL_CALL_CONFIRMATION] media_lookup tool was called for title: "${title}"`);
+        execute: async ({ title, year }: { title: string, year?: number }) => {
           try {
-            console.log(`🔍 Searching for: "${title}"`);
+            const apiKey = process.env.TMDB_API_KEY;
+            if (!apiKey) {
+              throw new Error('TMDB_API_KEY is not set');
+            }
 
-            const searchUrl = `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(title)}&include_adult=false&language=en-US&page=1`;
-            const options = {
-              method: 'GET',
-              headers: {
-                'accept': 'application/json',
-                'Authorization': `Bearer ${process.env.TMDB_API_KEY}`,
-              },
+            // Helper to fetch and log
+            const fetchTMDB = async (endpoint: string, params: Record<string, string | number | undefined>, type: 'movie' | 'tv') => {
+              const paramStr = Object.entries(params)
+                .filter(([_, v]) => v !== undefined)
+                .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+                .join('&');
+              const url = `https://api.themoviedb.org/3/${endpoint}?${paramStr}`;
+              console.log(`[TMDB_FETCH] ${type.toUpperCase()} endpoint: ${url}`);
+              const options = {
+                method: 'GET',
+                headers: {
+                  'accept': 'application/json',
+                  'Authorization': `Bearer ${apiKey}`,
+                },
+              };
+              const res = await fetch(url, options);
+              return res.json() as Promise<TMDBSearchResponse>;
             };
 
-            const searchResponse = await fetch(searchUrl, options);
-            const searchData = await searchResponse.json() as TMDBSearchResponse;
+            // Try movie search
+            let movieResults: TMDBSearchResult[] = [];
+            let tvResults: TMDBSearchResult[] = [];
+            if (title) {
+              const movieParams: Record<string, string | number | undefined> = { query: title, include_adult: 'false', language: 'en-US', page: 1 };
+              if (year) movieParams.year = year;
+              const movieData = await fetchTMDB('search/movie', movieParams, 'movie');
+              movieResults = movieData.results?.map(r => ({ ...r, media_type: 'movie' })) || [];
 
-            if (!searchData.results || searchData.results.length === 0) {
+              const tvParams: Record<string, string | number | undefined> = { query: title, include_adult: 'false', language: 'en-US', page: 1 };
+              if (year) tvParams.first_air_date_year = year;
+              const tvData = await fetchTMDB('search/tv', tvParams, 'tv');
+              tvResults = tvData.results?.map(r => ({ ...r, media_type: 'tv' })) || [];
+            }
+
+            // If both are empty, fallback to multi
+            let allResults: TMDBSearchResult[] = [...movieResults, ...tvResults];
+            if (allResults.length === 0) {
+              const multiParams: Record<string, string | number | undefined> = { query: title, include_adult: 'false', language: 'en-US', page: 1 };
+              const multiData = await fetchTMDB('search/multi', multiParams, 'movie');
+              allResults = multiData.results?.filter(r => r.media_type === 'movie' || r.media_type === 'tv') || [];
+            }
+
+            if (!allResults.length) {
               return { error: 'No results found' };
             }
 
-            // Smart selection with proper typing
-            const selectBestMatch = (results: TMDBSearchResult[]): TMDBSearchResult | null => {
-              // Extract year if the AI included it in the title
-              const yearMatch = /\((\d{4})\)/.exec(title);
-              const searchYear = yearMatch?.[1] ? parseInt(yearMatch[1]) : null;
-              const cleanTitle = title.replace(/\s*\(\d{4}\)/, '').trim();
-
-              console.log(`🎯 Looking for: "${cleanTitle}" ${searchYear ? `(${searchYear})` : ''}`);
-
-              const scored = results
-                .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
-                .map(item => {
-                  let score = 0;
-                  const itemTitle = item.title ?? item.name ?? '';
-                  const itemYear = parseInt(
-                    item.release_date?.substring(0, 4) ??
-                    item.first_air_date?.substring(0, 4) ?? '0'
-                  );
-
-                  // Exact title match (case-insensitive)
-                  if (itemTitle.toLowerCase() === cleanTitle.toLowerCase()) {
-                    score += 50;
-                  }
-                  // Partial title match
-                  else if (itemTitle.toLowerCase().includes(cleanTitle.toLowerCase())) {
-                    score += 20;
-                  }
-
-                  // Year matching (if provided)
-                  if (searchYear && itemYear) {
-                    if (itemYear === searchYear) {
-                      score += 60; // Exact year match
-                    } else {
-                      const yearDiff = Math.abs(itemYear - searchYear);
-                      score -= yearDiff * 2; // Penalize by year difference
-                    }
-                  }
-
-                  // Popularity bonus (normalized)
-                  score += Math.min(item.popularity / 100, 10);
-
-                  // Prefer movies over TV for ambiguous searches
-                  if (item.media_type === 'movie') score += 5;
-
-                  console.log(`  📊 ${itemTitle} (${itemYear}): score=${score}`);
-
-                  return { item, score };
-                });
-
-              // Sort by score descending
-              scored.sort((a, b) => b.score - a.score);
-
-              if (scored.length > 0 && scored[0]) {
-                console.log(`✅ Selected: ${scored[0].item.title ?? scored[0].item.name}`);
-                return scored[0].item;
+            // Scoring logic (prioritize exact title and year matches)
+            const cleanTitle = title.trim().toLowerCase();
+            const scored = allResults.map(item => {
+              let score = 0;
+              const itemTitle = (item.title ?? item.name ?? '').toLowerCase();
+              const itemYear = parseInt(item.release_date?.substring(0, 4) ?? item.first_air_date?.substring(0, 4) ?? '0');
+              let logDetails = [];
+              // Exact title match
+              if (itemTitle === cleanTitle) {
+                score += 50;
+                logDetails.push('exact title match +50');
               }
-
-              return null;
-            };
-
-            const item = selectBestMatch(searchData.results);
-
-            if (!item) {
-              return { error: 'No suitable movie or TV show found' };
+              // Partial title match
+              else if (itemTitle.includes(cleanTitle)) {
+                score += 20;
+                logDetails.push('partial title match +20');
+              }
+              // Year matching
+              if (year && itemYear) {
+                if (itemYear === year) {
+                  score += 60;
+                  logDetails.push('exact year match +60');
+                } else {
+                  const diff = Math.abs(itemYear - year);
+                  score -= diff * 2;
+                  logDetails.push(`year diff -${diff * 2}`);
+                }
+              }
+              // Popularity bonus
+              const popBonus = Math.min(item.popularity / 100, 10);
+              score += popBonus;
+              if (popBonus > 0) logDetails.push(`popularity +${popBonus.toFixed(2)}`);
+              // Prefer movies over TV for ambiguous searches
+              if (item.media_type === 'movie') {
+                score += 5;
+                logDetails.push('movie bonus +5');
+              }
+              return { item, score };
+            });
+            scored.sort((a, b) => b.score - a.score);
+            if (scored.length > 0 && scored[0]) {
+              const best = scored[0].item;
+              const bestScore = scored[0].score;
+              const bestTitle = (best.title ?? best.name ?? '').toLowerCase();
+              const bestYear = parseInt(best.release_date?.substring(0, 4) ?? best.first_air_date?.substring(0, 4) ?? '0');
+              return {
+                id: best.id,
+                title: best.title ?? best.name ?? '',
+                poster_url: best.poster_path ? `https://image.tmdb.org/t/p/w500${best.poster_path}` : null,
+                release_date: best.release_date ?? best.first_air_date,
+                rating: best.vote_average,
+                overview: best.overview,
+                media_type: best.media_type as 'movie' | 'tv'
+              };
             }
-
-            const movieResult = {
-              id: item.id,
-              title: item.title ?? item.name ?? '',
-              poster_url: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-              release_date: item.release_date ?? item.first_air_date,
-              rating: item.vote_average,
-              overview: item.overview,
-              media_type: item.media_type as 'movie' | 'tv'
-            };
-
-            console.log(`[TMDB_FETCH_SUCCESS] Found movie data to be sent to client:`, movieResult);
-
-            return movieResult;
-
+            return { error: 'No suitable movie or TV show found' };
           } catch (error) {
             console.error('TMDB API error:', error);
             return { error: 'Failed to fetch movie data' };
@@ -230,13 +239,13 @@ export async function POST(req: Request) {
         messages,
         responseMessages: response.messages,
       });
-      console.log('📝 [saveChat call] Full message array being saved:', allMessages.map(msg => ({
-        ...msg,
-        parts: Array.isArray(msg.parts) ? msg.parts : undefined
-      })));
-      // Log all assistant message IDs before saving
-      const assistantIds = allMessages.filter(msg => msg.role === 'assistant').map(msg => msg.id);
-      console.log('[SAVE] Assistant message IDs:', assistantIds);
+      // Log the raw assistant response text for output inspection
+      const assistantMessages = allMessages.filter(msg => msg.role === 'assistant');
+      assistantMessages.forEach(msg => {
+        if (msg.content) {
+          console.log('[RAW ASSISTANT OUTPUT]', JSON.stringify(msg.content));
+        }
+      });
       await saveChat({
         id,
         messages: allMessages,
