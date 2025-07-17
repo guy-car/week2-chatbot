@@ -1,12 +1,14 @@
 # AI Message Persistence Bug
 
 **Last Updated:** 2024-07-17  
-**Status:** Active - Single assistant message lost on refresh  
-**Priority:** Medium (affects UX but doesn't break core functionality)
+**Status:** **RESOLVED** ✅ - Message update handling implemented  
+**Priority:** ~~Medium (affects UX but doesn't break core functionality)~~ **RESOLVED**
 
 ## Issue Summary
 
-When the AI generates a response that includes tool calls (e.g., movie recommendations), the assistant's message is lost when the page is refreshed. The user's message remains, but the AI's response disappears entirely.
+~~When the AI generates a response that includes tool calls (e.g., movie recommendations), the assistant's message is lost when the page is refreshed. The user's message remains, but the AI's response disappears entirely.~~
+
+**RESOLUTION (2024-07-17)**: Implemented proper message update handling in the `saveChat` function to handle both new messages and updates to existing messages. The AI SDK generates two separate requests for tool-using responses (tool calls first, then text content), and the system now properly updates existing messages with new content instead of filtering them out.
 
 ## Evolution of the Issue
 
@@ -21,7 +23,13 @@ When the AI generates a response that includes tool calls (e.g., movie recommend
 - **Change**: Updated system prompt to prevent pre-tool messages
 - **Result**: AI now sends only one message per tool-using turn
 - **New Problem**: The single message is now lost on refresh
-- **Current State**: User sees the response initially, but it disappears after page refresh
+- **Current State**: ~~User sees the response initially, but it disappears after page refresh~~ **RESOLVED**
+
+### Phase 3: Message Update Handling (2024-07-17) ✅
+- **Root Cause Identified**: The `saveChat` function only handled new messages, filtering out existing messages that needed updates
+- **Solution Implemented**: Modified `saveChat` to separate new messages from existing messages that need updates
+- **Result**: Both tool results and text content now persist correctly after page refresh
+- **Status**: **FULLY RESOLVED**
 
 ## Current Behavior
 

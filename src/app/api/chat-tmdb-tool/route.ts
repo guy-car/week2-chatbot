@@ -235,17 +235,31 @@ export async function POST(req: Request) {
       }
     },
     async onFinish({ response }) {
+      console.log('🎯 onFinish called with response messages:', response.messages.length);
+      
+      // Log the raw response messages before processing
+      console.log('📨 Raw response messages:', response.messages.map(msg => ({
+        id: msg.id,
+        role: msg.role,
+        contentLength: msg.content?.length || 0,
+        hasParts: Array.isArray((msg as any).parts),
+        partsCount: Array.isArray((msg as any).parts) ? (msg as any).parts.length : 0
+      })));
+      
       const allMessages = appendResponseMessages({
         messages,
         responseMessages: response.messages,
       });
-      // Log the raw assistant response text for output inspection
-      const assistantMessages = allMessages.filter(msg => msg.role === 'assistant');
-      assistantMessages.forEach(msg => {
-        if (msg.content) {
-          console.log('[RAW ASSISTANT OUTPUT]', JSON.stringify(msg.content));
-        }
-      });
+      
+      // Log all messages being saved to understand the structure
+      console.log('💾 Messages being saved to database:', allMessages.map(msg => ({
+        id: msg.id,
+        role: msg.role,
+        contentLength: msg.content?.length || 0,
+        hasParts: Array.isArray((msg as any).parts),
+        partsCount: Array.isArray((msg as any).parts) ? (msg as any).parts.length : 0
+      })));
+      
       await saveChat({
         id,
         messages: allMessages,
