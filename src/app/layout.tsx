@@ -3,7 +3,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, Bebas_Neue, Poppins } from "next/font/google";
+import { Geist, Poppins } from "next/font/google";
 import { headers } from "next/headers";
 import { Toaster } from 'react-hot-toast'
 

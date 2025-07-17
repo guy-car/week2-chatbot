@@ -151,12 +151,12 @@ export async function POST(req: Request) {
               const movieParams: Record<string, string | number | undefined> = { query: title, include_adult: 'false', language: 'en-US', page: 1 };
               if (year) movieParams.year = year;
               const movieData = await fetchTMDB('search/movie', movieParams, 'movie');
-              movieResults = movieData.results?.map(r => ({ ...r, media_type: 'movie' })) || [];
+              movieResults = movieData.results?.map(r => ({ ...r, media_type: 'movie' })) ?? [];
 
               const tvParams: Record<string, string | number | undefined> = { query: title, include_adult: 'false', language: 'en-US', page: 1 };
               if (year) tvParams.first_air_date_year = year;
               const tvData = await fetchTMDB('search/tv', tvParams, 'tv');
-              tvResults = tvData.results?.map(r => ({ ...r, media_type: 'tv' })) || [];
+              tvResults = tvData.results?.map(r => ({ ...r, media_type: 'tv' })) ?? [];
             }
 
             // If both are empty, fallback to multi
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
             if (allResults.length === 0) {
               const multiParams: Record<string, string | number | undefined> = { query: title, include_adult: 'false', language: 'en-US', page: 1 };
               const multiData = await fetchTMDB('search/multi', multiParams, 'movie');
-              allResults = multiData.results?.filter(r => r.media_type === 'movie' || r.media_type === 'tv') || [];
+              allResults = multiData.results?.filter(r => r.media_type === 'movie' || r.media_type === 'tv') ?? [];
             }
 
             if (!allResults.length) {
@@ -177,7 +177,7 @@ export async function POST(req: Request) {
               let score = 0;
               const itemTitle = (item.title ?? item.name ?? '').toLowerCase();
               const itemYear = parseInt(item.release_date?.substring(0, 4) ?? item.first_air_date?.substring(0, 4) ?? '0');
-              let logDetails = [];
+              const logDetails = [];
               // Exact title match
               if (itemTitle === cleanTitle) {
                 score += 50;
@@ -213,9 +213,6 @@ export async function POST(req: Request) {
             scored.sort((a, b) => b.score - a.score);
             if (scored.length > 0 && scored[0]) {
               const best = scored[0].item;
-              const bestScore = scored[0].score;
-              const bestTitle = (best.title ?? best.name ?? '').toLowerCase();
-              const bestYear = parseInt(best.release_date?.substring(0, 4) ?? best.first_air_date?.substring(0, 4) ?? '0');
               return {
                 id: best.id,
                 title: best.title ?? best.name ?? '',
@@ -241,9 +238,9 @@ export async function POST(req: Request) {
       console.log('📨 Raw response messages:', response.messages.map(msg => ({
         id: msg.id,
         role: msg.role,
-        contentLength: msg.content?.length || 0,
-        hasParts: Array.isArray((msg as any).parts),
-        partsCount: Array.isArray((msg as any).parts) ? (msg as any).parts.length : 0
+        contentLength: msg.content?.length ?? 0,
+        hasParts: false,
+        partsCount: 0
       })));
       
       const allMessages = appendResponseMessages({
@@ -255,9 +252,9 @@ export async function POST(req: Request) {
       console.log('💾 Messages being saved to database:', allMessages.map(msg => ({
         id: msg.id,
         role: msg.role,
-        contentLength: msg.content?.length || 0,
-        hasParts: Array.isArray((msg as any).parts),
-        partsCount: Array.isArray((msg as any).parts) ? (msg as any).parts.length : 0
+        contentLength: msg.content?.length ?? 0,
+        hasParts: false,
+        partsCount: 0
       })));
       
       await saveChat({
