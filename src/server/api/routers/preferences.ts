@@ -7,12 +7,12 @@ export const preferencesRouter = createTRPCRouter({
     get: protectedProcedure
         .query(async ({ ctx }) => {
             const preferences = await ctx.db.query.userPreferences.findFirst({
-                where: eq(userPreferences.userId, ctx.user.id),
+                where: eq(userPreferences.userId, ctx.user!.id),
             });
 
             // Return default values if no preferences exist yet
             return preferences ?? {
-                userId: ctx.user.id,
+                userId: ctx.user!.id,
                 favoriteGenres: "",
                 likedMovies: "",
                 dislikedMovies: "",
@@ -32,7 +32,7 @@ export const preferencesRouter = createTRPCRouter({
             await ctx.db
                 .insert(userPreferences)
                 .values({
-                    userId: ctx.user.id,
+                    userId: ctx.user!.id,
                     ...input,
                 })
                 .onConflictDoUpdate({

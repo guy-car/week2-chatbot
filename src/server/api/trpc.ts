@@ -109,9 +109,12 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.user?.id) {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
+  // At this point, we know ctx.user is defined
+  const user = ctx.user;
   return next({
     ctx: {
-      user: ctx.user,
+      ...ctx,
+      user,
     },
   });
 });

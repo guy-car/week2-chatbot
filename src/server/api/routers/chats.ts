@@ -8,7 +8,7 @@ export const chatRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
       const allChats = await ctx.db.query.chats.findMany({
-        where: eq(chats.userId, ctx.user.id),
+        where: eq(chats.userId, ctx.user!.id),
         orderBy: (chats, { desc }) => [desc(chats.createdAt)],  // Order by newest first
       })
       return allChats;
@@ -16,7 +16,7 @@ export const chatRouter = createTRPCRouter({
 
   create: protectedProcedure
     .mutation(async ({ ctx }) => {
-      const chatId = await createChat(ctx.user.id)
+      const chatId = await createChat(ctx.user!.id)
       return { chatId }
     }),
 
