@@ -17,7 +17,7 @@ export const moviesRouter = createTRPCRouter({
             // Insert the interaction
             await ctx.db.insert(movieInteractions).values({
                 id: crypto.randomUUID(),
-                userId: ctx.user.id,
+                userId: ctx.user!.id,
                 movieId: input.movieId,
                 movieTitle: input.movieTitle,
                 interactionType: input.interactionType,
@@ -25,7 +25,7 @@ export const moviesRouter = createTRPCRouter({
 
             // Update the user preferences
             const currentPrefs = await ctx.db.query.userPreferences.findFirst({
-                where: eq(userPreferences.userId, ctx.user.id),
+                where: eq(userPreferences.userId, ctx.user!.id),
             });
 
             const likedMovies = currentPrefs?.likedMovies ? currentPrefs.likedMovies.split(', ') : [];
@@ -42,7 +42,7 @@ export const moviesRouter = createTRPCRouter({
                 await ctx.db
                     .insert(userPreferences)
                     .values({
-                        userId: ctx.user.id,
+                        userId: ctx.user!.id,
                         likedMovies: likedMovies.join(', '),
                         dislikedMovies: filteredDisliked.join(', '),
                         favoriteGenres: currentPrefs?.favoriteGenres ?? '',
@@ -67,7 +67,7 @@ export const moviesRouter = createTRPCRouter({
                 await ctx.db
                     .insert(userPreferences)
                     .values({
-                        userId: ctx.user.id,
+                        userId: ctx.user!.id,
                         likedMovies: filteredLiked.join(', '),
                         dislikedMovies: dislikedMovies.join(', '),
                         favoriteGenres: currentPrefs?.favoriteGenres ?? '',
@@ -89,7 +89,7 @@ export const moviesRouter = createTRPCRouter({
     getRecentInteractions: protectedProcedure
         .query(async ({ ctx }) => {
             return await ctx.db.query.movieInteractions.findMany({
-                where: eq(movieInteractions.userId, ctx.user.id),
+                where: eq(movieInteractions.userId, ctx.user!.id),
                 orderBy: [desc(movieInteractions.createdAt)],
                 limit: 50,
             });
@@ -107,7 +107,7 @@ export const moviesRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             await ctx.db.insert(userMovies).values({
                 id: crypto.randomUUID(),
-                userId: ctx.user.id,
+                userId: ctx.user!.id,
                 movieId: input.movieId,
                 title: input.title,
                 posterUrl: input.posterUrl,
@@ -128,7 +128,7 @@ export const moviesRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             await ctx.db.delete(userMovies).where(
                 and(
-                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.userId, ctx.user!.id),
                     eq(userMovies.movieId, input.movieId),
                     eq(userMovies.collectionType, 'watchlist')
                 )
@@ -141,7 +141,7 @@ export const moviesRouter = createTRPCRouter({
         .query(async ({ ctx }) => {
             return await ctx.db.query.userMovies.findMany({
                 where: and(
-                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.userId, ctx.user!.id),
                     eq(userMovies.collectionType, 'watchlist')
                 ),
                 orderBy: [desc(userMovies.addedAt)],
@@ -161,7 +161,7 @@ export const moviesRouter = createTRPCRouter({
             // Add to history
             await ctx.db.insert(userMovies).values({
                 id: crypto.randomUUID(),
-                userId: ctx.user.id,
+                userId: ctx.user!.id,
                 movieId: input.movieId,
                 title: input.title,
                 posterUrl: input.posterUrl,
@@ -175,7 +175,7 @@ export const moviesRouter = createTRPCRouter({
             // Remove from watchlist if exists
             await ctx.db.delete(userMovies).where(
                 and(
-                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.userId, ctx.user!.id),
                     eq(userMovies.movieId, input.movieId),
                     eq(userMovies.collectionType, 'watchlist')
                 )
@@ -188,7 +188,7 @@ export const moviesRouter = createTRPCRouter({
         .query(async ({ ctx }) => {
             return await ctx.db.query.userMovies.findMany({
                 where: and(
-                    eq(userMovies.userId, ctx.user.id),
+                    eq(userMovies.userId, ctx.user!.id),
                     eq(userMovies.collectionType, 'history')
                 ),
                 orderBy: [desc(userMovies.addedAt)],
@@ -200,14 +200,14 @@ export const moviesRouter = createTRPCRouter({
             const [latestWatchlist, latestHistory] = await Promise.all([
                 ctx.db.query.userMovies.findFirst({
                     where: and(
-                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.userId, ctx.user!.id),
                         eq(userMovies.collectionType, 'watchlist')
                     ),
                     orderBy: [desc(userMovies.addedAt)],
                 }),
                 ctx.db.query.userMovies.findFirst({
                     where: and(
-                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.userId, ctx.user!.id),
                         eq(userMovies.collectionType, 'history')
                     ),
                     orderBy: [desc(userMovies.addedAt)],
@@ -218,13 +218,13 @@ export const moviesRouter = createTRPCRouter({
                 ctx.db.select({ count: count() })
                     .from(userMovies)
                     .where(and(
-                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.userId, ctx.user!.id),
                         eq(userMovies.collectionType, 'watchlist')
                     )),
                 ctx.db.select({ count: count() })
                     .from(userMovies)
                     .where(and(
-                        eq(userMovies.userId, ctx.user.id),
+                        eq(userMovies.userId, ctx.user!.id),
                         eq(userMovies.collectionType, 'history')
                     ))
             ]);
