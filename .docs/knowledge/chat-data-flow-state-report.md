@@ -32,6 +32,13 @@ This document outlines the end-to-end data flow for the chat feature, from messa
 ### 6. Known Issues
 - **UI Text Rendering**: Double newlines in AI responses are not rendered as paragraph breaks in the frontend, even though the AI outputs them correctly.
 - **AI Message Persistence**: ~~The assistant's message content is lost on page refresh, though tool results persist correctly. This is documented in detail in `.notes/bugs/ai-message-persistence-bug.md`.~~ **RESOLVED (2024-07-17)**: Implemented proper message update handling in `saveChat` function to handle both new messages and updates to existing messages.
+- **Sidebar Cache Invalidation**: Newly created chats don't appear in the sidebar's recent chat list until the page is refreshed. This is documented in detail in `.docs/knowledge/sidebar-cache-invalidation-patterns.md`.
 
-### 7. Diagrams (Optional)
+### 7. Cache Invalidation Patterns (2024-07-17)
+- **Chat Creation**: Requires cache invalidation of `chat.getAll` to update sidebar immediately
+- **Chat Title Updates**: Requires cache invalidation of `chat.getAll` when first user message sets the title
+- **Server-Client Integration**: Server components (sidebar) and client components (chat creation) share the same tRPC cache
+- **Mutation Pattern**: All chat mutations should include `onSuccess: () => { void utils.chat.getAll.invalidate(); }`
+
+### 8. Diagrams (Optional)
 A Mermaid diagram would be beneficial here to visualize the complex data flow between the client, server, AI service, and database, especially the two-pronged data loading process on the client. 
