@@ -4,6 +4,8 @@ import { signOut } from '~/lib/auth-client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { magicButtonStyles } from '~/components/ui/button-magic'
+import Image from 'next/image'
+import { CustomSidebarTrigger } from '~/components/ui/custom-sidebar-trigger'
 
 interface HeaderClientProps {
     user?: {
@@ -44,14 +46,27 @@ export function HeaderClient({ user }: HeaderClientProps) {
     }
 
     return (
-        <div className="flex justify-between items-center w-full">
-            <Link
-                href="/"
-                className="text-5xl font-bold bg-gradient-to-t from-[#adf1f0] to-[#FFC559] bg-clip-text text-transparent transition-all hover:brightness-110 text-glow-gold"
-            >
-                <h1>Watch Genie</h1>
-            </Link>
+        <div className="flex items-center justify-between w-full h-full px-4">
+            {/* Left: Sidebar Trigger */}
+            <div className="flex items-center">
+                <CustomSidebarTrigger />
+            </div>
 
+            {/* Center: Logo */}
+            <div className="flex-1 flex justify-left ml-8">
+                <Link href="/" className="flex items-center">
+                    <Image
+                        src="/title/main-title-horizontal-v2png.png"
+                        alt="Watch Genie"
+                        width={400}
+                        height={63}
+                        className="w-auto max-h-[190px]"
+                        priority
+                    />
+                </Link>
+            </div>
+
+            {/* Right: Auth Buttons */}
             <div className='flex items-center gap-4'>
                 {renderAuthButtons()}
             </div>

@@ -8,11 +8,9 @@ export async function HeaderServer() {
   });
 
   return (
-    <header className='w-full border-b p-4'>
-      <div className='max-w-7xl mx-auto'>
-        <div className=' gap-4'>
-          <HeaderClient user={session?.user ?? null} />
-        </div>
+    <header className='w-full bg-[#0a0a0b] border-b border-[#fd8e2c] h-[123px]'>
+      <div className='h-full flex items-center px-4'>
+        <HeaderClient user={session?.user ?? null} />
       </div>
     </header>
   );
