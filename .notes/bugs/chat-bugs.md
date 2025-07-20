@@ -67,3 +67,16 @@ This document tracks various bugs and unexpected behaviors discovered during cha
 -   **Observation:** AI responses with double newlines (intended as paragraph breaks) are rendered as single paragraphs in the UI.
 -   **Hypothesis:** The frontend is not properly converting `\n\n` sequences to paragraph breaks or proper spacing.
 -   **Status:** **NEW FEATURE REQUEST.** This is a UI enhancement needed to properly render the AI's formatted responses. 
+
+
+___
+
+
+Me:
+Why is the LEftovers such a good show?
+Genie
+The Leftovers (2014): This gripping drama explores the emotional aftermath of a mysterious event where 2% of the world's population suddenly vanishes. It delves into the lives and struggles of those left behind, offering intense performances and profound storytelling that keep viewers captivated.
+Me:
+yes but why is it so good?
+Genie
+The Leftovers (2014): This show is celebrated for its unique premise, exploring deep emotional and philosophical themes through the lens of a community grappling with unexplained loss. Its strong character development, coupled with haunting performances and a mysterious narrative, makes it a compelling and thought-provoking series.
