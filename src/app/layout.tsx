@@ -9,7 +9,7 @@ import { Toaster } from 'react-hot-toast'
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { HeaderServer } from '~/app/_components/server/HeaderServer'
-import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
+import { SidebarProvider } from "~/components/ui/sidebar"
 import AppSidebar from "~/app/_components/server/AppSidebar";
 import { auth } from "~/lib/auth";
 import { Providers } from "./providers";
@@ -42,12 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <SidebarProvider>
       <AppSidebar />
       <main className="flex-1">
-        <div className="flex justify-between items-center p-4 border-b bg-background sticky top-0 z-10">
-          <SidebarTrigger />
-          <div className="flex-1">
-            <HeaderServer />
-          </div>
-        </div>
+        <HeaderServer />
         <div className="p-4">
           {children}
         </div>
