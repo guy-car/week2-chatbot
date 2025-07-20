@@ -1,6 +1,6 @@
 'use client'
 
-import { useSidebar } from './sidebar'
+import { useCustomSidebar } from './custom-sidebar-context'
 import { Button } from './button'
 import { cn } from '~/styles/component-styles'
 import Image from 'next/image'
@@ -11,7 +11,7 @@ interface CustomSidebarTriggerProps {
 }
 
 export function CustomSidebarTrigger({ className, onClick, ...props }: CustomSidebarTriggerProps) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar } = useCustomSidebar()
 
   return (
     <Button
