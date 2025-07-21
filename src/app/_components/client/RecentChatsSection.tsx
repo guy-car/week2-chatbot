@@ -29,7 +29,7 @@ export default function RecentChatsSection({ chats }: RecentChatsSectionProps) {
       {/* Recent Chats Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`${buttonVariants.sidebar} flex items-center gap-3 w-full h-[51px] px-4 mb-2 mr-4`}
+        className={`${buttonVariants.sidebar} flex items-center gap-3 w-full h-[51px] pl-4 pr-8 mb-6`}
       >
         <Image 
           src="/icons/sidebar/three-dots.png" 
@@ -43,17 +43,18 @@ export default function RecentChatsSection({ chats }: RecentChatsSectionProps) {
 
       {/* Recent Chats List - Expandable */}
       {isExpanded && (
-        <div className="bg-[rgba(2,255,251,0.25)] border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] p-4 max-h-[300px] overflow-y-auto mr-4">
-          <div className="text-white text-[18px] font-bold space-y-3">
-            {chats?.slice(0, 10).map((chat) => (
-              <Link 
-                key={chat.id} 
-                href={`/chat/${chat.id}`}
-                className="block mb-[13px] ms-[27px] hover:text-[#00E5FF] transition-colors"
-              >
-                • {chat.title ?? formatChatDate(chat.createdAt)}
-              </Link>
-            ))}
+        <div className="bg-[rgba(2,255,251,0.25)] border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] pl-0 pr-4 pt-4 pb-4 max-h-[300px] overflow-y-auto">
+          <div className="text-white text-[18px] font-normal space-y-3">
+                          {chats?.slice(0, 10).map((chat) => (
+                <Link 
+                  key={chat.id} 
+                  href={`/chat/${chat.id}`}
+                  className="block mb-[13px] ms-[27px] hover:text-[#00E5FF] transition-colors truncate"
+                  title={chat.title ?? formatChatDate(chat.createdAt)}
+                >
+                  • {chat.title ?? formatChatDate(chat.createdAt)}
+                </Link>
+              ))}
           </div>
         </div>
       )}

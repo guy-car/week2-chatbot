@@ -40,17 +40,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const isLoggedIn = !!session?.user;
 
   const loggedInLayout = (
-    <CustomSidebarProvider>
-      <SidebarProvider>
-        <CustomSidebarWrapper />
-        <main className="flex-1">
-          <HeaderServer />
-          <div className="p-4">
-            {children}
-          </div>
-        </main>
-      </SidebarProvider>
-    </CustomSidebarProvider>
+    <SidebarProvider>
+      <CustomSidebarWrapper />
+      <main className="flex-1">
+        <HeaderServer />
+        <div className="p-4">
+          {children}
+        </div>
+      </main>
+    </SidebarProvider>
   );
 
   const loggedOutLayout = (
@@ -73,8 +71,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <Providers>
           <TRPCReactProvider>
-            {isLoggedIn ? loggedInLayout : loggedOutLayout}
-            <Toaster />
+            <CustomSidebarProvider>
+              {isLoggedIn ? loggedInLayout : loggedOutLayout}
+              <Toaster />
+            </CustomSidebarProvider>
           </TRPCReactProvider>
         </Providers>
       </body>

@@ -32,14 +32,6 @@ export default function WatchlistPage() {
             <div className="max-w-7xl mx-auto p-6">
                 <h1 className="text-3xl font-bold mb-6 text-[#FFC559] glow-gold-subtle text-center">My Watchlist</h1>
                 <div className="text-center py-8">
-                    <div className="relative">
-                        <img
-                            src="/bad-genie.png"
-                            alt="Empty Watchlist Genie"
-                            className="w-120 h-auto mx-auto opacity-50"
-                        />
-                        <div className="absolute inset-0 bg-radial-gradient pointer-events-none" />
-                    </div>
                     <div className="text-center space-y-4">
                         <p className="text-[#D18843] text-lg">Your watchlist is empty...</p>
                         <p className="text-gray-400 italic">Fill it up to satiate the Genie</p>

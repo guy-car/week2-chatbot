@@ -10,6 +10,7 @@ BUGS----------------
 Bugs:
 - movies without a poster don't have a clickable link
 - also see .notes/bugs
+- can't remove movies from watch history
 
 ####################
 UI / UX-------------

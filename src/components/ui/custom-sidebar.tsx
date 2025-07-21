@@ -26,7 +26,7 @@ function CustomSidebarButton({ href, icon, children, className }: CustomSidebarB
   return (
     <Link 
       href={href}
-      className={`${buttonVariants.sidebar} flex items-center gap-3 w-full h-[51px] px-4 mb-2 ${className ?? ''}`}
+      className={`${buttonVariants.sidebar} flex items-center gap-3 w-full h-[51px] pl-4 pr-8 mb-6 ${className ?? ''}`}
     >
       <Image 
         src={icon} 
@@ -43,9 +43,6 @@ function CustomSidebarButton({ href, icon, children, className }: CustomSidebarB
 // Main Custom Sidebar Component
 export default function CustomSidebar({ className, chats }: CustomSidebarProps) {
   const { isOpen } = useCustomSidebar()
-  
-  // Don't render if not open
-  if (!isOpen) return null
 
   const formatChatDate = (createdAt: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -56,12 +53,13 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
   };
 
   return (
-    <div className={`fixed left-0 w-[293px] flex flex-col border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] bg-[#0A0A0B] z-50 ${className ?? ''}`} style={{
-      top: 'calc(123px + 20px)',
-      height: 'calc(100vh - 123px - 40px)'
+    <div className={`fixed left-0 w-[293px] flex flex-col border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] bg-[#0A0A0B] z-50 transform transition-transform duration-300 ease-in-out ${className ?? ''}`} style={{
+      top: 'calc(123px + 32px)',
+      height: 'calc(100vh - 123px - 64px)',
+      transform: isOpen ? 'translateX(0)' : 'translateX(-100%)'
     }}>
       {/* Navigation Buttons - Each as standalone button */}
-      <div className="flex flex-col space-y-2 mb-4 px-4 pt-4">
+      <div className="flex flex-col space-y-[21px] mb-0 pr-8 pt-8">
         <CustomSidebarButton 
           href="/watchlist" 
           icon="/icons/sidebar/star.png"
@@ -85,12 +83,12 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
       </div>
 
       {/* Recent Chats Section - Client-side interactive */}
-      <div className="flex-1 mt-4 px-4">
+      <div className="flex-1 mt-0 pr-8">
         <RecentChatsSection chats={chats} />
       </div>
 
       {/* Sign Out Button - At the very bottom */}
-      <div className="mt-auto px-4 pb-4">
+      <div className="mt-auto pr-8 pb-8">
         <CustomSidebarButton 
           href="/auth/signout" 
           icon="/icons/sidebar/sign-out.png"
