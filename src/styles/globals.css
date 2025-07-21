@@ -82,8 +82,8 @@
 }
 
 .dark {
-  /* Background - Raisin black */
-  --background: oklch(0.20 0.02 285);
+  /* Background - Dark background matching design tokens */
+  --background: #0A0A0B;
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
@@ -128,16 +128,9 @@
 @layer base {
   body {
     @apply bg-background text-foreground;
-    font-family: 'Savate', sans-serif;
-    font-weight: 200;
-    /* Extra light */
-  }
-
-  body {
-    @apply bg-background text-foreground;
     font-family: var(--font-poppins), sans-serif;
-    /* Poppins as default */
     font-weight: 400;
+    min-height: 100vh;
   }
 }
 

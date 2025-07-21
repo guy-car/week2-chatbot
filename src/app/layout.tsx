@@ -10,7 +10,8 @@ import { Toaster } from 'react-hot-toast'
 import { TRPCReactProvider } from "~/trpc/react";
 import { HeaderServer } from '~/app/_components/server/HeaderServer'
 import { SidebarProvider } from "~/components/ui/sidebar"
-import AppSidebar from "~/app/_components/server/AppSidebar";
+import CustomSidebarWrapper from "~/app/_components/client/CustomSidebarWrapper";
+import { CustomSidebarProvider } from "~/components/ui/custom-sidebar-context";
 import { auth } from "~/lib/auth";
 import { Providers } from "./providers";
 
@@ -40,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   const loggedInLayout = (
     <SidebarProvider>
-      <AppSidebar />
+      <CustomSidebarWrapper />
       <main className="flex-1">
         <HeaderServer />
         <div className="p-4">
@@ -70,8 +71,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <Providers>
           <TRPCReactProvider>
-            {isLoggedIn ? loggedInLayout : loggedOutLayout}
-            <Toaster />
+            <CustomSidebarProvider>
+              {isLoggedIn ? loggedInLayout : loggedOutLayout}
+              <Toaster />
+            </CustomSidebarProvider>
           </TRPCReactProvider>
         </Providers>
       </body>
