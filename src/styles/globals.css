@@ -85,16 +85,16 @@
   /* Background - Dark background matching design tokens */
   --background: #0A0A0B;
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
+  --card: #292929;
+  --card-foreground: #FFFFFF;
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
-  /* Primary - Russian violet (magical accent) */
-  --primary: oklch(0.35 0.15 290);
-  --primary-foreground: oklch(0.95 0 0);
-  /* Secondary - Kobicha (warm brown) */
-  --secondary: oklch(0.45 0.08 60);
-  --secondary-foreground: oklch(0.95 0 0);
+  /* Primary - Orange from design tokens */
+  --primary: #FD8E2C;
+  --primary-foreground: #FFFFFF;
+  /* Secondary - Cyan from design tokens */
+  --secondary: #00E5FF;
+  --secondary-foreground: #FFFFFF;
   --muted: oklch(0.274 0.006 286.033);
   --muted-foreground: oklch(0.705 0.015 286.067);
   /* Accent - Caramel (call-to-action) */
@@ -119,9 +119,9 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
   /* Success/Positive - Brunswick green */
   --success: oklch(0.35 0.10 165);
-  /* Card/Surface - Drab dark brown */
-  --card: oklch(0.30 0.05 80);
-  --card-foreground: oklch(0.90 0 0);
+  /* Card/Surface - Secondary background from design tokens */
+  --card: #292929;
+  --card-foreground: #FFFFFF;
 
 }
 

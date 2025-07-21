@@ -111,6 +111,16 @@ style={{
 }}
 ```
 
+### 3.6 Third-Party Component Integration
+
+**Design System Integration**: Third-party components require special consideration for design system integration.
+
+- **CSS Variables Synchronization**: Third-party components rely on CSS variables in `globals.css`, which must be synchronized with design tokens
+- **Hybrid Styling Approach**: The application uses direct hex values for custom components and CSS variables for third-party components
+- **Component-Specific Styling**: Some third-party components (like AuthCard) have complex internal structures requiring specific class name targeting
+
+**Critical Detail**: CSS variables in `globals.css` must match design tokens exactly to ensure third-party components use the correct colors. See **[Auth System State Report](./auth-system-state-report.md#35-ui-component-styling-challenges)** for detailed AuthCard styling patterns and limitations.
+
 ### 3.6 Authentication State Integration
 
 **Conditional Rendering**: The UI adapts based on authentication state with proper fallbacks.

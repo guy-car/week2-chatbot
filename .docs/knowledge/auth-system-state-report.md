@@ -58,6 +58,33 @@ This document outlines the complete authentication system implementation, which 
 - **Social Login Configuration:** The `social` prop must be passed to `<AuthUIProvider>` for social login buttons to appear
 - **Dynamic Routing:** The `pathname` prop is essential for the component to know which auth form to render
 
+**AuthCard Class Names:** The component accepts specific class names for different sections:
+
+- **`form.primaryButton`**: Targets the main Login button
+- **`form.providerButton`**: Targets social login buttons (GitHub/Google)
+- **`form.secondaryButton`**: Targets secondary form buttons
+- **`footer`**: Targets footer section with `[&_button]:...` selectors
+- **`base`**: Targets the entire card container
+- **`continueWith`**: Targets the "Or continue with" separator
+
+**Styling Patterns:**
+- Use direct hex values with opacity: `bg-[#00E5FF]/60`
+- Target nested elements: `[&_button]:bg-[#00E5FF]/20`
+- Avoid invalid CSS selectors that cause build errors
+- Localization for button text doesn't work (component limitation)
+
+**Example Implementation:**
+```tsx
+classNames={{
+  form: {
+    primaryButton: "bg-[#00E5FF]/60 text-white border border-white/60 hover:bg-[#00E5FF]/40",
+    providerButton: "bg-transparent border border-[#FD8E2C] text-white hover:bg-[#FD8E2C]/10"
+  },
+  footer: "[&_button]:w-full [&_button]:bg-[#00E5FF]/20 [&_button]:border [&_button]:border-input",
+  base: "border border-[#00E5FF] rounded-md p-6"
+}}
+```
+
 ### 3.6 Environment Validation Requirements
 
 **Strict Schema:** The application uses `@t3-oss/env-nextjs` for strict environment variable validation.
