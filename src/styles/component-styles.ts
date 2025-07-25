@@ -31,11 +31,21 @@ export const buttonVariants = {
   // Sidebar button - Cyan outline, cyan transparent background
   sidebar: cn(
     'px-6 py-3 rounded-br-[11px] rounded-tr-[11px] transition-all',
-    'bg-[rgba(2,255,251,0.25)]',
+    'bg-[rgba(2,255,251,0.075)]',
     'border border-[rgba(0,229,255,0.99)]',
     'text-white font-bold text-[21px]',
     'hover:bg-[rgba(2,255,251,0.35)]'
   ),
+    // Sidebar button - Cyan outline, cyan transparent background
+    homepageNewChat: cn(
+      'px-4 py-2 rounded-[20px] transition-all',
+      'bg-[rgba(2,255,251,0.07)]',
+      'border border-[rgba(244,243,241,0.05)]',
+      'text-white text-xl font-medium',
+      'shadow-[0px_0px_18px_-2px_#fd8e2c,0px_0px_22px_-4px_#fd8e2c]',
+      'hover:bg-[rgba(2,255,251,0.15)]',
+      'cursor-pointer'
+    ),
 };
 
 // Card variants

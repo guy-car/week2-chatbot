@@ -5,6 +5,7 @@ import { Bookmark, History } from 'lucide-react'
 import { HomepageCard } from '~/app/_components/client/HomepageCard'
 import { api } from "~/trpc/server";
 import { WelcomeMessage } from "../client/WelcomeMessage";
+import { HomepageGenie } from "../client/HomepageGenie";
 
 export async function HomePage() {
     const session = await auth.api.getSession({
@@ -26,6 +27,9 @@ export async function HomePage() {
 
     return (
         <div className="relative min-h-screen">
+            {/* Homepage Genie - positioned on the left */}
+            <HomepageGenie />
+            
             {/* Content wrapper */}
             <div className="relative">
                 <NewChatComponent user={session.user} />

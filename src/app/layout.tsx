@@ -3,7 +3,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, Poppins } from "next/font/google";
+import { Geist, Poppins, Noto_Sans } from "next/font/google";
 import { headers } from "next/headers";
 import { Toaster } from 'react-hot-toast'
 
@@ -24,6 +24,11 @@ const poppins = Poppins({
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
+});
+
+const notoSans = Noto_Sans({
+  subsets: ["latin"],
+  variable: "--font-noto-sans",
 });
 
 export const metadata: Metadata = {
@@ -61,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 
   return (
-    <html lang="en" className={`${geist.variable} ${poppins.variable} dark`}>
+    <html lang="en" className={`${geist.variable} ${poppins.variable} ${notoSans.variable} dark`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
