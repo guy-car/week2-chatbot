@@ -105,7 +105,7 @@ export default function ProfilePage() {
                 {!isEditing && (
                     <button
                         onClick={() => setIsEditing(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-[#FD8E2C] hover:text-[#e07b1e] transition-colors"
                     >
                         <Edit2 className="w-4 h-4" />
                         Edit
@@ -120,10 +120,10 @@ export default function ProfilePage() {
                     </label>
                     <input
                         type="text"
-                        placeholder={isEditing ? "Sci-fi, thriller, comedy..." : "No genres detected yet"}
-                        className={`w-full px-4 py-2 border rounded-lg ${isEditing
-                            ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            : 'bg-gray-50 text-gray-600 cursor-not-allowed'
+                        placeholder="Sci-fi, thriller, comedy..."
+                        className={`w-full px-4 py-2 rounded-lg border ${isEditing
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.favoriteGenres ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, favoriteGenres: e.target.value })}
@@ -137,9 +137,9 @@ export default function ProfilePage() {
                     </label>
                     <textarea
                         placeholder={isEditing ? "Inception, The Matrix, Spirited Away..." : "Like some movies to build your profile"}
-                        className={`w-full px-4 py-2 border rounded-lg h-20 ${isEditing
-                            ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            : 'bg-gray-50 text-gray-600 cursor-not-allowed'
+                        className={`w-full px-4 py-2 rounded-lg border h-20 ${isEditing
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.likedMovies ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, likedMovies: e.target.value })}
@@ -153,9 +153,9 @@ export default function ProfilePage() {
                     </label>
                     <textarea
                         placeholder={isEditing ? "Horror movies, overly violent films..." : "No dislikes recorded yet"}
-                        className={`w-full px-4 py-2 border rounded-lg h-20 ${isEditing
-                            ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            : 'bg-gray-50 text-gray-600 cursor-not-allowed'
+                        className={`w-full px-4 py-2 rounded-lg border h-20 ${isEditing
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.dislikedMovies ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, dislikedMovies: e.target.value })}
@@ -168,10 +168,10 @@ export default function ProfilePage() {
                         Other Preferences
                     </label>
                     <textarea
-                        placeholder={isEditing ? "I prefer newer movies, love plot twists..." : "Chat more to discover your preferences"}
-                        className={`w-full px-4 py-2 border rounded-lg h-24 ${isEditing
-                            ? 'bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            : 'bg-gray-50 text-gray-600 cursor-not-allowed'
+                        placeholder="I prefer newer movies, love plot twists..."
+                        className={`w-full px-4 py-2 rounded-lg border h-24 ${isEditing
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.preferences ?? ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, preferences: e.target.value })}
@@ -184,7 +184,7 @@ export default function ProfilePage() {
                         <button
                             onClick={handleSave}
                             disabled={charCount > MAX_CHARS || updateProfile.isPending}
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors"
+                            className="flex items-center gap-2 px-6 py-3 bg-[#FD8E2C] text-white rounded-lg hover:bg-[#e07b1e] disabled:bg-gray-400 transition-colors"
                         >
                             <Save className="w-4 h-4" />
                             {updateProfile.isPending ? 'Saving...' : 'Save Profile'}

@@ -15,7 +15,10 @@ export const colors = {
   
   // Text colors
   text: {
-    primary: '#FFFFFF',    // White text
+    primary: '#FAFAFA',    // Primary text (soft white)
+    secondary: '#E5E5E5',  // Secondary text (muted)
+    accent: '#FFFFFF',     // Pure white for emphasis
+    muted: '#A1A1A1',     // Subtle text
   },
   
   // Border colors

@@ -6,6 +6,8 @@
 @theme {
   --font-sans: var(--font-noto-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: var(--font-noto-sans-display), var(--font-noto-sans), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @theme inline {
@@ -128,30 +130,31 @@
 @layer base {
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-poppins), sans-serif;
+    font-family: var(--font-noto-sans), sans-serif;
     font-weight: 400;
     min-height: 100vh;
+    color: #FAFAFA; /* Default soft white text */
   }
 }
 
 h1,
 .display-font {
-  font-family: 'Savate', var(--font-poppins), sans-serif;
+  font-family: var(--font-noto-sans-display), var(--font-noto-sans), sans-serif;
   font-weight: 400;
 }
 
-.font-savate-light {
-  font-family: 'Savate', sans-serif;
-  font-weight: 200;
+.font-noto-light {
+  font-family: var(--font-noto-sans), sans-serif;
+  font-weight: 300;
 }
 
-.font-savate-regular {
-  font-family: 'Savate', sans-serif;
+.font-noto-regular {
+  font-family: var(--font-noto-sans), sans-serif;
   font-weight: 400;
 }
 
-.font-savate-bold {
-  font-family: 'Savate', sans-serif;
+.font-noto-bold {
+  font-family: var(--font-noto-sans), sans-serif;
   font-weight: 700;
 }
 

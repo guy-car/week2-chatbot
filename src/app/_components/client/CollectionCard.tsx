@@ -6,6 +6,7 @@ import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-hot-toast'
 import type { MovieData } from '~/app/types'
 import { useTasteProfile } from '~/app/_services/tasteProfile'
+import { textVariants } from '~/styles/component-styles'
 
 interface CollectionCardProps {
     movie: MovieData & { addedAt?: string; watchedAt?: string }
@@ -59,7 +60,7 @@ export function CollectionCard({
         <div className="flex flex-col h-full items-center">
             {/* Title + Metadata block */}
             <div className="text-center mb-2 w-48 px-2 min-h-[4.5rem]">
-                <h3 className="font-semibold text-gray-800 text-sm line-clamp-2">
+                <h3 className={`font-semibold text-sm line-clamp-2 ${textVariants.primary}`}>
                     {movie.title}{year && ` (${year})`}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">

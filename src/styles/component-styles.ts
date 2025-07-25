@@ -120,38 +120,44 @@ export const chipVariants = {
 
 // Text variants
 export const textVariants = {
+  // Core text colors from design tokens
+  primary: cn('text-[#FAFAFA]'),     // Primary text (soft white)
+  secondary: cn('text-[#E5E5E5]'),   // Secondary text (muted)
+  accent: cn('text-[#FFFFFF]'),      // Pure white for emphasis
+  muted: cn('text-[#A1A1A1]'),      // Subtle text
+  
   // Heading styles
   h1: cn(
-    'text-2xl font-bold text-white',
+    'text-2xl font-bold text-[#FAFAFA]',
     'font-display'
   ),
   
   h2: cn(
-    'text-xl font-bold text-white',
+    'text-xl font-bold text-[#FAFAFA]',
     'font-display'
   ),
   
   h3: cn(
-    'text-lg font-semibold text-white'
+    'text-lg font-semibold text-[#FAFAFA]'
   ),
   
   // Body text
   body: cn(
-    'text-base text-white leading-relaxed'
+    'text-base text-[#FAFAFA] leading-relaxed'
   ),
   
   bodySmall: cn(
-    'text-sm text-white/80 leading-normal'
+    'text-sm text-[#E5E5E5] leading-normal'
   ),
   
-  // Accent text
-  accent: cn(
+  // Special accent text
+  brand: cn(
     'text-[#FFC559] font-medium'
   ),
   
   // Caption text
   caption: cn(
-    'text-xs text-white/60'
+    'text-xs text-[#A1A1A1]'
   ),
 };
 

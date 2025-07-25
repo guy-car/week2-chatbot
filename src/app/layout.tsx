@@ -3,7 +3,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, Poppins, Noto_Sans } from "next/font/google";
+import { Noto_Sans, Noto_Sans_Display } from "next/font/google";
 import { headers } from "next/headers";
 import { Toaster } from 'react-hot-toast'
 
@@ -15,20 +15,16 @@ import { CustomSidebarProvider } from "~/components/ui/custom-sidebar-context";
 import { auth } from "~/lib/auth";
 import { Providers } from "./providers";
 
-const poppins = Poppins({
-  weight: ['400', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-poppins'
-})
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
-
 const notoSans = Noto_Sans({
   subsets: ["latin"],
+  weight: ['300', '400', '500', '700'],
   variable: "--font-noto-sans",
+});
+
+const notoSansDisplay = Noto_Sans_Display({
+  subsets: ["latin"],
+  weight: ['300', '400', '500', '700'],
+  variable: "--font-noto-sans-display",
 });
 
 export const metadata: Metadata = {
@@ -66,12 +62,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 
   return (
-    <html lang="en" className={`${geist.variable} ${poppins.variable} ${notoSans.variable} dark`}>
+    <html lang="en" className={`${notoSans.variable} ${notoSansDisplay.variable} dark`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Savate:wght@200;400;700&display=swap" rel="stylesheet" />
-
       </head>
       <body>
         <Providers>

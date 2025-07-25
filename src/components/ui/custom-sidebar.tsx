@@ -97,6 +97,13 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
         >
           Watchlist
         </CustomSidebarButton>
+
+        <CustomSidebarButton 
+          href="/history" 
+          icon="/icons/sidebar/film-can-1.png"
+        >
+          Watch History
+        </CustomSidebarButton>
         
         <CustomSidebarButton 
           href="/profile" 
@@ -105,12 +112,7 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
           Taste Profile
         </CustomSidebarButton>
         
-        <CustomSidebarButton 
-          href="/history" 
-          icon="/icons/sidebar/film-can-1.png"
-        >
-          Watch History
-        </CustomSidebarButton>
+
       </div>
 
       {/* Recent Chats Section - Client-side interactive */}
