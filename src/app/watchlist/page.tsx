@@ -33,7 +33,7 @@ export default function WatchlistPage() {
                 <h1 className="text-3xl font-bold mb-6 text-[#FFC559] glow-gold-subtle text-center">My Watchlist</h1>
                 <div className="text-center py-8">
                     <div className="text-center space-y-4">
-                        <p className="text-[#D18843] text-lg">Your watchlist is empty...</p>
+                        <p className="text-[#A1A1A1] text-lg">Your watchlist is empty...</p>
                         <p className="text-gray-400 italic">Fill it up to satiate the Genie</p>
                     </div>
                 </div>

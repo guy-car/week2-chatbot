@@ -262,7 +262,7 @@ export default function Chat({
       )}
 
       {(status === 'submitted' || status === 'streaming') && (
-        <div className="mb-4 flex items-center justify-between p-3 bg-[#024845] border border-[#D18843] rounded-lg">
+        <div className="mb-4 flex items-center justify-between p-3 bg-[#292929] border border-[#FD8E2C] rounded-lg">
           <div className="flex items-center">
             {status === 'submitted' && <Spinner />}
             {status === 'streaming' && <span className="text-sm text-[#FFC559] glow-gold-subtle">AI is responding...</span>}
