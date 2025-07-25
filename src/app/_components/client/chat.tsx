@@ -36,18 +36,7 @@ const THINKING_MESSAGES = [
   "The archives whisper their secrets..."
 ];
 
-function Spinner() {
-  const [message] = useState(() =>
-    THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)]
-  );
 
-      return (
-      <div className="flex items-center space-x-2">
-        <Loader2 className={`h-4 w-4 animate-spin ${textVariants.brand} glow-gold-strong`} />
-        <span className={`text-sm ${textVariants.brand} glow-gold-subtle`}>{message}</span>
-      </div>
-    );
-}
 
 function extractMoviesFromMessage(message: Message): MovieData[] {
   const movies: MovieData[] = [];
@@ -243,6 +232,7 @@ export default function Chat({
       <MovieCardsSection movies={recommendedMovies} />
       <ConversationChips
         chips={conversationChips}
+        isAiThinking={status === 'submitted' || status === 'streaming'}
         onChipClick={(text) => {
           void append({ role: 'user', content: text })
           setConversationChips([])
@@ -261,21 +251,7 @@ export default function Chat({
         </div>
       )}
 
-      {(status === 'submitted' || status === 'streaming') && (
-        <div className={`mb-4 flex items-center justify-between ${cardVariants.chat}`}>
-          <div className="flex items-center">
-            {status === 'submitted' && <Spinner />}
-            {status === 'streaming' && <span className={`text-sm ${textVariants.brand} glow-gold-subtle`}>AI is responding...</span>}
-          </div>
-          <button
-            type="button"
-            onClick={() => stop()}
-            className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-          >
-            Stop
-          </button>
-        </div>
-      )}
+
 
       <form onSubmit={handleSubmit} className="flex gap-3">
 
