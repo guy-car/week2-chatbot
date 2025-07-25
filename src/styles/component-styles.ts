@@ -11,7 +11,7 @@ export const buttonVariants = {
   // Primary button (Send button) - Orange outline, dark gray background
   primary: cn(
     'px-6 py-3 rounded-[11px] transition-all',
-    'bg-[#292929] border border-[#fd8e2c]',
+    'bg-none border border-[#fd8e2c]',
     'text-white font-medium',
     'hover:bg-[#292929]/80',
     'focus:outline-none focus:ring-2 focus:ring-[#fd8e2c]'

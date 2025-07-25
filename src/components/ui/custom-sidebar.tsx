@@ -3,6 +3,7 @@ import Image from "next/image"
 import { buttonVariants } from "~/styles/component-styles"
 import RecentChatsSection from "~/app/_components/client/RecentChatsSection"
 import { useCustomSidebar } from "./custom-sidebar-context"
+import { signOut } from "~/lib/auth-client"
 
 // Custom Sidebar Components
 interface CustomSidebarProps {
@@ -16,6 +17,12 @@ interface CustomSidebarProps {
 
 interface CustomSidebarButtonProps {
   href: string
+  icon: string
+  children: React.ReactNode
+  className?: string
+}
+
+interface SignOutButtonProps {
   icon: string
   children: React.ReactNode
   className?: string
@@ -37,6 +44,30 @@ function CustomSidebarButton({ href, icon, children, className }: CustomSidebarB
       />
       <span className="text-white font-bold text-[21px]">{children}</span>
     </Link>
+  )
+}
+
+// Sign Out Button Component (with click handler)
+function SignOutButton({ icon, children, className }: SignOutButtonProps) {
+  const handleSignOut = async () => {
+    await signOut()
+    window.location.href = '/'
+  }
+
+  return (
+    <button 
+      onClick={handleSignOut}
+      className={`${buttonVariants.sidebar} flex items-center gap-3 w-full h-[51px] pl-4 pr-8 mb-6 ${className ?? ''}`}
+    >
+      <Image 
+        src={icon} 
+        alt="" 
+        width={40} 
+        height={40}
+        className="flex-shrink-0"
+      />
+      <span className="text-white font-bold text-[21px]">{children}</span>
+    </button>
   )
 }
 
@@ -89,12 +120,11 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
 
       {/* Sign Out Button - At the very bottom */}
       <div className="mt-auto pr-8 pb-8">
-        <CustomSidebarButton 
-          href="/auth/signout" 
+        <SignOutButton 
           icon="/icons/sidebar/sign-out.png"
         >
           Sign out
-        </CustomSidebarButton>
+        </SignOutButton>
       </div>
     </div>
   )

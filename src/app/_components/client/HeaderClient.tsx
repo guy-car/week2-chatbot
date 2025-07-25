@@ -1,6 +1,5 @@
 'use client'
 
-import { signOut } from '~/lib/auth-client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { magicButtonStyles } from '~/components/ui/button-magic'
@@ -16,21 +15,9 @@ interface HeaderClientProps {
 export function HeaderClient({ user }: HeaderClientProps) {
     const pathname = usePathname()
 
-    const handleSignOut = async () => {
-        await signOut()
-        window.location.href = '/'
-    }
-
     const renderAuthButtons = () => {
         if (user) {
-            return (
-                <button
-                    onClick={handleSignOut}
-                    className='px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-500'
-                >
-                    Logout
-                </button>
-            );
+            return null; // No logout button - handled in sidebar
         }
 
         // Don't show auth buttons on auth pages
