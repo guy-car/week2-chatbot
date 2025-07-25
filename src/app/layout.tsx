@@ -14,6 +14,7 @@ import CustomSidebarWrapper from "~/app/_components/client/CustomSidebarWrapper"
 import { CustomSidebarProvider } from "~/components/ui/custom-sidebar-context";
 import { auth } from "~/lib/auth";
 import { Providers } from "./providers";
+import { PromotedIconsProvider } from "~/app/_components/client/ConversationChips";
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -71,8 +72,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Providers>
           <TRPCReactProvider>
             <CustomSidebarProvider>
-              {isLoggedIn ? loggedInLayout : loggedOutLayout}
-              <Toaster />
+              <PromotedIconsProvider>
+                {isLoggedIn ? loggedInLayout : loggedOutLayout}
+                <Toaster />
+              </PromotedIconsProvider>
             </CustomSidebarProvider>
           </TRPCReactProvider>
         </Providers>
