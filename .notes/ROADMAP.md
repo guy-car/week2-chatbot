@@ -16,16 +16,20 @@ Bugs:
 UI / UX-------------
 ####################
 
-Look / style:
-- consistency of colors 
-- use Sora images
+✅ Look / style:
+- ✅ consistency of colors 
+- ✅ use Sora images
 
-Posters:
+<---------------- ⭐️
+<---------------- ⭐️
+Posters: THIS IS NEXT <---------------- ⭐️
 - different layout for buttons
 - make a caroussel / enable users to scroll through all posters fetched during a chat
 - Sometimes shows more than 3 posters
 - text box above poster (in chat view) sometimes crops info (too small)
-
+<---------------- ⭐️
+<---------------- ⭐️
+ 
 Chat:
 - differentiate genie messages from user messages
 - play with result format (list? Allow UI to display lists, there is an issue about that right now)
@@ -34,9 +38,9 @@ Chips:
 - improve look
 - make sure they display after first message ⭐️
 
-Sidebar:
-- do we keep it?
-- needs to look nicer
+✅ Sidebar:
+- ✅ do we keep it?
+- ✅ needs to look nicer
 
 Misc.
 - Dark/light theme toggle
