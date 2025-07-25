@@ -14,7 +14,7 @@ export const buttonVariants = {
     'bg-none border border-[#fd8e2c]',
     'text-white font-medium',
     'hover:bg-[#292929]/80',
-    'focus:outline-none focus:ring-2 focus:ring-[#fd8e2c]'
+    'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)]'
   ),
   
   // Chip button (Conversation chips) - Orange glow effect

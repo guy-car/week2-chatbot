@@ -122,7 +122,7 @@ export default function ProfilePage() {
                         type="text"
                         placeholder="Sci-fi, thriller, comedy..."
                         className={`w-full px-4 py-2 rounded-lg border ${isEditing
-                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)]'
                             : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.favoriteGenres ?? ''}
@@ -138,7 +138,7 @@ export default function ProfilePage() {
                     <textarea
                         placeholder={isEditing ? "Inception, The Matrix, Spirited Away..." : "Like some movies to build your profile"}
                         className={`w-full px-4 py-2 rounded-lg border h-20 ${isEditing
-                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)]'
                             : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.likedMovies ?? ''}
@@ -154,7 +154,7 @@ export default function ProfilePage() {
                     <textarea
                         placeholder={isEditing ? "Horror movies, overly violent films..." : "No dislikes recorded yet"}
                         className={`w-full px-4 py-2 rounded-lg border h-20 ${isEditing
-                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)]'
                             : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.dislikedMovies ?? ''}
@@ -170,7 +170,7 @@ export default function ProfilePage() {
                     <textarea
                         placeholder="I prefer newer movies, love plot twists..."
                         className={`w-full px-4 py-2 rounded-lg border h-24 ${isEditing
-                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FD8E2C]/50'
+                            ? 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)]'
                             : 'bg-[#292929] border-[#FD8E2C] text-[#FAFAFA] cursor-not-allowed'
                             }`}
                         value={displayProfile.preferences ?? ''}

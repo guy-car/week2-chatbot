@@ -9,7 +9,7 @@ export const colors = {
   // Background colors
   background: {
     main: '#0A0A0B',       // Main dark background for the whole website, must use this unless otherwise specified
-    secondary: '#292929',       // for chat window and input fields
+    secondary: 'rgb(41, 41, 41)',       // for chat window and input fields
     chip: 'rgba(2,255,251,0.07)',    // Chip background
   },
   
@@ -33,6 +33,12 @@ export const colors = {
     cyan: 'rgba(0,229,255,0.99)',     // Cyan glow
     orange: '#FD8E2C',                 // Orange glow
     gold: '#FFC559',                   // Gold glow
+  },
+
+  // Focus colors
+  focus: {
+    primary: '#FAFAFA',               // Primary focus color (soft white)
+    ring: 'rgba(250, 250, 250, 0.5)', // Focus ring with opacity
   }
 };
 

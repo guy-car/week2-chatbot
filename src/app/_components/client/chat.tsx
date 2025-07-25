@@ -10,13 +10,13 @@ import type { MovieData } from '~/app/types'
 import { ConversationChips } from './ConversationChips'
 import { type Chip } from '~/app/types'
 import { useChatTitle } from '~/app/_hooks/useChatTitle'
-import { WelcomeMessage } from './WelcomeMessage';
 
 import { useRouter } from 'next/navigation'
 import { api } from "~/trpc/react"
 import { loadMoviesForChat } from 'tools/chat-store';
 import { cn } from "~/lib/utils"
 import { magicButtonStyles } from '~/components/ui/button-magic';
+import { buttonVariants } from '~/styles/component-styles';
 
 const THINKING_MESSAGES = [
   "Consulting the cosmic catalog...",
@@ -215,10 +215,9 @@ export default function Chat({
 
   return (
     <div className="w-full git max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {messages.length === 0 && <WelcomeMessage chatId={id ?? ''} />}
       <div
         ref={chatContainerRef}
-        className="glow-gold h-64  p-6 mb-6 overflow-y-auto bg-[#229e9c70] rounded-lg">
+        className="h-64 p-6 mb-6 overflow-y-auto bg-[rgb(41,41,41)] border border-[#FD8E2C] rounded-lg">
         {messages.map(message => (
           <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-xl'}`}>
             <strong>{message.role === 'user' ? 'Me: ' : 'Genie '}</strong>
@@ -283,7 +282,7 @@ export default function Chat({
         <button
           type="button"
           onClick={handleNewChat}
-          className={magicButtonStyles.success}
+          className={buttonVariants.primary}
           title="Start new chat"
         >
           New chat
@@ -293,16 +292,15 @@ export default function Chat({
           name="prompt"
           value={input}
           onChange={handleInputChange}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex-1 px-4 py-2 border border-[#FD8E2C] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]"
           placeholder="Type your message..."
           disabled={status !== 'ready'}
         />
         <button
           className={cn(
-            "px-6 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2",
             status !== 'ready'
-              ? "bg-gray-400 text-gray-200 cursor-not-allowed focus:ring-gray-400"
-              : [magicButtonStyles.caramel, "focus:ring-[#221745]"]
+              ? "px-6 py-2 rounded-lg bg-gray-400 text-gray-200 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
+              : buttonVariants.primary
           )}
           disabled={status !== 'ready'}
         >
