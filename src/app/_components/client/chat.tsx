@@ -16,7 +16,7 @@ import { api } from "~/trpc/react"
 import { loadMoviesForChat } from 'tools/chat-store';
 import { cn } from "~/lib/utils"
 import { magicButtonStyles } from '~/components/ui/button-magic';
-import { buttonVariants } from '~/styles/component-styles';
+import { buttonVariants, cardVariants, inputVariants, textVariants } from '~/styles/component-styles';
 
 const THINKING_MESSAGES = [
   "Consulting the cosmic catalog...",
@@ -41,12 +41,12 @@ function Spinner() {
     THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)]
   );
 
-  return (
-    <div className="flex items-center space-x-2">
-      <Loader2 className="h-4 w-4 animate-spin text-[#FFC559] glow-gold-strong" />
-      <span className="text-sm text-[#FFC559] glow-gold-subtle">{message}</span>
-    </div>
-  );
+      return (
+      <div className="flex items-center space-x-2">
+        <Loader2 className={`h-4 w-4 animate-spin ${textVariants.brand} glow-gold-strong`} />
+        <span className={`text-sm ${textVariants.brand} glow-gold-subtle`}>{message}</span>
+      </div>
+    );
 }
 
 function extractMoviesFromMessage(message: Message): MovieData[] {
@@ -217,7 +217,7 @@ export default function Chat({
     <div className="w-full git max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div
         ref={chatContainerRef}
-        className="h-64 p-6 mb-6 overflow-y-auto bg-[rgb(41,41,41)] border border-[#FD8E2C] rounded-lg">
+        className={`h-64 p-6 mb-6 overflow-y-auto ${cardVariants.chat}`}>
         {messages.map(message => (
           <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-xl'}`}>
             <strong>{message.role === 'user' ? 'Me: ' : 'Genie '}</strong>
@@ -262,10 +262,10 @@ export default function Chat({
       )}
 
       {(status === 'submitted' || status === 'streaming') && (
-        <div className="mb-4 flex items-center justify-between p-3 bg-[#024845] border border-[#D18843] rounded-lg">
+        <div className={`mb-4 flex items-center justify-between ${cardVariants.chat}`}>
           <div className="flex items-center">
             {status === 'submitted' && <Spinner />}
-            {status === 'streaming' && <span className="text-sm text-[#FFC559] glow-gold-subtle">AI is responding...</span>}
+            {status === 'streaming' && <span className={`text-sm ${textVariants.brand} glow-gold-subtle`}>AI is responding...</span>}
           </div>
           <button
             type="button"
@@ -292,7 +292,7 @@ export default function Chat({
           name="prompt"
           value={input}
           onChange={handleInputChange}
-          className="flex-1 px-4 py-2 border border-[#FD8E2C] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]"
+          className={`flex-1 ${inputVariants.chat}`}
           placeholder="Type your message..."
           disabled={status !== 'ready'}
         />

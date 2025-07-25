@@ -64,7 +64,7 @@ export function HomepageCard({
                 </div>
 
                 {/* Hover effect */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#d18843] transform scale-x-0 group-hover:scale-x-100 transition-transform" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#FD8E2C] transform scale-x-0 group-hover:scale-x-100 transition-transform" />
             </div>
         </Link>
     )

@@ -19,7 +19,11 @@ export function CustomSidebarTrigger({ className, onClick, ...props }: CustomSid
       data-slot="sidebar-trigger"
       variant="ghost"
       size="default"
-      className={cn("size-20 p-2", className)}
+      className={cn(
+        "size-20 p-2",
+        "focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C] focus:animate-[glow-fade_2500ms_ease-out_forwards]",
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

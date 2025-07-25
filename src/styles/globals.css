@@ -163,6 +163,15 @@ h1,
   -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
 }
 
+@keyframes glow-fade {
+  0% {
+    box-shadow: 0 0 10px 4px rgba(253, 142, 44, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0px 0px rgba(253, 142, 44, 0);
+  }
+}
+
 @layer utilities {
   .glow-gold {
     filter: drop-shadow(0 0 20px rgba(255, 197, 89, 0.6));
