@@ -1,6 +1,6 @@
 # State Report: UI Architecture & Design System
 
-**Last Updated:** January 25, 2025
+**Last Updated:** July 22, 2025
 
 ## 1. Overview
 
@@ -32,6 +32,10 @@ This document outlines the complete UI architecture and design system implementa
 - **`src/app/_components/client/ConversationChips.tsx`** - Advanced cinema loading system with random icon selection, click interactions, promotion animations, and header integration
 - **`src/app/_components/client/chat.tsx`** - Migrated from hardcoded values to design token system with proper focus states and cinema loading integration
 - **`src/app/_components/client/NewChatComponent.tsx`** - Uses `magicButtonStyles.caramel` with enhanced hover and focus effects
+- **`src/app/_components/client/HomepageGenie.tsx`** - New component for authenticated users with sidebar-responsive behavior and genie logo integration
+- **`src/app/_components/client/WelcomeMessage.tsx`** - Updated with genie logo integration for non-authenticated users
+- **`src/app/_components/client/HeaderClient.tsx`** - Cleaned up authentication logic, removed logout functionality
+- **`src/components/ui/custom-sidebar.tsx`** - Added sign out functionality to sidebar
 
 ### Cinema Loading System Assets ✅ **NEW**
 - **`public/icons/footer/camera-2-modern.png`** - Cinema camera icon for loading animations
@@ -58,10 +62,18 @@ This document outlines the complete UI architecture and design system implementa
 
 **New Token Categories Added:**
 ```typescript
-// Focus states with proper orange theming
+// Focus states with unified soft white theming
 focus: {
-  orange: '#FD8E2C',                    // Orange focus for inputs
-  orangeRing: 'rgba(253, 142, 44, 0.3)', // Orange focus ring
+  primary: '#FAFAFA',                    // Soft white focus for inputs
+  ring: 'rgba(250, 250, 250, 0.5)',     // Soft white focus ring
+}
+
+// Text color hierarchy system
+text: {
+  primary: '#FAFAFA',                    // Soft white - easier on eyes than pure white
+  secondary: '#E5E5E5',                  // Muted text
+  accent: '#FFFFFF',                     // Pure white for emphasis
+  muted: '#A1A1A1',                     // Subtle text/captions
 }
 
 // Hover states with different opacity levels
@@ -91,7 +103,7 @@ system: {
 **Working Solution**:
 ```typescript
 // Hardcoded classes work reliably
-'focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C]'
+'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]'
 ```
 
 **Root Cause**: Template literal evaluation timing in Tailwind's CSS generation process
@@ -141,8 +153,8 @@ className={`${cardVariants.chat} ${textVariants.brand}`}
 ```
 
 **Interactive State Hierarchy**:
-- **Input Focus**: 2px orange border + orange ring (no white interference)
-- **Button Focus**: Orange border + ring + animated glow that fades
+- **Input Focus**: 2px soft white border + soft white ring (no white interference)
+- **Button Focus**: Soft white border + ring + animated glow that fades
 - **Button Hover**: Subtle orange background with different opacity levels
 - **Special Button Hover**: Enhanced visibility for "Ask the Genie" button
 
@@ -282,7 +294,63 @@ const renderAuthButtons = () => {
 }
 ```
 
-### 3.13 Cinema Icon Loading System ✅ **NEW MAJOR FEATURE**
+### 3.13 Genie Logo Integration System ✅ **NEW MAJOR FEATURE**
+
+**Brand Identity Enhancement**: Implemented comprehensive genie logo integration across the application to strengthen brand identity and improve user experience.
+
+**Core Features**:
+- **Landing Page Logo**: Large responsive genie logo for non-authenticated users with proper scaling (48x48 mobile → 96x96 desktop)
+- **Homepage Dynamic Logo**: `HomepageGenie.tsx` component for authenticated users with sidebar-responsive behavior
+- **Sidebar-Responsive Behavior**: Logo fades out smoothly when sidebar opens (300ms transition) and fades back when sidebar closes
+- **Context Integration**: Uses `useCustomSidebar` context for state management
+- **Image Optimization**: Next.js Image component for optimal loading and responsive scaling
+
+**Technical Implementation**:
+```typescript
+// Sidebar-responsive genie logo
+const { isOpen } = useCustomSidebar()
+className={`transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`}
+
+// Responsive scaling
+className="w-12 h-12 md:w-24 md:h-24" // 48x48 mobile → 96x96 desktop
+```
+
+**User Experience Benefits**:
+- **Brand Reinforcement**: Genie mascot properly integrated as brand element
+- **Visual Consistency**: Consistent logo placement and behavior across pages
+- **Responsive Design**: Logo scales appropriately for different screen sizes
+- **Smooth Transitions**: Professional fade animations enhance perceived performance
+- **Context Awareness**: Logo behavior adapts to UI state (sidebar open/closed)
+
+### 3.14 Authentication Flow Optimization ✅ **NEW FEATURE**
+
+**Streamlined User Experience**: Redesigned authentication flow for improved usability and cleaner UI.
+
+**Key Changes**:
+- **Sign Out Migration**: Moved logout functionality from header to sidebar for better accessibility
+- **Header Cleanup**: Removed complex logout logic from `HeaderClient.tsx`, simplified to show only sign-in button for non-authenticated users
+- **New Component**: Created `SignOutButton` component with proper auth handling and redirect to landing page
+- **Sidebar Integration**: Added sign out functionality to custom sidebar with proper session management
+
+**Implementation Pattern**:
+```typescript
+// Before: Complex header logout logic
+const handleSignOut = async () => {
+  await signOut()
+  window.location.href = '/'
+}
+
+// After: Clean, focused header
+return user ? null : <SignInButton />
+```
+
+**Benefits**:
+- **Cleaner Header**: Simplified header component with reduced complexity
+- **Better Accessibility**: Sign out button in sidebar is more discoverable
+- **Consistent Flow**: All authentication actions now flow through sidebar
+- **Improved UX**: Clear separation between authenticated and non-authenticated states
+
+### 3.15 Cinema Icon Loading System ✅ **NEW MAJOR FEATURE**
 
 **Revolutionary Loading Experience**: Implemented an sophisticated cinema-themed loading animation system that replaces traditional loading indicators with interactive movie equipment icons.
 
@@ -364,10 +432,11 @@ WebkitTapHighlightColor: 'transparent'
 
 ### Design System Configuration ✅ **UPDATED**
 - **Colors**: Comprehensive palette in `design-tokens.ts` with cyan (#00E5FF) and orange (#FD8E2C) theme
-- **Focus States**: Orange-themed focus indicators with ring and border styles
+- **Focus States**: Soft white focus indicators with ring and border styles for improved accessibility
+- **Text Colors**: Complete hierarchy system with soft white (#FAFAFA) primary, secondary (#E5E5E5), accent (#FFFFFF), and muted (#A1A1A1) variants
 - **Hover States**: Multi-level hover system with different opacity levels
 - **System Colors**: Complete error, neutral, and pure color sets
-- **Typography**: Noto Sans and Noto Sans Display font families
+- **Typography**: Noto Sans and Noto Sans Display font families with weights 300, 400, 500, 700
 - **Spacing**: XS to XXL scale with consistent increments
 - **Shadows**: Custom glow effects and standard shadow variants
 - **Layout**: Component-specific dimensions for header (123px), sidebar (293px), etc.
@@ -484,17 +553,25 @@ graph TD
 ### 8.1 Color System ✅ **EXPANDED**
 - **Primary Colors**: Cyan (#00E5FF) and Orange (#FD8E2C) for brand identity
 - **Background Colors**: Dark theme with `#0A0A0B` main background and configurable secondary
-- **Text Colors**: White primary text with proper contrast ratios
+- **Text Colors**: Complete hierarchy system with soft white (#FAFAFA) primary, secondary (#E5E5E5), accent (#FFFFFF), and muted (#A1A1A1) variants
 - **Border Colors**: Orange primary border with cyan secondary border
-- **Focus Colors**: Orange-themed focus system with ring and border variants
+- **Focus Colors**: Soft white focus system with ring and border variants for improved accessibility
 - **Hover Colors**: Multi-level hover system (subtle to prominent)
 - **System Colors**: Comprehensive error, neutral, and pure color collections
 - **Glow Effects**: Custom glow colors for cyan, orange, and consistent gold→orange conversion
 
-### 8.2 Interactive State System ✅ **NEW**
+### 8.2 Interactive State System ✅ **UPDATED**
 ```typescript
-// Focus state examples
-'focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C]'
+// Focus state examples (soft white system)
+'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]'
+
+// Text color hierarchy examples
+text: {
+  primary: 'text-[#FAFAFA]',     // Soft white - easier on eyes
+  secondary: 'text-[#E5E5E5]',   // Muted text
+  accent: 'text-[#FFFFFF]',      // Pure white for emphasis
+  muted: 'text-[#A1A1A1]',      // Subtle text/captions
+}
 
 // Hover state examples  
 hover: {
@@ -506,17 +583,19 @@ hover: {
 'focus:animate-[glow-fade_2500ms_ease-out_forwards]'
 ```
 
-### 8.3 Typography Hierarchy
-- **Font Families**: Noto Sans for body text, Noto Sans Display for headings
+### 8.3 Typography Hierarchy ✅ **UPDATED**
+- **Font Families**: Noto Sans for body text, Noto Sans Display for headings (migrated from Geist Sans, Poppins, Savate)
 - **Font Sizes**: XS (14px) to XXL (24px) with consistent scale
-- **Font Weights**: Normal (400), Medium (500), Bold (700)
+- **Font Weights**: Light (300), Normal (400), Medium (500), Bold (700) for both variants
 - **Line Heights**: Tight (1.2), Normal (1.5), Relaxed (1.8)
+- **Global Default**: Soft white (#FAFAFA) as base text color for improved readability
 
 ### 8.4 Component Variants ✅ **UPDATED**
 - **Button Variants**: Primary (orange outline + animated glow), Chip (orange glow), Genie (enhanced hover), Sidebar (cyan outline)
 - **Card Variants**: Chat (orange border), Sidebar (cyan border), Movie (cyan glow)
-- **Input Variants**: Chat (orange focus), Search (transparent background)
-- **Text Variants**: Brand (orange), Primary (white), Secondary (muted), Accent (pure white)
+- **Input Variants**: Chat (soft white focus), Search (transparent background)
+- **Text Variants**: Primary (soft white), Secondary (muted), Accent (pure white), Muted (subtle)
+- **New Components**: HomepageGenie (sidebar-responsive), SignOutButton (authentication), WelcomeMessage (genie logo integration)
 
 ### 8.5 Layout System
 - **Container Dimensions**: Header (123px), Sidebar (293px), Chat (358px), Movie cards (141x212px)
@@ -611,19 +690,23 @@ hover: {
 - **System Color Integration**: Comprehensive error, neutral, and pure color systems
 
 ### ✅ **Completed Component Updates:**
-- **Chat Component**: Fully migrated from hardcoded values to design token variants
+- **Chat Component**: Fully migrated from hardcoded values to design token variants, removed genie image and welcome message
 - **Conversation Chips**: Simplified from complex category system to unified styling with advanced cinema loading integration
 - **Button System**: Enhanced with advanced focus/hover states and custom animations
-- **Input System**: Orange focus states with proper ring and border styling
-- **Header Implementation**: Dark background, orange border, custom sidebar trigger, image-based logo, promoted icons display
-- **Custom Sidebar**: Cyan outline with transparent background, slide-out animations, recent chats integration
+- **Input System**: Soft white focus states with proper ring and border styling for improved accessibility
+- **Header Implementation**: Dark background, orange border, custom sidebar trigger, image-based logo, promoted icons display, cleaned up authentication logic
+- **Custom Sidebar**: Cyan outline with transparent background, slide-out animations, recent chats integration, added sign out functionality
+- **New Components**: HomepageGenie (sidebar-responsive genie logo), SignOutButton (authentication), WelcomeMessage (genie logo integration)
+- **Component Styling**: Taste profile page transformation, movie cards text color fixes, collection card improvements
 
 ### ✅ **Completed Infrastructure:**
-- **Asset Integration**: Custom sidebar icon, logo, and cinema equipment icons properly integrated
+- **Asset Integration**: Custom sidebar icon, logo, cinema equipment icons, and genie logo properly integrated
 - **Animation System**: Custom keyframe animations in globals.css including cinema loading effects
 - **RGB Transparency Support**: Dual format system for transparency variations
 - **Template Literal Resolution**: Fixed broken token interpolation patterns
 - **Context Management**: PromotedIconsProvider for cross-component state management
+- **Font System Migration**: Complete migration to Noto Sans family with proper weights and global text color
+- **Authentication Flow**: Streamlined authentication with sidebar integration and header cleanup
 
 ### ✅ **Completed Cinema Loading System:** ✅ **NEW MAJOR FEATURE**
 - **Random Icon Display**: 3 randomly selected cinema icons during AI thinking states
@@ -637,14 +720,17 @@ hover: {
 
 ### 📋 **Key Achievements:**
 - **Functional Design System**: Changing values in `design-tokens.ts` now propagates throughout application
-- **Consistent Interactive States**: All focus/hover states use orange theme instead of browser defaults
+- **Consistent Interactive States**: All focus/hover states use soft white theme for improved accessibility
 - **Unified Visual Language**: Eliminated visual chaos from category-based chip colors
 - **Advanced Animation Effects**: Custom glow-fade animations for enhanced user feedback
 - **Maintainable Codebase**: Centralized styling control with zero hardcoded color values
 - **Performance Optimized**: CSS transform-based animations with proper timing
-- **Accessibility Compliant**: Orange focus indicators meet contrast requirements
+- **Accessibility Compliant**: Soft white focus indicators meet contrast requirements and improve readability
 - **Innovative Loading Experience**: Cinema-themed loading system that enhances brand identity and user engagement
 - **Cross-Browser Compatibility**: Comprehensive solutions for selection highlights and touch interactions
+- **Brand Identity Enhancement**: Genie logo integration strengthens brand identity across all pages
+- **Typography Excellence**: Complete font system migration to Noto Sans with improved readability
+- **Authentication Streamlining**: Cleaner authentication flow with sidebar integration
 
 ## 11. Related Documentation
 
@@ -656,10 +742,14 @@ For specific implementation details, see:
 
 ### 12.1 Functional Verification
 - ✅ **Token Propagation**: Changing `colors.background.secondary` updates all chat windows
-- ✅ **Focus State Consistency**: All interactive elements show orange focus instead of white browser defaults
+- ✅ **Focus State Consistency**: All interactive elements show soft white focus for improved accessibility
+- ✅ **Text Color Hierarchy**: Complete text color system with soft white primary, secondary, accent, and muted variants
 - ✅ **Hover State Integration**: Unified hover effects with configurable opacity levels
 - ✅ **Animation Performance**: Smooth 60fps animations with CSS transforms
 - ✅ **Build Stability**: All changes compile without errors or CSS generation issues
+- ✅ **Font System**: Noto Sans family properly loaded with all weights (300, 400, 500, 700)
+- ✅ **Genie Logo Integration**: Responsive genie logo with sidebar-responsive behavior
+- ✅ **Authentication Flow**: Streamlined authentication with sidebar integration
 
 ### 12.2 Maintenance Benefits
 - ✅ **Single Source of Truth**: All design decisions centralized in `design-tokens.ts`
@@ -669,14 +759,17 @@ For specific implementation details, see:
 - ✅ **Scalability**: New components automatically inherit design system patterns
 
 ### 12.3 User Experience Improvements
-- ✅ **Visual Consistency**: Unified orange/cyan theme throughout application
+- ✅ **Visual Consistency**: Unified orange/cyan theme throughout application with improved text hierarchy
 - ✅ **Enhanced Feedback**: Custom animations provide clear interaction feedback
-- ✅ **Accessibility**: Orange focus indicators improve keyboard navigation
+- ✅ **Accessibility**: Soft white focus indicators improve keyboard navigation and readability
 - ✅ **Performance**: Optimized animations maintain smooth interactions
 - ✅ **Responsive Design**: Consistent behavior across all screen sizes
 - ✅ **Cinematic Loading Experience**: Engaging cinema-themed loading animations that reinforce brand identity
 - ✅ **Discovery-Based Interactions**: Hidden features that encourage user exploration and engagement
 - ✅ **Achievement System**: Promoted icons create sense of progression and accomplishment
 - ✅ **Cross-Browser Compatibility**: Eliminated unwanted selection highlights and touch interference
+- ✅ **Brand Identity**: Genie logo integration strengthens brand recognition and user connection
+- ✅ **Typography Excellence**: Noto Sans family provides improved readability and professional appearance
+- ✅ **Authentication UX**: Streamlined authentication flow with better discoverability
 
 The UI architecture and design system is now mature, stable, and fully operational with comprehensive token coverage, advanced interactive states, zero hardcoded values, and an innovative cinema loading system that elevates the user experience beyond traditional loading indicators. 
