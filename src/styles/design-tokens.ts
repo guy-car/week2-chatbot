@@ -9,7 +9,7 @@ export const colors = {
   // Background colors
   background: {
     main: '#0A0A0B',       // Main dark background for the whole website, must use this unless otherwise specified
-    secondary: '#4a1010',   // for chat window and input fields (rgb(74, 16, 16) in hex)
+    secondary: 'rgb(35, 35, 35)',   // for chat window and input fields (rgb(35, 35, 35) in hex)
     secondaryRgb: '74, 16, 16', // RGB values for transparency variations
     chip: 'rgba(2,255,251,0.07)',    // Chip background
   },
