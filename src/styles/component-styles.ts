@@ -1,30 +1,74 @@
-// Design tokens are imported for reference but not directly used in this file
-// They are used indirectly through the design system
+// Import design tokens for centralized styling
+import { colors, spacing, borderRadius, shadows } from './design-tokens';
 
 // Utility function to combine classes
 export const cn = (...classes: (string | undefined | null | false)[]) => {
   return classes.filter(Boolean).join(' ');
 };
 
+// Design token utility functions - these output the exact same CSS classes as before
+// but now they're sourced from design tokens for centralized control
+const tokens = {
+  bg: {
+    main: `bg-[${colors.background.main}]`,           // bg-[#0A0A0B]
+    secondary: `bg-[${colors.background.secondary}]`, // bg-[#292929] 
+    chip: `bg-[${colors.background.chip}]`,           // bg-[rgba(2,255,251,0.07)]
+  },
+  border: {
+    primary: `border-[${colors.border.primary}]`,     // border-[#FD8E2C]
+    secondary: `border-[${colors.border.secondary}]`, // border-[rgba(0,229,255,0.99)]
+    subtle: `border-[${colors.border.subtle}]`,       // border-[rgba(244,243,241,0.05)]
+  },
+  text: {
+    primary: `text-[${colors.text.primary}]`,         // text-[#FAFAFA]
+    secondary: `text-[${colors.text.secondary}]`,     // text-[#E5E5E5]
+    accent: `text-[${colors.text.accent}]`,           // text-[#FFFFFF]
+    muted: `text-[${colors.text.muted}]`,             // text-[#A1A1A1]
+    gold: `text-[${colors.glow.gold}]`,               // text-[#FFC559]
+  },
+  radius: {
+    sm: `rounded-[${borderRadius.sm}]`,                // rounded-[3px]
+    md: `rounded-[${borderRadius.md}]`,                // rounded-[11px]
+    lg: `rounded-[${borderRadius.lg}]`,                // rounded-[20px]
+  },
+  shadow: {
+    orange: `shadow-[${shadows.glowOrange}]`,          // Orange glow effect
+  },
+  focus: {
+    ring: `focus:ring-[${colors.focus.ring}]`,        // focus:ring-[rgba(250,250,250,0.5)]
+    border: `focus:border-[${colors.focus.primary}]`, // focus:border-[#FAFAFA]
+    orange: `focus:border-[${colors.focus.orange}]`,  // focus:border-[#FD8E2C]
+    orangeRing: `focus:ring-[${colors.focus.orangeRing}]`, // Orange focus ring
+  },
+  hover: {
+    primary: `hover:bg-[${colors.hover.primary}]`,    // Orange hover
+    chip: `hover:bg-[${colors.hover.chip}]`,          // Chip hover
+    button: `hover:bg-[${colors.hover.button}]`,      // Button hover
+    genie: `hover:bg-[${colors.hover.genie}]`,        // More visible orange hover
+  }
+};
+
 // Button variants using design tokens
 export const buttonVariants = {
   // Primary button (Send button) - Orange outline, dark gray background
   primary: cn(
-    'px-6 py-3 rounded-[11px] transition-all',
-    'bg-none border border-[#fd8e2c]',
-    'text-white font-medium',
-    'hover:bg-[#292929]/80',
-    'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)]'
+    'px-6 py-3 transition-all',
+    tokens.radius.md,
+    `bg-transparent border ${tokens.border.primary}`,
+    `${tokens.text.accent} font-medium`,
+    tokens.hover.primary,
+          'focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C] focus:shadow-[0_0_10px_4px_rgba(253,142,44,0.3)] transition-shadow duration-700'
   ),
   
   // Chip button (Conversation chips) - Orange glow effect
   chip: cn(
-    'px-4 py-2 rounded-[20px] transition-all',
-    'bg-[rgba(2,255,251,0.07)]',
-    'border border-[rgba(244,243,241,0.05)]',
-    'text-white text-sm font-medium',
+    'px-4 py-2 transition-all',
+    tokens.radius.lg,
+    tokens.bg.chip,
+    `border ${tokens.border.subtle}`,
+    `${tokens.text.accent} text-sm font-medium`,
     'shadow-[0px_0px_18px_-2px_#fd8e2c,0px_0px_22px_-4px_#fd8e2c]',
-    'hover:bg-[rgba(2,255,251,0.15)]',
+    tokens.hover.chip,
     'cursor-pointer'
   ),
   
@@ -43,7 +87,8 @@ export const buttonVariants = {
       'border border-[rgba(244,243,241,0.05)]',
       'text-white text-xl font-medium',
       'shadow-[0px_0px_18px_-2px_#fd8e2c,0px_0px_22px_-4px_#fd8e2c]',
-      'hover:bg-[rgba(2,255,251,0.15)]',
+      tokens.hover.genie,
+      'focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C]',
       'cursor-pointer'
     ),
 };
@@ -60,15 +105,15 @@ export const cardVariants = {
   
   // Chat container
   chat: cn(
-    'rounded-[11px] border border-[#fd8e2c]',
-    'bg-[#292929] p-6',
+    `${tokens.radius.md} border ${tokens.border.primary}`,
+    `${tokens.bg.secondary} p-6`,
     'shadow-lg'
   ),
   
   // Sidebar card
   sidebar: cn(
-    'rounded-br-[11px] rounded-tr-[11px]',
-    'border border-[rgba(0,229,255,0.99)]',
+    `rounded-br-[${borderRadius.md}] rounded-tr-[${borderRadius.md}]`,
+    `border ${tokens.border.secondary}`,
     'transition-all'
   ),
 };
@@ -77,10 +122,11 @@ export const cardVariants = {
 export const inputVariants = {
   // Chat input field
   chat: cn(
-    'px-4 py-2 rounded-[11px]',
-    'bg-[#292929] border border-[#fd8e2c]',
-    'text-white placeholder-gray-400',
-    'focus:outline-none focus:ring-2 focus:ring-[#fd8e2c]',
+    'px-4 py-2',
+    tokens.radius.md,
+    `${tokens.bg.secondary} border-2 ${tokens.border.primary}`,
+    `${tokens.text.accent} placeholder-gray-400`,
+    'focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C]',
     'transition-all'
   ),
   
@@ -103,7 +149,7 @@ export const chipVariants = {
     'border border-[rgba(244,243,241,0.05)]',
     'text-white text-sm font-medium',
     'shadow-[0px_0px_18px_-2px_#fd8e2c,0px_0px_22px_-4px_#fd8e2c]',
-    'hover:bg-[rgba(2,255,251,0.15)]',
+    tokens.hover.primary,
     'transition-all cursor-pointer'
   ),
   
@@ -121,43 +167,43 @@ export const chipVariants = {
 // Text variants
 export const textVariants = {
   // Core text colors from design tokens
-  primary: cn('text-[#FAFAFA]'),     // Primary text (soft white)
-  secondary: cn('text-[#E5E5E5]'),   // Secondary text (muted)
-  accent: cn('text-[#FFFFFF]'),      // Pure white for emphasis
-  muted: cn('text-[#A1A1A1]'),      // Subtle text
+  primary: cn(tokens.text.primary),     // Primary text (soft white)
+  secondary: cn(tokens.text.secondary), // Secondary text (muted)
+  accent: cn(tokens.text.accent),       // Pure white for emphasis
+  muted: cn(tokens.text.muted),         // Subtle text
   
   // Heading styles
   h1: cn(
-    'text-2xl font-bold text-[#FAFAFA]',
+    `text-2xl font-bold ${tokens.text.primary}`,
     'font-display'
   ),
   
   h2: cn(
-    'text-xl font-bold text-[#FAFAFA]',
+    `text-xl font-bold ${tokens.text.primary}`,
     'font-display'
   ),
   
   h3: cn(
-    'text-lg font-semibold text-[#FAFAFA]'
+    `text-lg font-semibold ${tokens.text.primary}`
   ),
   
   // Body text
   body: cn(
-    'text-base text-[#FAFAFA] leading-relaxed'
+    `text-base ${tokens.text.primary} leading-relaxed`
   ),
   
   bodySmall: cn(
-    'text-sm text-[#E5E5E5] leading-normal'
+    `text-sm ${tokens.text.secondary} leading-normal`
   ),
   
   // Special accent text
   brand: cn(
-    'text-[#FFC559] font-medium'
+    `${tokens.text.gold} font-medium`
   ),
   
   // Caption text
   caption: cn(
-    'text-xs text-[#A1A1A1]'
+    `text-xs ${tokens.text.muted}`
   ),
 };
 
