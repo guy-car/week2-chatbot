@@ -8,6 +8,7 @@ import type { MovieCardActionType } from './movie-card-icons'
 interface MovieCardSidepanelProps {
   posterUrl: string;
   movieTitle: string;
+  movieId: number; // Add movieId prop
   onAddToWatchlist: () => void;
   onMarkAsWatched: () => void;
   onMoreInfo: () => void;
@@ -19,6 +20,7 @@ interface MovieCardSidepanelProps {
 export function MovieCardSidepanel({ 
   posterUrl, 
   movieTitle, 
+  movieId, // Add movieId to destructuring
   onAddToWatchlist,
   onMarkAsWatched,
   onMoreInfo,
@@ -49,17 +51,6 @@ export function MovieCardSidepanel({
   return (
     <div 
       className={`group ${sidepanelVariants.container} ${className ?? ''}`}
-      onMouseEnter={() => console.log('Mouse enter - container should expand')}
-      onMouseLeave={() => console.log('Mouse leave - container should shrink')}
-      style={{ width: '150px' }}
-      onMouseOver={(e) => {
-        console.log('Mouse over - setting width to 200px');
-        e.currentTarget.style.width = '200px';
-      }}
-      onMouseOut={(e) => {
-        console.log('Mouse out - setting width to 150px');
-        e.currentTarget.style.width = '150px';
-      }}
     >
       {/* Movie Poster */}
       <div 
@@ -82,6 +73,7 @@ export function MovieCardSidepanel({
               iconPath={action.iconPath}
               actionType={action.actionName as MovieCardActionType}
               tooltipText={action.tooltipText}
+              movieId={movieId} // Pass movieId to each icon
               onClick={() => handleAction(action.actionName as MovieCardActionType)}
             />
           ))}

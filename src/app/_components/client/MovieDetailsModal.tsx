@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { X, ExternalLink } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { modalVariants } from '~/styles/component-styles'
 
 interface MovieDetails {
     id: number
@@ -65,56 +66,56 @@ export function MovieDetailsModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-gray bg-opacity-40 backdrop-blur-sm"
+                className={modalVariants.backdrop}
                 onClick={onClose}
             />
 
             {/* Modal */}
-            <div className="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className={modalVariants.container}>
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
+                    className={modalVariants.closeButton}
                 >
                     <X className="w-5 h-5" />
                 </button>
 
-                <div className="p-6">
+                <div className={modalVariants.content}>
                     {isLoading ? (
                         /* Skeleton loader */
                         <div className="animate-pulse">
-                            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4" />
-                            <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-                            <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-                            <div className="h-4 bg-gray-200 rounded w-2/3 mb-4" />
+                            <div className={modalVariants.skeletonTitle} />
+                            <div className={modalVariants.skeletonText} />
+                            <div className={modalVariants.skeletonText} />
+                            <div className={modalVariants.skeletonShort} />
                             <div className="flex gap-4 mb-4">
-                                <div className="h-6 bg-gray-200 rounded w-24" />
-                                <div className="h-6 bg-gray-200 rounded w-32" />
+                                <div className={modalVariants.skeletonChip} />
+                                <div className={modalVariants.skeletonChipLarge} />
                             </div>
                         </div>
                     ) : details ? (
                         /* Actual content */
                         <>
-                            <h2 className="text-2xl font-bold mb-4 text-black">{details.title}</h2>
+                            <h2 className={modalVariants.title}>{details.title}</h2>
 
                             <div className="space-y-4">
                                 <div>
-                                    <h3 className="font-semibold text-gray-700 mb-1">Overview</h3>
-                                    <p className="text-gray-600">{details.overview}</p>
+                                    <h3 className={modalVariants.sectionHeader}>Overview</h3>
+                                    <p className={modalVariants.bodyText}>{details.overview}</p>
                                 </div>
 
-                                <div className="flex gap-6">
+                                <div className={modalVariants.infoRow}>
                                     <div>
-                                        <span className="font-semibold text-gray-700">User Score: </span>
-                                        <span className="text-gray-600">
+                                        <span className={modalVariants.infoLabel}>User Score: </span>
+                                        <span className={modalVariants.infoValue}>
                                             {(details.vote_average * 10).toFixed(0)}%
                                         </span>
                                     </div>
 
                                     {details.origin_country.length > 0 && (
                                         <div>
-                                            <span className="font-semibold text-gray-700">Country: </span>
-                                            <span className="text-gray-600">
+                                            <span className={modalVariants.infoLabel}>Country: </span>
+                                            <span className={modalVariants.infoValue}>
                                                 {details.origin_country.join(', ')}
                                             </span>
                                         </div>
@@ -122,12 +123,12 @@ export function MovieDetailsModal({
                                 </div>
 
                                 {tmdbUrl && (
-                                    <div className="pt-4 border-t">
+                                    <div className={modalVariants.divider}>
                                         <a
                                             href={tmdbUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                                            className={modalVariants.link}
                                         >
                                             View on TMDB
                                             <ExternalLink className="w-4 h-4" />

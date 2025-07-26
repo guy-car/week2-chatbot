@@ -1,6 +1,6 @@
 # State Report: UI Architecture & Design System
 
-**Last Updated:** July 22, 2025
+**Last Updated:** July 25, 2025
 
 ## 1. Overview
 
@@ -735,7 +735,9 @@ hover: {
 ## 11. Related Documentation
 
 For specific implementation details, see:
+- **[Modal Design System Integration](./modal-design-system-integration-state-report.md)** - Comprehensive documentation of the modal design system integration with cohesive sidebar button aesthetic and zero hardcoded values
 - **[Custom Sidebar Implementation](./custom-sidebar-implementation.md)** - Detailed sidebar-specific implementation, quirks, and solutions
+- **[Movie Card Sidepanel Implementation](./movie-card-sidepanel-state-report.md)** - Comprehensive documentation of the movie card sidepanel system with absolute positioning strategy and fade animation implementation
 - **[Figma MCP Workflow](../figma-mcp-workflow.md)** - Process documentation for Figma integration and design system workflow
 
 ## 12. Design System Success Metrics ✅ **NEW SECTION**

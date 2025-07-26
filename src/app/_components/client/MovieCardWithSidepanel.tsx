@@ -82,6 +82,7 @@ export function MovieCardWithSidepanel({ movie, onMoreInfo }: MovieCardWithSidep
                 <MovieCardSidepanel
                     posterUrl={movie.poster_url}
                     movieTitle={movie.title}
+                    movieId={movie.id} // Add movieId prop
                     onAddToWatchlist={handleAddToWatchlist}
                     onMarkAsWatched={handleMarkAsWatched}
                     onMoreInfo={handleMoreInfo}
