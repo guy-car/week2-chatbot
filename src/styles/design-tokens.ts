@@ -167,6 +167,19 @@ export const layout = {
   chip: {
     height: '40px',
   },
+  
+  // Sidepanel dimensions and animation
+  sidepanel: {
+    panelWidth: '50px',
+    posterWidth: '150px',
+    containerWidthClosed: '150px',
+    containerWidthOpen: '200px',
+    slideOutDuration: '400ms',
+    panelBackground: 'rgba(0,229,255,0.15)', // Derived from cyan theme
+    iconSpacing: '12px',
+    panelPadding: '16px',
+    iconDisplaySize: '32px', // For consistent icon sizing
+  },
 };
 
  

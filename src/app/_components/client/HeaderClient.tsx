@@ -18,11 +18,9 @@ export function HeaderClient({ user }: HeaderClientProps) {
     
     // Get promoted icons if we're in the context
     let promotedIcons: string[] = []
-    try {
-        const { promotedIcons: icons } = usePromotedIcons()
-        promotedIcons = icons
-    } catch {
-        // Not in context, ignore
+    const promotedIconsContext = usePromotedIcons()
+    if (promotedIconsContext) {
+        promotedIcons = promotedIconsContext.promotedIcons
     }
 
     const renderAuthButtons = () => {
@@ -66,15 +64,17 @@ export function HeaderClient({ user }: HeaderClientProps) {
             {/* Promoted Icons */}
             {promotedIcons.length > 0 && (
                 <div className="flex items-center gap-4 mx-4">
-                    {promotedIcons.map((iconPath, index) => (
+                    {promotedIcons.map((iconPath) => (
                         <div 
                             key={iconPath}
                             className="relative"
                         >
-                            <img 
+                            <Image 
                                 src={iconPath} 
                                 alt="Promoted cinema equipment"
-                                className="w-12 h-12 object-contain"
+                                width={48}
+                                height={48}
+                                className="object-contain"
                                 style={{
                                     transform: 'scale(1.1)',
                                     filter: 'drop-shadow(0 0 8px rgba(253, 142, 44, 1)) drop-shadow(0 0 16px rgba(253, 142, 44, 0.8)) drop-shadow(0 0 24px rgba(253, 142, 44, 0.4))'

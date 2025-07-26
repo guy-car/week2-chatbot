@@ -28,6 +28,10 @@ Posters: THIS IS NEXT <---------------- ⭐️
 - Sometimes shows more than 3 posters
 - text box above poster (in chat view) sometimes crops info (too small)
 <---------------- ⭐️
+Icon color after clicked (wrong color - should no apply to "more info") remove animation --> [07.25.25-2300-movie-card-icon-click-animations]
+icon shift around when hovering (maybe tooltip issue)
+style toast notifications [07.25.25-2303-toast-design-system-integration]
+close sidebar when clicking outside [07.25.25-2303-sidebar-click-outside-close]
 <---------------- ⭐️
  
 Chat:

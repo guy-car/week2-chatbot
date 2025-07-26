@@ -2,7 +2,6 @@
 
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
-import { Loader2 } from "lucide-react";
 
 import { useState, useEffect, useRef } from 'react'
 import { MovieCardsSection } from './MovieCardsSection'
@@ -15,26 +14,9 @@ import { useRouter } from 'next/navigation'
 import { api } from "~/trpc/react"
 import { loadMoviesForChat } from 'tools/chat-store';
 import { cn } from "~/lib/utils"
-import { magicButtonStyles } from '~/components/ui/button-magic';
-import { buttonVariants, cardVariants, inputVariants, textVariants } from '~/styles/component-styles';
+import { buttonVariants, cardVariants, inputVariants } from '~/styles/component-styles';
 
-const THINKING_MESSAGES = [
-  "Consulting the cosmic catalog...",
-  "Weaving threads of story and mood...",
-  "The Genie ponders your desire...",
-  "Sifting through realms of possibility...",
-  "Divining the perfect tale for you...",
-  "The stars align to reveal...",
-  "Summoning stories from the ether...",
-  "Your wish echoes in the vault of dreams...",
-  "Casting nets into the sea of cinema...",
-  "The oracle of entertainment awakens...",
-  "Translating your mood into moving pictures...",
-  "The wheel of fortune spins...",
-  "Brewing a potion of perfect picks...",
-  "Your taste profile glimmers in my crystal ball...",
-  "The archives whisper their secrets..."
-];
+
 
 
 
@@ -66,7 +48,7 @@ export default function Chat({
 
   // ========== HOOKS SECTION START ==========
 
-  const { messages, input, status, error, handleInputChange, handleSubmit, stop, reload, append } = useChat({
+  const { messages, input, status, error, handleInputChange, handleSubmit, reload, append } = useChat({
     api: '/api/chat-tmdb-tool',
     body: {
     },

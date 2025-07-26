@@ -1,5 +1,5 @@
 // Import design tokens for centralized styling
-import { colors, spacing, borderRadius, shadows } from './design-tokens';
+import { colors, borderRadius, shadows, typography } from './design-tokens';
 
 // Utility function to combine classes
 export const cn = (...classes: (string | undefined | null | false)[]) => {
@@ -265,5 +265,234 @@ export const animationVariants = {
   
   hoverGlow: cn(
     'transition-shadow hover:shadow-glowCyan'
+  ),
+  
+  // Click animation effects
+  clickScale: cn(
+    'active:scale-95 transition-transform duration-150'
+  ),
+  
+  clickGlow: cn(
+    'active:shadow-[0px_0px_20px_0px_rgba(253,142,44,0.8)] transition-shadow duration-300'
+  ),
+  
+  // Success animation
+  successPulse: cn(
+    'animate-[success-pulse_600ms_ease-out]'
+  ),
+  
+  // Icon state transitions
+  iconActive: cn(
+    'filter brightness-0 invert brightness-200', // Make icons solid white when active
+    'transition-all duration-300'
+  ),
+  
+  iconInactive: cn(
+    'filter brightness-0 invert', // Original hollow white appearance
+    'transition-all duration-300'
+  ),
+};
+
+// Sidepanel variants using design tokens
+export const sidepanelVariants = {
+  // Parent container with glow effect
+  container: cn(
+    'relative transition-all duration-400',
+    'bg-[rgba(0,229,255,0.25)]', // Semi-transparent cyan background
+    'shadow-[0px_0px_22px_0px_rgba(0,229,255,0.99),0px_0px_35px_0px_rgba(0,229,255,0.25),0px_0px_12px_-4px_rgba(0,229,255,0.99)]', // Cyan glow effect
+    'rounded-[11px]',
+    'w-[150px]' // Fixed width - no expansion needed
+  ),
+  
+  // Movie poster container
+  poster: cn(
+    'relative overflow-hidden',
+    'bg-cover bg-center bg-no-repeat',
+    'rounded-[3px]'
+  ),
+  
+  // Sliding panel container
+  panel: cn(
+    'absolute top-0 left-[150px] h-full z-10', // Position to the right of the poster, above other content
+    'bg-[rgba(0,229,255,0.15)]', // Semi-transparent cyan background
+    'flex flex-col items-center justify-center',
+    'transition-all duration-300 ease-in-out',
+    'opacity-0 pointer-events-none', // Hidden by default, no pointer events
+    'group-hover:opacity-100 group-hover:pointer-events-auto', // Fade in on hover, enable pointer events
+    'w-[50px] rounded-tr-[11px] rounded-br-[11px]' // Fixed panel width with rounded right corners
+  ),
+  
+  // Icon container within panel
+  iconContainer: cn(
+    'flex flex-col items-center justify-center',
+    'space-y-3', // 12px spacing between icons
+    'p-4' // 16px padding
+  ),
+  
+  // Individual icon button
+  iconButton: cn(
+    'w-8 h-8', // 32px display size
+    'flex items-center justify-center',
+    'transition-all duration-200',
+    'hover:scale-110', // Slight scale on hover
+    'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]',
+    'cursor-pointer'
+  ),
+  
+  // Icon image styling
+  iconImage: cn(
+    'w-full h-full',
+    'object-contain', // Maintain aspect ratio
+    'filter brightness-0 invert', // Make icons white
+    'transition-all duration-200'
+  ),
+  
+  // Mobile overlay variant
+  mobileOverlay: cn(
+    'fixed inset-0 z-50',
+    'bg-black bg-opacity-50',
+    'flex items-center justify-center',
+    'p-4'
+  ),
+  
+  // Mobile panel variant (slides in from right)
+  mobilePanel: cn(
+    'relative h-full max-w-[200px]',
+    'bg-[rgba(0,229,255,0.15)]',
+    'flex flex-col items-center justify-center',
+    'transform translate-x-full',
+    'transition-transform duration-400 ease-in-out',
+    'group-hover:translate-x-0'
+  ),
+}; 
+
+// Modal variants using design tokens
+export const modalVariants = {
+  // Modal backdrop with design system overlay
+  backdrop: cn(
+    'absolute inset-0',
+    `bg-[${colors.system.pure.blackAlpha}]`,
+    'backdrop-blur-sm',
+    'transition-opacity duration-300'
+  ),
+  
+  // Modal container with cyan border and dark background
+  container: cn(
+    'relative',
+    'bg-[rgba(102, 174, 173, 0.15)]', // Dark teal background like sidebar button
+    `border border-[${colors.border.secondary}]`, // Cyan border
+    `rounded-[${borderRadius.md}]`, // 11px border radius
+    'max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto',
+    //'shadow-[0px_0px_22px_0px_rgba(0,229,255,0.99),0px_0px_35px_0px_rgba(0,229,255,0.25)]', // Cyan glow effect
+    'transition-all duration-300'
+  ),
+  
+  // Modal content area
+  content: cn(
+    'p-6',
+    'bg-[#292929b3]', // Dark background for content
+    `text-[${colors.text.primary}]` // Soft white text
+  ),
+  
+  // Close button with design system styling
+  closeButton: cn(
+    'absolute top-4 right-4 p-2',
+    'rounded-full',
+    `bg-[${colors.background.secondary}]`,
+    `border border-[${colors.border.subtle}]`,
+    `text-[${colors.text.primary}]`,
+    'hover:bg-[rgba(2,255,251,0.15)]', // Subtle cyan hover
+    'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]',
+    'transition-all duration-200'
+  ),
+  
+  // Modal title with design system typography
+  title: cn(
+    `text-[${typography.fontSize.xxl}] font-[${typography.fontWeight.bold}]`,
+    `text-[${colors.text.accent}]`, // Pure white for emphasis
+    'mb-4'
+  ),
+  
+  // Modal section headers
+  sectionHeader: cn(
+    `font-[${typography.fontWeight.medium}]`,
+    `text-[${colors.text.primary}]`, // Soft white
+    'mb-1'
+  ),
+  
+  // Modal body text
+  bodyText: cn(
+    `text-[${colors.text.secondary}]`, // Muted text
+    `text-[${typography.fontSize.md}]`
+  ),
+  
+  // Modal link styling
+  link: cn(
+    'inline-flex items-center gap-2',
+    `text-[${typography.fontSize.sm}]`,
+    `text-[${colors.primary}]`, // Cyan color for links
+    `hover:text-[${colors.glow.cyan}]`,
+    'transition-colors duration-200'
+  ),
+  
+  // Skeleton loader with design system colors
+  skeleton: cn(
+    'animate-pulse',
+    `bg-[${colors.system.neutral[400]}]`, // Use neutral gray for skeleton
+    'rounded'
+  ),
+  
+  // Skeleton text variants
+  skeletonTitle: cn(
+    'h-8 w-3/4 mb-4',
+    `bg-[${colors.system.neutral[400]}]`,
+    'rounded'
+  ),
+  
+  skeletonText: cn(
+    'h-4 w-full mb-2',
+    `bg-[${colors.system.neutral[400]}]`,
+    'rounded'
+  ),
+  
+  skeletonShort: cn(
+    'h-4 w-2/3 mb-4',
+    `bg-[${colors.system.neutral[400]}]`,
+    'rounded'
+  ),
+  
+  skeletonChip: cn(
+    'h-6 w-24',
+    `bg-[${colors.system.neutral[400]}]`,
+    'rounded'
+  ),
+  
+  skeletonChipLarge: cn(
+    'h-6 w-32',
+    `bg-[${colors.system.neutral[400]}]`,
+    'rounded'
+  ),
+  
+  // Divider with design system styling
+  divider: cn(
+    'pt-4 border-t',
+    `border-[${colors.border.subtle}]` // Subtle border
+  ),
+  
+  // Info row container
+  infoRow: cn(
+    'flex gap-6',
+    `text-[${colors.text.secondary}]` // Muted text for info
+  ),
+  
+  // Info label styling
+  infoLabel: cn(
+    `font-[${typography.fontWeight.medium}]`,
+    `text-[${colors.text.primary}]` // Soft white for labels
+  ),
+  
+  // Info value styling
+  infoValue: cn(
+    `text-[${colors.text.secondary}]` // Muted text for values
   ),
 }; 
