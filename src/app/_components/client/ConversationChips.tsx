@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, createContext, useContext } from 'react'
+import Image from 'next/image'
 import { type Chip } from '~/app/types'
 import { buttonVariants } from '~/styles/component-styles'
 
@@ -79,7 +80,7 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
 
     // Handle icon clicks
     const handleIconClick = (iconPath: string) => {
-        const newCount = Math.min((iconClickCounts[iconPath] || 0) + 1, 12)
+        const newCount = Math.min((iconClickCounts[iconPath] ?? 0) + 1, 12)
         
         setIconClickCounts(prev => ({
             ...prev,
@@ -117,7 +118,7 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
 
     // Calculate glow intensity (0 to 1) based on click count
     const getGlowIntensity = (iconPath: string) => {
-        const clicks = iconClickCounts[iconPath] || 0
+        const clicks = iconClickCounts[iconPath] ?? 0
         return clicks / 12 // 0 to 1 over 12 clicks
     }
 
@@ -127,7 +128,7 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
         const glowOpacity = intensity * 1.0 // Max opacity of 1.0 (full opacity)
         const glowSize = 8 + (intensity * 32) // Glow size from 8px to 40px
         const scale = 1 + (intensity * 0.3) // Scale from 1 to 1.3 (30% bigger when maxed)
-        const rotation = iconRotations[iconPath] || 0
+        const rotation = iconRotations[iconPath] ?? 0
         
         // Special animation for promoting icon
         if (promotingIcon === iconPath) {
@@ -152,7 +153,6 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
         return (
             <div className="mb-3 flex justify-evenly items-center">
                 {randomIcons.map((icon, index) => {
-                    const clickCount = iconClickCounts[icon] || 0
                     const isPromoting = promotingIcon === icon
                     
                     return (
@@ -170,10 +170,12 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
                             }}
                             onClick={() => !isPromoting && handleIconClick(icon)}
                         >
-                            <img 
+                            <Image 
                                 src={icon} 
                                 alt="Cinema equipment" 
-                                className="w-20 h-20 object-contain"
+                                width={80}
+                                height={80}
+                                className="object-contain"
                                 style={getIconStyles(icon)}
                             />
                         </div>

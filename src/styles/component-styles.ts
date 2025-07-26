@@ -1,5 +1,5 @@
 // Import design tokens for centralized styling
-import { colors, spacing, borderRadius, shadows } from './design-tokens';
+import { colors, borderRadius, shadows, layout } from './design-tokens';
 
 // Utility function to combine classes
 export const cn = (...classes: (string | undefined | null | false)[]) => {
@@ -265,5 +265,78 @@ export const animationVariants = {
   
   hoverGlow: cn(
     'transition-shadow hover:shadow-glowCyan'
+  ),
+};
+
+// Sidepanel variants using design tokens
+export const sidepanelVariants = {
+  // Parent container with glow effect
+  container: cn(
+    'relative overflow-hidden transition-all duration-400',
+    'bg-[rgba(0,229,255,0.25)]', // Semi-transparent cyan background
+    'shadow-[0px_0px_22px_0px_rgba(0,229,255,0.99),0px_0px_35px_0px_rgba(0,229,255,0.25),0px_0px_12px_-4px_rgba(0,229,255,0.99)]', // Cyan glow effect
+    'rounded-[11px]'
+  ),
+  
+  // Movie poster container
+  poster: cn(
+    'relative overflow-hidden',
+    'bg-cover bg-center bg-no-repeat',
+    'rounded-[3px]'
+  ),
+  
+  // Sliding panel container
+  panel: cn(
+    'absolute top-0 right-0 h-full',
+    'bg-[rgba(0,229,255,0.15)]', // Semi-transparent cyan background
+    'flex flex-col items-center justify-center',
+    'transition-transform duration-400 ease-in-out',
+    'transform translate-x-full', // Hidden by default
+    'group-hover:translate-x-0', // Slide out on hover
+    'md:group-hover:translate-x-0', // Desktop behavior
+    'max-md:group-hover:translate-x-0' // Mobile behavior (slides in from right)
+  ),
+  
+  // Icon container within panel
+  iconContainer: cn(
+    'flex flex-col items-center justify-center',
+    'space-y-3', // 12px spacing between icons
+    'p-4' // 16px padding
+  ),
+  
+  // Individual icon button
+  iconButton: cn(
+    'w-8 h-8', // 32px display size
+    'flex items-center justify-center',
+    'transition-all duration-200',
+    'hover:scale-110', // Slight scale on hover
+    'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]',
+    'cursor-pointer'
+  ),
+  
+  // Icon image styling
+  iconImage: cn(
+    'w-full h-full',
+    'object-contain', // Maintain aspect ratio
+    'filter brightness-0 invert', // Make icons white
+    'transition-all duration-200'
+  ),
+  
+  // Mobile overlay variant
+  mobileOverlay: cn(
+    'fixed inset-0 z-50',
+    'bg-black bg-opacity-50',
+    'flex items-center justify-center',
+    'p-4'
+  ),
+  
+  // Mobile panel variant (slides in from right)
+  mobilePanel: cn(
+    'relative h-full max-w-[200px]',
+    'bg-[rgba(0,229,255,0.15)]',
+    'flex flex-col items-center justify-center',
+    'transform translate-x-full',
+    'transition-transform duration-400 ease-in-out',
+    'group-hover:translate-x-0'
   ),
 }; 

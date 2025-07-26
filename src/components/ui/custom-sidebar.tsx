@@ -75,14 +75,6 @@ function SignOutButton({ icon, children, className }: SignOutButtonProps) {
 export default function CustomSidebar({ className, chats }: CustomSidebarProps) {
   const { isOpen } = useCustomSidebar()
 
-  const formatChatDate = (createdAt: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(new Date(createdAt));
-  };
-
   return (
     <div className={`fixed left-0 w-[293px] flex flex-col border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] bg-[#0A0A0B] z-50 transform transition-transform duration-300 ease-in-out ${className ?? ''}`} style={{
       top: 'calc(123px + 32px)',
