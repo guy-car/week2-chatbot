@@ -5,7 +5,7 @@ import { useMovieCollections } from '~/app/_services/useMovieCollections'
 import { useTasteProfile } from '~/app/_services/tasteProfile'
 import { MovieCardSidepanel } from './MovieCardSidepanel'
 
-interface MovieCardProps {
+interface MovieCardWithSidepanelProps {
     movie: {
         id: number
         title: string
@@ -16,7 +16,7 @@ interface MovieCardProps {
     onMoreInfo?: (movieId: number, mediaType: 'movie' | 'tv', title: string) => void
 }
 
-export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
+export function MovieCardWithSidepanel({ movie, onMoreInfo }: MovieCardWithSidepanelProps) {
     const { addLikedMovie, addDislikedMovie } = useTasteProfile();
     const { addToWatchlist, markAsWatched } = useMovieCollections();
     const year = movie.release_date?.substring(0, 4)
@@ -95,4 +95,4 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
             )}
         </div>
     )
-}
+} 

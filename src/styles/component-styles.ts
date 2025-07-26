@@ -275,7 +275,9 @@ export const sidepanelVariants = {
     'relative overflow-hidden transition-all duration-400',
     'bg-[rgba(0,229,255,0.25)]', // Semi-transparent cyan background
     'shadow-[0px_0px_22px_0px_rgba(0,229,255,0.99),0px_0px_35px_0px_rgba(0,229,255,0.25),0px_0px_12px_-4px_rgba(0,229,255,0.99)]', // Cyan glow effect
-    'rounded-[11px]'
+    'rounded-[11px]',
+    'w-[150px]', // Closed state width
+    'group-hover:w-[200px]' // Open state width (expands to accommodate panel)
   ),
   
   // Movie poster container
@@ -291,10 +293,9 @@ export const sidepanelVariants = {
     'bg-[rgba(0,229,255,0.15)]', // Semi-transparent cyan background
     'flex flex-col items-center justify-center',
     'transition-transform duration-400 ease-in-out',
-    'transform translate-x-full', // Hidden by default
-    'group-hover:translate-x-0', // Slide out on hover
-    'md:group-hover:translate-x-0', // Desktop behavior
-    'max-md:group-hover:translate-x-0' // Mobile behavior (slides in from right)
+    'transform translate-x-full', // Hidden by default (outside right edge)
+    'group-hover:translate-x-0', // Slide in from right on hover (extends to the right)
+    'w-[50px]' // Fixed panel width
   ),
   
   // Icon container within panel
