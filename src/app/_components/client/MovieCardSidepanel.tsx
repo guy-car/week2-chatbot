@@ -47,7 +47,20 @@ export function MovieCardSidepanel({
   };
 
   return (
-    <div className={`group ${sidepanelVariants.container} ${className ?? ''}`}>
+    <div 
+      className={`group ${sidepanelVariants.container} ${className ?? ''}`}
+      onMouseEnter={() => console.log('Mouse enter - container should expand')}
+      onMouseLeave={() => console.log('Mouse leave - container should shrink')}
+      style={{ width: '150px' }}
+      onMouseOver={(e) => {
+        console.log('Mouse over - setting width to 200px');
+        e.currentTarget.style.width = '200px';
+      }}
+      onMouseOut={(e) => {
+        console.log('Mouse out - setting width to 150px');
+        e.currentTarget.style.width = '150px';
+      }}
+    >
       {/* Movie Poster */}
       <div 
         className={sidepanelVariants.poster}
