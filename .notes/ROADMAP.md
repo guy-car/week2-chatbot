@@ -28,10 +28,8 @@ Posters: THIS IS NEXT <---------------- ⭐️
 - Sometimes shows more than 3 posters
 - text box above poster (in chat view) sometimes crops info (too small)
 <---------------- ⭐️
-Icon color after clicked (wrong color - should no apply to "more info") remove animation --> [07.25.25-2300-movie-card-icon-click-animations]
 icon shift around when hovering (maybe tooltip issue)
 style toast notifications [07.25.25-2303-toast-design-system-integration]
-close sidebar when clicking outside [07.25.25-2303-sidebar-click-outside-close]
 <---------------- ⭐️
 
 Chat history:
@@ -45,18 +43,10 @@ Chips:
 - improve look
 - make sure they display after first message ⭐️
 
-✅ Sidebar:
-- ✅ do we keep it?
-- ✅ needs to look nicer
-
 Misc.
 - Dark/light theme toggle
 - Delete individual chats
 - style toaster notifications to be more consistent with overall aesthetics
-
-UX:
-- Loading states during sign-in/chat creation
-- Error handling for failed auth/chat operations
 
 AI character:
 - too eager to give recommendations
