@@ -137,6 +137,22 @@ export const moviesRouter = createTRPCRouter({
             return { success: true };
         }),
 
+    removeFromHistory: protectedProcedure
+        .input(z.object({
+            movieId: z.string(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.delete(userMovies).where(
+                and(
+                    eq(userMovies.userId, ctx.user!.id),
+                    eq(userMovies.movieId, input.movieId),
+                    eq(userMovies.collectionType, 'history')
+                )
+            );
+
+            return { success: true };
+        }),
+
     getWatchlist: protectedProcedure
         .query(async ({ ctx }) => {
             return await ctx.db.query.userMovies.findMany({
