@@ -267,28 +267,12 @@ export const animationVariants = {
     'transition-shadow hover:shadow-glowCyan'
   ),
   
-  // Click animation effects
-  clickScale: cn(
-    'active:scale-95 transition-transform duration-150'
-  ),
-  
-  clickGlow: cn(
-    'active:shadow-[0px_0px_20px_0px_rgba(253,142,44,0.8)] transition-shadow duration-300'
-  ),
-  
-  // Success animation
-  successPulse: cn(
-    'animate-[success-pulse_600ms_ease-out]'
-  ),
-  
   // Icon state transitions
   iconActive: cn(
-    'filter brightness-0 invert brightness-200', // Make icons solid white when active
     'transition-all duration-300'
   ),
   
   iconInactive: cn(
-    'filter brightness-0 invert', // Original hollow white appearance
     'transition-all duration-300'
   ),
 };
@@ -335,7 +319,6 @@ export const sidepanelVariants = {
     'flex items-center justify-center',
     'transition-all duration-200',
     'hover:scale-110', // Slight scale on hover
-    'focus:outline-none focus:ring-2 focus:ring-[rgba(250,250,250,0.5)] focus:border-[#FAFAFA]',
     'cursor-pointer'
   ),
   
@@ -343,7 +326,6 @@ export const sidepanelVariants = {
   iconImage: cn(
     'w-full h-full',
     'object-contain', // Maintain aspect ratio
-    'filter brightness-0 invert', // Make icons white
     'transition-all duration-200'
   ),
   

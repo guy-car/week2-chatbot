@@ -79,7 +79,12 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+      const target = event.target as Element
+      
+      // Check if click is on the sidebar trigger button
+      const isTriggerButton = target?.closest('[data-sidebar="trigger"]')
+      
+      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(target) && !isTriggerButton) {
         closeSidebar()
       }
     }
