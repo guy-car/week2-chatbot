@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import { useRef, useEffect } from "react"
 import { buttonVariants } from "~/styles/component-styles"
 import RecentChatsSection from "~/app/_components/client/RecentChatsSection"
 import { useCustomSidebar } from "./custom-sidebar-context"
@@ -73,14 +74,35 @@ function SignOutButton({ icon, children, className }: SignOutButtonProps) {
 
 // Main Custom Sidebar Component
 export default function CustomSidebar({ className, chats }: CustomSidebarProps) {
-  const { isOpen } = useCustomSidebar()
+  const { isOpen, closeSidebar } = useCustomSidebar()
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        closeSidebar()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen, closeSidebar])
 
   return (
-    <div className={`fixed left-0 w-[293px] flex flex-col border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] bg-[#0A0A0B] z-50 transform transition-transform duration-300 ease-in-out ${className ?? ''}`} style={{
-      top: 'calc(123px + 32px)',
-      height: 'calc(100vh - 123px - 64px)',
-      transform: isOpen ? 'translateX(0)' : 'translateX(-100%)'
-    }}>
+    <div 
+      ref={sidebarRef}
+      className={`fixed left-0 w-[293px] flex flex-col border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] bg-[#0A0A0B] z-50 transform transition-transform duration-300 ease-in-out ${className ?? ''}`} 
+      style={{
+        top: 'calc(123px + 32px)',
+        height: 'calc(100vh - 123px - 64px)',
+        transform: isOpen ? 'translateX(0)' : 'translateX(-100%)'
+      }}
+    >
       {/* Navigation Buttons - Each as standalone button */}
       <div className="flex flex-col space-y-[21px] mb-0 pr-8 pt-8">
         <CustomSidebarButton 
