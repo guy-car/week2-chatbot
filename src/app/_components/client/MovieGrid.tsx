@@ -18,11 +18,15 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
     const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
     const [selectedMovieTitle, setSelectedMovieTitle] = useState('')
 
-    const { removeFromWatchlist, markAsWatched } = useMovieCollections();
+    const { removeFromWatchlist, removeFromHistory, markAsWatched } = useMovieCollections();
 
     const handleRemove = async (movieId: number) => {
         try {
-            await removeFromWatchlist(movieId);
+            if (variant === 'watchlist') {
+                await removeFromWatchlist(movieId);
+            } else {
+                await removeFromHistory(movieId);
+            }
             const movie = movies.find(m => m.id === movieId);
             toast.success(`Removed "${movie?.title}" from ${variant}`);
         } catch {

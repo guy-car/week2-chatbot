@@ -15,6 +15,11 @@ export const useMovieCollections = () => {
             void utils.movies.getWatchlist.invalidate();
         },
     });
+    const removeFromHistoryMutation = api.movies.removeFromHistory.useMutation({
+        onSuccess: () => {
+            void utils.movies.getWatchHistory.invalidate();
+        },
+    });
 
     // Watch history queries/mutations
     const watchHistory = api.movies.getWatchHistory.useQuery();
@@ -87,6 +92,12 @@ export const useMovieCollections = () => {
         });
     };
 
+    const removeFromHistory = async (movieId: number) => {
+        await removeFromHistoryMutation.mutateAsync({
+            movieId: movieId.toString(),
+        });
+    };
+
     return {
         watchlist: watchlist.data ?? [],
         watchHistory: watchHistory.data ?? [],
@@ -94,6 +105,7 @@ export const useMovieCollections = () => {
         addToWatchlist,
         markAsWatched,
         removeFromWatchlist,
+        removeFromHistory,
         isAddingToWatchlist: addToWatchlistMutation.isPending,
         isMarkingAsWatched: markAsWatchedMutation.isPending,
     };

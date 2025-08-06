@@ -33,6 +33,9 @@ icon shift around when hovering (maybe tooltip issue)
 style toast notifications [07.25.25-2303-toast-design-system-integration]
 close sidebar when clicking outside [07.25.25-2303-sidebar-click-outside-close]
 <---------------- ⭐️
+
+Chat history:
+- add ability to delete / rename chats in the sidebar (add pencil icon at end of recent chats button, on hover, that toggles "edit mode")
  
 Chat:
 - differentiate genie messages from user messages

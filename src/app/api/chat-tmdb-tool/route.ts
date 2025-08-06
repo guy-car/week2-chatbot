@@ -103,11 +103,21 @@ export async function POST(req: Request) {
     return id;
   };
 
+  // Construct system prompt with user context
+  const systemPrompt = tasteProfileSummary 
+    ? `${mediaLookupWithYear_2024_07_17_v3}
+
+USER CONTEXT:
+${tasteProfileSummary}
+
+Use this information to personalize your recommendations based on the user's taste preferences.`
+    : mediaLookupWithYear_2024_07_17_v3;
+
   const result = streamText({
     model: openai('gpt-4o'),
     temperature: 0.8,
     // Using basePrompt for now; see .docs/knowledge/chat-data-flow-state-report.md for rationale
-    system: mediaLookupWithYear_2024_07_17_v3,
+    system: systemPrompt,
     messages,
     toolCallStreaming: true,
     experimental_generateMessageId: loggingIdGen,
