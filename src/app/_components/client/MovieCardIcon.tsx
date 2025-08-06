@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Tooltip } from 'react-tooltip'
-import { sidepanelVariants, animationVariants } from '~/styles/component-styles'
+import { sidepanelVariants } from '~/styles/component-styles'
+import { MOVIE_CARD_ACTIONS } from './movie-card-icons'
+import { cn } from '~/lib/utils'
 import type { MovieCardActionType } from './movie-card-icons'
 
 interface MovieCardIconProps {
@@ -25,9 +27,8 @@ export function MovieCardIcon({
   const tooltipId = `movie-action-${actionType}-${movieId}`;
   const storageKey = `movie-${movieId}-${actionType}-clicked`;
   
-  // State for clicked status and animation
+  // State for clicked status
   const [isClicked, setIsClicked] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   // Load clicked state from localStorage on mount
   useEffect(() => {
@@ -37,23 +38,29 @@ export function MovieCardIcon({
     }
   }, [storageKey]);
 
-  const handleClick = async () => {
-    // Prevent multiple rapid clicks
-    if (isAnimating) return;
-    
-    setIsAnimating(true);
-    
-    // Mark as clicked and save to localStorage
-    setIsClicked(true);
-    localStorage.setItem(storageKey, 'true');
+  const handleClick = () => {
+    // Don't mark "More Info" as clicked since it shouldn't change appearance
+    if (actionType !== 'moreInfo') {
+      setIsClicked(true);
+      localStorage.setItem(storageKey, 'true');
+    }
     
     // Call the original onClick handler
     onClick();
+  };
+
+  // Function to get the appropriate icon path based on state and action type
+  const getIconPath = () => {
+    const action = MOVIE_CARD_ACTIONS.find(a => a.actionName === actionType);
+    if (!action) return iconPath;
     
-    // Reset animation state after animation completes
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 600); // Match animation duration
+    // For "More Info", always return the default icon
+    if (actionType === 'moreInfo') {
+      return action.iconPath;
+    }
+    
+    // For other actions, return filled icon if clicked, default icon otherwise
+    return isClicked ? action.filledIconPath : action.iconPath;
   };
 
   return (
@@ -61,9 +68,7 @@ export function MovieCardIcon({
       <button
         className={cn(
           sidepanelVariants.iconButton,
-          animationVariants.clickScale,
-          animationVariants.clickGlow,
-          isAnimating && animationVariants.successPulse,
+          'focus:outline-none',
           className ?? ''
         )}
         onClick={handleClick}
@@ -71,15 +76,11 @@ export function MovieCardIcon({
         data-tooltip-content={tooltipText}
         aria-label={tooltipText}
         type="button"
-        disabled={isAnimating}
       >
         <img
-          src={iconPath}
+          src={getIconPath()}
           alt={tooltipText}
-          className={cn(
-            sidepanelVariants.iconImage,
-            isClicked ? animationVariants.iconActive : animationVariants.iconInactive
-          )}
+          className={sidepanelVariants.iconImage}
           style={{
             width: '32px',
             height: '32px',
@@ -96,9 +97,4 @@ export function MovieCardIcon({
       />
     </>
   );
-}
-
-// Helper function to combine classes (if not already imported)
-const cn = (...classes: (string | undefined | null | false)[]) => {
-  return classes.filter(Boolean).join(' ');
-}; 
+} 
