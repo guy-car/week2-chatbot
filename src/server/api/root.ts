@@ -2,6 +2,7 @@ import { chatRouter } from "~/server/api/routers/chats";
 import { preferencesRouter } from "~/server/api/routers/preferences";
 import { moviesRouter } from "~/server/api/routers/movies";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { enrichmentRouter } from "~/server/api/routers/enrichment";
 
 /**
  * This is the primary router for your server.
@@ -11,7 +12,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 export const appRouter = createTRPCRouter({
   chat: chatRouter,
   preferences: preferencesRouter,
-  movies: moviesRouter
+  movies: moviesRouter,
+  enrichment: enrichmentRouter,
 });
 
 // export type definition of API
