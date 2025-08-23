@@ -4,6 +4,8 @@ import { toast } from 'react-hot-toast'
 import { useMovieCollections } from '~/app/_services/useMovieCollections'
 import { useTasteProfile } from '~/app/_services/tasteProfile'
 import { MovieCardSidepanel } from './MovieCardSidepanel'
+import { useEffect, useRef, useState } from 'react'
+import { api } from '~/trpc/react'
 
 interface MovieCardProps {
     movie: {
@@ -71,8 +73,38 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
         }
     }
 
+    // Enrichment trigger (poster visibility)
+    const posterContainerRef = useRef<HTMLDivElement | null>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        if (!posterContainerRef.current) return;
+        let observed = true;
+        const el = posterContainerRef.current;
+        const io = new IntersectionObserver((entries) => {
+            const entry = entries[0];
+            if (entry?.isIntersecting) {
+                setIsVisible(true);
+                if (observed) {
+                    io.unobserve(el);
+                    observed = false;
+                }
+            }
+        }, { root: null, threshold: 0.2 });
+        io.observe(el);
+        return () => {
+            if (observed) io.unobserve(el);
+            io.disconnect();
+        };
+    }, []);
+
+    api.enrichment.enrich.useQuery(
+        { type: movie.media_type, id: movie.id },
+        { enabled: isVisible, staleTime: 1000 * 60 * 10 }
+    );
+
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center" ref={posterContainerRef}>
             <div className="text-center mb-2 w-40 px-2 h-12 flex items-center justify-center">
                 <h3 className="font-semibold text-gray-100 line-clamp-2">
                     {movie.title}{year && ` (${year})`}
