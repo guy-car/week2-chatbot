@@ -358,6 +358,26 @@ export const modalVariants = {
     'transition-opacity duration-300'
   ),
   
+  // Enhanced container with cyan glow and subtle gradients (for modal sandbox)
+  containerGlow: cn(
+    'relative',
+    'bg-[rgba(0,229,255,0.05)]',
+    `rounded-[${borderRadius.md}]`,
+    // Cyan glow matching Figma exactly
+    'shadow-[0px_0px_22px_0px_rgba(2,255,251,0.81)]'
+  ),
+  
+  // Container with dual gradient overlay (from Figma)
+  containerGradient: cn(
+    'relative',
+    'bg-[rgba(0,229,255,0.05)]',
+    `rounded-[${borderRadius.md}]`,
+    // Dual gradient overlay from Figma
+    'bg-gradient-to-br from-transparent via-transparent to-[rgba(2,255,251,0.21)]',
+    'before:absolute before:inset-0 before:rounded-[11px] before:bg-gradient-to-br before:from-transparent before:via-transparent before:to-[rgba(2,255,251,0.227)] before:opacity-50',
+    'shadow-[0px_0px_22px_0px_rgba(2,255,251,0.81)]'
+  ),
+  
   // Modal container with cyan border and dark background
   container: cn(
     'relative',
@@ -374,6 +394,64 @@ export const modalVariants = {
     'p-6',
     'bg-[#292929b3]', // Dark background for content
     `text-[${colors.text.primary}]` // Soft white text
+  ),
+  
+  // Poster container used in modal sandbox
+  poster: cn(
+    'w-[188px] h-[282px]',
+    'rounded-[3px] overflow-hidden',
+    'bg-black/30',
+    'shadow-md'
+  ),
+  
+  // Trailer frame area with subtle glow
+  trailerFrame: cn(
+    'rounded-[11px] overflow-hidden',
+    'bg-black/50',
+    'border border-[rgba(244,243,241,0.05)]',
+    'shadow-[0px_0px_18px_-2px_rgba(0,229,255,0.75)]'
+  ),
+  
+  // Header row (title + badges)
+  headerRow: cn(
+    'flex items-center gap-4',
+    `text-[${colors.text.accent}]`,
+    `font-[${typography.fontWeight.bold}]`,
+    `text-[${typography.fontSize.xxl}]`
+  ),
+  
+  // Meta line under trailer
+  metaLine: cn(
+    'italic text-sm',
+    `text-[${colors.text.secondary}]`
+  ),
+  
+  // Right action rail - Updated to match poster hover panel styling
+  actionRail: cn(
+    'flex flex-col items-center justify-start',
+    'w-[80px] py-4 h-full', // Wider width for better proportions
+    'bg-[rgba(0,229,255,0.15)]', // Same glass-like background as poster panel
+    'border border-[rgba(0,229,255,0.99)]', // Cyan border like poster panel
+    'rounded-tl-[11px] rounded-bl-[11px]', // Rounded left corners only, extend to right edge
+    'shadow-[0px_0px_22px_0px_rgba(0,229,255,0.99),0px_0px_35px_0px_rgba(0,229,255,0.25),0px_0px_12px_-4px_rgba(0,229,255,0.99)]' // Same cyan glow as poster panel
+  ),
+  actionRailSection: cn(
+    'flex flex-col items-center text-center gap-3 py-4', // More padding for better spacing
+    `text-[${colors.text.primary}]`
+  ),
+  actionRailSeparator: cn(
+    'w-8 h-px my-2', // Wider separator for better proportions
+    'bg-[rgba(0,229,255,0.5)]' // Cyan separator
+  ),
+  
+  // Provider card
+  providerCard: cn(
+    'mt-3 p-5 w-full min-h-[64px]',
+    'bg-[rgba(2,255,251,0.07)]',
+    `border border-[${colors.border.secondary}]`,
+    `rounded-[${borderRadius.lg}]`,
+    // Remove orange glow; use subtle cyan shadow
+    'shadow-[0px_0px_14px_-2px_rgba(0,229,255,0.35)]'
   ),
   
   // Close button with design system styling

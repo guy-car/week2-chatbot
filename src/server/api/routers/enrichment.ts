@@ -6,7 +6,18 @@ export type EnrichOutput = {
   ratings?: { rottenTomatoes?: string; metacritic?: string; imdb?: string },
   watch?: { country: 'US'; link?: string; flatrate?: { id: number; name: string; logoPath: string }[] },
   duration?: number, // minutes
-  trailer?: { site: string; key: string; name: string; url: string },
+  trailer?: { 
+    site: string; 
+    key: string; 
+    name: string; 
+    url: string;
+    thumbnails: {
+      default: string;    // 120x90
+      medium: string;     // 320x180
+      high: string;       // 480x360
+    };
+    embedUrl: string;     // YouTube embed URL
+  },
   genres?: string[],
   director?: string,
 };
@@ -235,15 +246,41 @@ async function fetchDetails(type: 'movie' | 'tv', id: number, capMs: number): Pr
   }
 }
 
-export function pickBestTrailer(videos?: TMDBVideosResponse['results']): { site: string; key: string; name: string; url: string } | undefined {
+export function pickBestTrailer(videos?: TMDBVideosResponse['results']): { 
+  site: string; 
+  key: string; 
+  name: string; 
+  url: string;
+  thumbnails: {
+    default: string;
+    medium: string;
+    high: string;
+  };
+  embedUrl: string;
+} | undefined {
   if (!videos || videos.length === 0) return undefined;
   const youtubeTrailers = videos.filter(v => v.site === 'YouTube' && v.type === 'Trailer');
   const official = youtubeTrailers.find(v => v.official);
   const chosen = official ?? youtubeTrailers[0] ?? videos[0];
   if (!chosen) return undefined;
-  const url = chosen.site === 'YouTube' && chosen.key ? `https://www.youtube.com/watch?v=${chosen.key}` : undefined;
-  if (!url) return undefined;
-  return { site: chosen.site, key: chosen.key, name: chosen.name, url };
+  
+  if (chosen.site === 'YouTube' && chosen.key) {
+    const key = chosen.key;
+    return {
+      site: chosen.site,
+      key: key,
+      name: chosen.name,
+      url: `https://www.youtube.com/watch?v=${key}`,
+      thumbnails: {
+        default: `https://img.youtube.com/vi/${key}/default.jpg`,
+        medium: `https://img.youtube.com/vi/${key}/mqdefault.jpg`,
+        high: `https://img.youtube.com/vi/${key}/hqdefault.jpg`
+      },
+      embedUrl: `https://www.youtube.com/embed/${key}`
+    };
+  }
+  
+  return undefined;
 }
 
 async function fetchTrailer(type: 'movie' | 'tv', id: number, capMs: number): Promise<EnrichOutput['trailer'] | undefined> {
