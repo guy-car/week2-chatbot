@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals
 // Mock DB schema symbols used by the route
 jest.unstable_mockModule('~/server/db/schema', () => ({
   chats: {},
+  messages: {},
 }))
 
 // Mock DB client with minimal chaining used by the route
@@ -35,6 +36,25 @@ jest.unstable_mockModule('tools/chat-store', () => ({
   // named exports
   saveChat: mockSaveChat,
   loadChat: mockLoadChat,
+}))
+
+// Mock auth and headers to avoid real session/taste profile
+jest.unstable_mockModule('~/lib/auth', () => ({
+  auth: { api: { getSession: async () => null } },
+}))
+jest.unstable_mockModule('next/headers', () => ({
+  headers: async () => ({}),
+}))
+
+// Mock recommendations + blocked list services
+const mockListRecs = jest.fn(async () => [])
+const mockAddRec = jest.fn(async () => undefined)
+jest.unstable_mockModule('~/server/db/chat-recommendations', () => ({
+  listChatRecommendations: mockListRecs,
+  addChatRecommendation: mockAddRec,
+}))
+jest.unstable_mockModule('~/server/services/blocked-list', () => ({
+  getUserBlockedList: async () => [],
 }))
 
 // After mocks, import the route under test
