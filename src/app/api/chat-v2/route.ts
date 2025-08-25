@@ -19,11 +19,17 @@ export const maxDuration = 30;
 // Shared planning instruction (Structured Outputs via json_schema)
 const planInstruction = `You are planning recommendations. Use INPUT as constraints.
 
+INPUT fields:
+- blocked: items to avoid (titles/years already suggested or on user lists)
+- tasteProfileSummary: concise summary of user's tastes
+- userRequest: the latest user request in natural language; tailor genres, tone, era, and specificity to this
+
 Output format (STRICT): JSON only. No prose. No markdown. No code fences. Must match exactly:
 {"intro":"string (<=160 chars)","picks":[{"title":"string","year":1234,"reason":"string"}]}
 
 Rules:
-- you MUST Avoid any items present in INPUT.blocked by title and year intent
+- you MUST avoid any items present in INPUT.blocked by title and year intent
+- you MUST honor INPUT.userRequest (topic/genre/constraints); do not ignore it
 - up to 3 picks maximum
 - title: exact canonical title (no quotes, no year in title)
 - year: 4-digit number only
@@ -69,6 +75,7 @@ Clarifications:
 Constraints:
 - No tool/metadata chatter — surface only what’s relevant to the user’s query.
 - Do not show your reasoning steps — just deliver the polished answer.
+- Do not use markdown or special formatting: no italics, asterisks, or quotes around titles. Write titles in plain text.
 
 ---
 
@@ -245,8 +252,8 @@ USER: "I liked Drive and Nightcrawler."
       ...userBlocked,
     ];
 
-    // use shared planInstruction
-    const planInput = { blocked, tasteProfileSummary };
+    // use shared planInstruction and include the user's latest request for steering
+    const planInput = { blocked, tasteProfileSummary, userRequest: lastUser.content };
 
     const _tplan0 = Date.now();
     const planResponse = await openai.responses.create({
@@ -377,11 +384,30 @@ USER: "I liked Drive and Nightcrawler."
 
   // Mode A: prefer streaming conversational text
   console.log('[FLOW] MODE A responding (stream)');
+  // Inject taste profile summary when available for conversational context
+  let modeATasteProfileSummary = '';
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (session?.user?.id) {
+      const profile = await tasteProfileService.getProfileForChat(session.user.id, db);
+      modeATasteProfileSummary = tasteProfileService.generateSummary(profile).slice(0, 600);
+    }
+  } catch {
+    // proceed without taste profile
+  }
+
+  const systemMessages: Array<{ role: 'system'; content: string }> = [
+    { role: 'system', content: modeAInstruction }
+  ];
+  if (modeATasteProfileSummary) {
+    systemMessages.push({ role: 'system', content: `User taste profile: ${modeATasteProfileSummary}` });
+  }
+
   // Use AI SDK streaming instead of broken OpenAI streaming
   const result = streamText({
     model: aiSDKOpenAI('chatgpt-4o-latest'),
     messages: [
-      { role: 'system', content: modeAInstruction },
+      ...systemMessages,
       { role: 'user', content: lastUser.content }
     ],
     temperature: 0.8,
