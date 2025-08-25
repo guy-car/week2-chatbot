@@ -5,8 +5,10 @@ import { chats, messages as messagesTable } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { saveChat, loadChat } from "tools/chat-store";
 import { type Message } from 'ai';
+import { streamText } from 'ai';
+import { openai as aiSDKOpenAI } from '@ai-sdk/openai';
 import { DecideModeSchema, PlanPicksOutputSchema, type MovieData } from '~/app/types';
-import { tasteProfileServerService } from "~/server/services/taste-profile";
+import { tasteProfileService } from "~/app/_services/tasteProfile";
 import { listChatRecommendations, addChatRecommendation } from "~/server/db/chat-recommendations";
 import { getUserBlockedList } from "~/server/services/blocked-list";
 import { lookupBestByTitleYear } from "~/server/services/tmdb";
@@ -218,8 +220,8 @@ USER: "I liked Drive and Nightcrawler."
       const _tp0 = Date.now();
       const session = await auth.api.getSession({ headers: await headers() });
       if (session?.user?.id) {
-        const profile = await tasteProfileServerService.getProfileForChat(session.user.id, db);
-        tasteProfileSummary = tasteProfileServerService.generateSummary(profile).slice(0, 600);
+        const profile = await tasteProfileService.getProfileForChat(session.user.id, db);
+        tasteProfileSummary = tasteProfileService.generateSummary(profile).slice(0, 600);
       }
       t_read_profile = Date.now() - _tp0;
     } catch {
@@ -248,7 +250,7 @@ USER: "I liked Drive and Nightcrawler."
 
     const _tplan0 = Date.now();
     const planResponse = await openai.responses.create({
-      model: 'gpt-5',
+      model: 'gpt-5-mini-2025-08-07',
       input: [
         { role: 'developer', content: [{ type: 'input_text', text: planInstruction }] },
         { role: 'user', content: [{ type: 'input_text', text: `INPUT:\n${JSON.stringify(planInput)}` }] },
@@ -375,264 +377,19 @@ USER: "I liked Drive and Nightcrawler."
 
   // Mode A: prefer streaming conversational text
   console.log('[FLOW] MODE A responding (stream)');
-  const aStream = openai.responses.stream({
-    model: 'gpt-5-chat-latest',
-    input: [
-      { role: 'developer', content: [{ type: 'input_text', text: modeAInstruction }] },
-      { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] }
+  // Use AI SDK streaming instead of broken OpenAI streaming
+  const result = streamText({
+    model: aiSDKOpenAI('chatgpt-4o-latest'),
+    messages: [
+      { role: 'system', content: modeAInstruction },
+      { role: 'user', content: lastUser.content }
     ],
-    text: { verbosity: 'medium'},
-    ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
+    temperature: 0.8,
   });
   const streamStartedAt = Date.now();
   console.log('[FLOW] A stream start', new Date(streamStartedAt).toISOString());
 
-  if (hasToReadableStream(aStream)) {
-    const finalP = getFinalResponsePromise(aStream);
-    if (finalP) {
-      finalP.then(async (final) => {
-        const outputText = getResponseText(final);
-        const responseId = getResponseId(final);
-        const userMsg: Message = { id: lastUser.id, role: 'user', content: lastUser.content } as Message;
-        const assistantMsg: Message = { id: `asst_${Date.now()}`, role: 'assistant', content: outputText } as Message;
-        const w0 = Date.now();
-        await saveChat({ id: chatId, messages: [...previousMessages, userMsg, assistantMsg] });
-        if (responseId) {
-          await db.update(chats).set({ lastResponseId: responseId }).where(eq(chats.id, chatId));
-        }
-        const w1 = Date.now();
-        const endAt = Date.now();
-        try {
-          const MAG = '\x1b[35m';
-          const CYA = '\x1b[36m';
-          const RES = '\x1b[0m';
-          const total = endAt - startedAt;
-          const t_stream = endAt - streamStartedAt;
-          const t_db_writes = w1 - w0;
-          const preview = (outputText ?? '').slice(0, 300);
-          const pct = (ms: number) => (total > 0 ? Math.round((ms / total) * 1000) / 10 : 0);
-          console.log(`${MAG}───────────────── TIMINGS (Mode A Stream) ─────────${RES}`);
-          console.log(`${CYA}total${RES}`, `${total} ms`);
-          console.log(`${CYA}decide_mode${RES}`, `${t_decide_mode} ms (${pct(t_decide_mode)}%)`);
-          console.log(`${CYA}stream_duration${RES}`, `${t_stream} ms (${pct(t_stream)}%)`);
-          console.log(`${CYA}db_writes${RES}`, `${t_db_writes} ms (${pct(t_db_writes)}%)`);
-          console.log(`${CYA}response_preview${RES}`, preview);
-          console.log(`${MAG}────────────────────────────────────────────────────${RES}`);
-        } catch {}
-        console.log('[FLOW] A stream end', { ms: endAt - streamStartedAt, responseId, length: outputText?.length ?? 0 });
-      }).catch((e) => {
-        console.warn('[FLOW] A stream finalize error', e);
-      });
-    }
-
-    return new Response(aStream.toReadableStream(), {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache',
-      }
-    });
-  }
-
-  // Fallback to non-streaming if stream interface unavailable
-  const aRes = await openai.responses.create({
-    model: 'gpt-5',
-    input: [
-      { role: 'developer', content: [{ type: 'input_text', text: modeAInstruction }] },
-      { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] }
-    ],
-    text: { verbosity: 'low' },
-    ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
-  });
-  const outputText: string = getResponseText(aRes);
-  const responseId: string | undefined = getResponseId(aRes);
-  // If A produced empty text, treat as misclassification and fall back to planning (B)
-  if (!outputText || outputText.trim().length === 0) {
-    console.log('[FLOW] A produced empty text → falling back to B planning');
-    // Re-run logic as if mode B
-    // Gather inputs: tasteProfile, blocked (chat + user lists)
-    let tasteProfileSummary = '';
-    try {
-      const session = await auth.api.getSession({ headers: await headers() });
-      if (session?.user?.id) {
-        const profile = await tasteProfileServerService.getProfileForChat(session.user.id, db);
-        tasteProfileSummary = tasteProfileServerService.generateSummary(profile).slice(0, 600);
-      }
-    } catch {
-      console.warn('[FLOW] tasteProfile error, continuing without');
-    }
-
-    const chatBlocked = await listChatRecommendations(chatId);
-    let userBlocked: { id_tmdb: number; media_type: 'movie'|'tv'; title: string; year: number }[] = [];
-    try {
-      const session = await auth.api.getSession({ headers: await headers() });
-      if (session?.user?.id) {
-        userBlocked = await getUserBlockedList(session.user.id);
-      }
-    } catch {}
-
-    const blocked = [
-      ...chatBlocked.map(b => ({ id_tmdb: b.id_tmdb, media_type: b.media_type, title: b.title, year: b.year })),
-      ...userBlocked,
-    ];
-
-    // use shared planInstruction
-    const planInput = { blocked, tasteProfileSummary };
-    const planResponse = await openai.responses.create({
-      model: 'gpt-5-mini-2025-08-07',
-      input: [
-        { role: 'developer', content: [{ type: 'input_text', text: planInstruction }] },
-        { role: 'user', content: [{ type: 'input_text', text: `INPUT:\n${JSON.stringify(planInput)}` }] },
-      ],
-      reasoning: { effort: 'low' },
-      text: {
-        verbosity: 'low',
-        format: {
-          type: 'json_schema',
-          name: 'plan_picks',
-          schema: {
-            type: 'object', additionalProperties: false,
-            properties: {
-              intro: { type: 'string' },
-              picks: { type: 'array', minItems: 1, maxItems: 3, items: {
-                type: 'object', additionalProperties: false,
-                properties: { title: { type: 'string' }, year: { type: 'number' }, reason: { type: 'string' } },
-                required: ['title','year','reason']
-              } }
-            },
-            required: ['intro','picks']
-          },
-          strict: true,
-        }
-      },
-      ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
-    });
-    // Minimal safe debug (no any-casts)
-    try {
-      const CYAN = '\x1b[36m';
-      const RESET = '\x1b[0m';
-      console.log(`${CYAN}✂️  [PLAN_OUTPUT_TEXT_LEN]${RESET}`, getResponseText(planResponse).length);
-      const parsed = getResponseParsed(planResponse);
-      console.log(`${CYAN}🧾 [PLAN_OUTPUT_PARSED]${RESET}`, parsed ? JSON.stringify(parsed).slice(0, 600) : 'none');
-    } catch (e) {
-      console.log('⚠️ [PLAN_DEBUG_LOG_ERROR]', e);
-    }
-    const planText: string = getResponseText(planResponse);
-    let intro = '';
-    let picks: { title: string; year: number; reason: string }[] = [];
-    try {
-      const raw = getResponseParsed(planResponse);
-      let candidate: unknown = raw;
-      if (!candidate && planText) {
-        candidate = JSON.parse(planText) as unknown;
-      }
-      const validated = PlanPicksOutputSchema.parse(candidate);
-      intro = validated.intro;
-      picks = validated.picks.slice(0, 3);
-    } catch {
-      console.warn('[FLOW] ❌ plan_picks parse/validate failed, returning no text');
-      const dbg = planText.slice(0, 1200);
-      return new Response(JSON.stringify({ text: '', mode: 'B' as const, debug: { raw: dbg } }), { headers: { 'Content-Type': 'application/json' } });
-    }
-
-    // Pretty CLI log of planned intro and picks (fallback path)
-    try {
-      const DIV = '\x1b[35m' + '────────────────────────────────────────────────' + '\x1b[0m';
-      const LABEL = (text: string) => `\x1b[36m${text}\x1b[0m`;
-      console.log(DIV);
-      console.log(LABEL('general intro'), intro);
-      picks.forEach((p, i) => {
-        const suffix = String.fromCharCode(65 + i);
-        console.log(LABEL(`title ${suffix}`), p.title);
-        console.log(LABEL(`year ${suffix}`), p.year);
-        console.log(LABEL(`reason ${suffix}`), p.reason);
-      });
-      console.log(DIV);
-    } catch {}
-
-    const blockedKey = new Set(blocked.map(b => `${b.media_type}:${b.id_tmdb}`));
-    const _ttmdbF0 = Date.now();
-    const perPickTimingsF: Array<{ title: string; year: number; ms: number; found: boolean }> = [];
-    const lookupResultsF = await Promise.all(picks.map(async (p) => {
-      const s = Date.now();
-      const found = await lookupBestByTitleYear(p.title, p.year);
-      const ms = Date.now() - s;
-      perPickTimingsF.push({ title: p.title, year: p.year, ms, found: Boolean(found) });
-      return found;
-    }));
-    const accepted: MovieData[] = [];
-    for (let i = 0; i < lookupResultsF.length; i++) {
-      const found = lookupResultsF[i];
-      const p = picks[i]!;
-      if (!found) continue;
-      const key = `${found.media_type}:${found.id}`;
-      if (blockedKey.has(key)) continue;
-      accepted.push(found);
-      await addChatRecommendation({ chatId, id_tmdb: found.id, media_type: found.media_type, title: found.title, year: Number((found.release_date ?? '').slice(0,4)) || p.year });
-      blockedKey.add(key);
-    }
-    const _twF0 = Date.now();
-    const asstId = `asst_${Date.now()}`;
-    await db.insert(messagesTable).values({ id: asstId, chatId, role: 'assistant', content: intro, toolResults: accepted });
-    const planRespIdB = getResponseId(planResponse);
-    if (planRespIdB) {
-      await db.update(chats).set({ lastResponseId: planRespIdB }).where(eq(chats.id, chatId));
-    }
-    const elapsedB = Date.now() - startedAt;
-    try {
-      const MAG = '\x1b[35m';
-      const CYA = '\x1b[36m';
-      const YEL = '\x1b[33m';
-      const RES = '\x1b[0m';
-      const pct = (ms: number) => (elapsedB > 0 ? Math.round((ms / elapsedB) * 1000) / 10 : 0);
-      const t_tmdb_lookups_totalF = Date.now() - _ttmdbF0;
-      const t_db_writesF = Date.now() - _twF0;
-      console.log(`${MAG}────────────── TIMINGS (Mode B Fallback) ───────────${RES}`);
-      console.log(`${CYA}total${RES}`, `${elapsedB} ms`);
-      console.log(`${CYA}tmdb_lookups_total${RES}`, `${t_tmdb_lookups_totalF} ms (${pct(t_tmdb_lookups_totalF)}%)`);
-      perPickTimingsF.forEach((r, i) => {
-        const suf = String.fromCharCode(65 + i);
-        console.log(`${YEL}  tmdb_${suf}${RES}`, `${r.ms} ms`, r.found ? 'found' : 'miss', '-', r.title, r.year);
-      });
-      console.log(`${CYA}db_writes${RES}`, `${t_db_writesF} ms (${pct(t_db_writesF)}%)`);
-      console.log(`${MAG}────────────────────────────────────────────────────${RES}`);
-    } catch {}
-    console.log('[FLOW] chat-v2 end (fallback to mode B planned)', { ms: elapsedB, picks: accepted.length });
-    return new Response(JSON.stringify({ text: intro, mode: 'B' as const, picks: accepted }), { headers: { 'Content-Type': 'application/json' } });
-  }
-
-  // Persist messages (Mode A only: assistant text)
-  const userMsg: Message = { id: lastUser.id, role: 'user', content: lastUser.content } as Message;
-  const assistantMsg: Message = { id: `asst_${Date.now()}`, role: 'assistant', content: outputText } as Message;
-  const w0 = Date.now();
-  await saveChat({ id: chatId, messages: [...previousMessages, userMsg, assistantMsg] });
-
-  if (responseId) {
-    await db.update(chats).set({ lastResponseId: responseId }).where(eq(chats.id, chatId));
-  }
-
-  const w1 = Date.now();
-  const elapsed = Date.now() - startedAt;
-  try {
-    const MAG = '\x1b[35m';
-    const CYA = '\x1b[36m';
-    const RES = '\x1b[0m';
-    const t_db_writes = w1 - w0;
-    const t_text_total = Math.max(0, elapsed - t_decide_mode - t_db_writes);
-    const preview = (outputText ?? '').slice(0, 300);
-    const pct = (ms: number) => (elapsed > 0 ? Math.round((ms / elapsed) * 1000) / 10 : 0);
-    console.log(`${MAG}────────────── TIMINGS (Mode A Non-Stream) ───────────${RES}`);
-    console.log(`${CYA}total${RES}`, `${elapsed} ms`);
-    console.log(`${CYA}decide_mode${RES}`, `${t_decide_mode} ms (${pct(t_decide_mode)}%)`);
-    console.log(`${CYA}text_total${RES}`, `${t_text_total} ms (${pct(t_text_total)}%)`);
-    console.log(`${CYA}db_writes${RES}`, `${t_db_writes} ms (${pct(t_db_writes)}%)`);
-    console.log(`${CYA}response_preview${RES}`, preview);
-    console.log(`${MAG}────────────────────────────────────────────────────${RES}`);
-  } catch {}
-  console.log('[FLOW] chat-v2 end (Mode A)', { ms: elapsed, responseId, mode: 'A' });
-
-  return new Response(JSON.stringify({ text: outputText, mode: 'A' as const }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+  // Return the streaming response in the format the AI SDK expects
+  return result.toDataStreamResponse();
 }
-
 
