@@ -8,6 +8,13 @@
       "when": 1752592770780,
       "tag": "0000_initial-schema-and-rls",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756078763326,
+      "tag": "0001_common_stick",
+      "breakpoints": true
     }
   ]
 }

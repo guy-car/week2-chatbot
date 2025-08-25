@@ -48,8 +48,9 @@ export default function Chat({
 
   // ========== HOOKS SECTION START ==========
 
+  const apiVersion = process.env.NEXT_PUBLIC_CHAT_API_VERSION ?? 'v1'
   const { messages, input, status, error, handleInputChange, handleSubmit, reload, append } = useChat({
-    api: '/api/chat-tmdb-tool',
+    api: apiVersion === 'v2' ? '/api/chat-v2' : '/api/chat-tmdb-tool',
     body: {
     },
     id,
