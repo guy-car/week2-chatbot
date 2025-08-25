@@ -13,7 +13,7 @@ export default function TestButtonsPage() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">Working Chip Button</h2>
             <div className="flex flex-wrap gap-4">
-              <button className={buttonVariants.new_chip_1}>
+              <button className={buttonVariants.chip}>
                 New Chip Button - Minimal Style
               </button>
             </div>
@@ -26,7 +26,7 @@ export default function TestButtonsPage() {
               <button className={buttonVariants.chip}>
                 Original Chip Style
               </button>
-              <button className={buttonVariants.new_chip_1}>
+              <button className={buttonVariants.chip}>
                 New Minimal Style
               </button>
             </div>

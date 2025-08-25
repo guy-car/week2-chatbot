@@ -193,7 +193,7 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
             {chips.map((chip, index) => (
                 <button
                     key={index}
-                    className={buttonVariants.new_chip_1}
+                    className={buttonVariants.chip}
                     onClick={() => onChipClick(chip.text)}
                 >
                     {chip.text}

@@ -194,13 +194,10 @@ export async function saveChat({
           content = textParts.join('\n').trim() || msg.content;
         }
 
-        // Only update if we have new content to add
+        // Only update if we have new content to add. Never touch toolResults on updates.
         if (content && content.trim().length > 0) {
           await db.update(messages)
-            .set({
-              content: content,
-              toolResults: extractToolResults(msg),
-            })
+            .set({ content })
             .where(eq(messages.id, msg.id));
 
           console.log('✅ Successfully updated message:', msg.id, 'with content length:', content?.length || 0);

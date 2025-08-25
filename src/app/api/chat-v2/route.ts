@@ -111,16 +111,7 @@ function getResponseId(res: unknown): string | undefined {
   return typeof r?.id === 'string' ? r.id : undefined;
 }
 
-// Type guards for streaming support (Responses SDK)
-function hasToReadableStream(obj: unknown): obj is { toReadableStream: () => ReadableStream<Uint8Array> } {
-  return !!obj && typeof (obj as { toReadableStream?: unknown }).toReadableStream === 'function';
-}
-function getFinalResponsePromise(obj: unknown): Promise<unknown> | undefined {
-  const maybe = obj as { finalResponse?: () => Promise<unknown>; final?: () => Promise<unknown> };
-  if (maybe && typeof maybe.finalResponse === 'function') return maybe.finalResponse();
-  if (maybe && typeof maybe.final === 'function') return maybe.final();
-  return undefined;
-}
+// (removed unused streaming helpers)
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
@@ -163,32 +154,6 @@ export async function POST(req: Request) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   // Stage 2: decide mode first (strict JSON) with explicit rules and few-shot
-  const decisionInstruction = `You are a mode decider. Return ONLY JSON: {"mode":"A|B","reason":"<160 chars>"}.
-
-Definitions:
-- Mode A: Conversational reply. No recommendations, no planning, no tools.
-- Mode B: Recommendation planning. Do NOT produce user-visible text; a separate step will plan picks.
-
-Rules:
-- If the user asks for recommendations, a list, "give me X", "suggest", "top/best", "pick(s)", or names a genre/title and wants similar → mode=B.
-- If the user asks for opinions, explanations, summaries, small talk, or profile discussion without asking for recommendations → mode=A.
-- If mixed/ambiguous, prefer mode=A and clarify with USER what the intent is
-
-Examples:
-USER: "Recommend 3 underrated neo-noir movies from the 2010s."
-→ {"mode":"B","reason":"User asked for three recommendations"}
-
-USER: "Suggest some animated sci‑fi TV shows like Futurama."
-→ {"mode":"B","reason":"Explicit recommendation request"}
-
-USER: "What makes neo‑noir different from classic noir?"
-→ {"mode":"A","reason":"Explanation; no recommendations requested"}
-
-USER: "Hey Genie how is it going?"
-→ {"mode":"A","reason":"Explanation; no recommendations requested"}
-
-USER: "I liked Drive and Nightcrawler."
-→ {"mode":"B","reason":"States likes; implies similar picks"}`;
   const decideStartedAt = Date.now();
   const decideResponse = await openai.responses.create({
     model: 'gpt-4o-mini-2024-07-18',
