@@ -4,7 +4,7 @@ import { db } from "~/server/db";
 import { chats, messages as messagesTable } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { saveChat, loadChat } from "tools/chat-store";
-import { type Message } from 'ai';
+import { type Message, appendResponseMessages } from 'ai';
 import { streamText } from 'ai';
 import { openai as aiSDKOpenAI } from '@ai-sdk/openai';
 import { DecideModeSchema, PlanPicksOutputSchema, type MovieData } from '~/app/types';
@@ -137,6 +137,22 @@ export async function POST(req: Request) {
   const lastUser = incomingMessages.filter(m => m.role === 'user').pop();
   if (!lastUser || typeof lastUser.content !== 'string' || lastUser.content.trim().length === 0) {
     return new Response(JSON.stringify({ error: 'No user message found' }), { status: 400 });
+  }
+
+  // Persist the latest user message immediately so it survives refreshes
+  try {
+    const existing = await db.select({ id: messagesTable.id }).from(messagesTable).where(eq(messagesTable.id, lastUser.id)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(messagesTable).values({
+        id: lastUser.id,
+        chatId,
+        role: 'user',
+        content: lastUser.content,
+        toolResults: null,
+      }).onConflictDoNothing();
+    }
+  } catch (err) {
+    console.warn('[FLOW] warn: failed to persist user message early', err);
   }
 
   // Threading: read lastResponseId for this chat
@@ -404,6 +420,7 @@ USER: "I liked Drive and Nightcrawler."
   }
 
   // Use AI SDK streaming instead of broken OpenAI streaming
+
   const result = streamText({
     model: aiSDKOpenAI('chatgpt-4o-latest'),
     messages: [
@@ -411,11 +428,24 @@ USER: "I liked Drive and Nightcrawler."
       { role: 'user', content: lastUser.content }
     ],
     temperature: 0.8,
+    async onFinish({ response }) {
+      try {
+        const base = [...previousMessages, lastUser];
+        const all = appendResponseMessages({ messages: base, responseMessages: response.messages });
+        await saveChat({ id: chatId, messages: all });
+        console.log('[FLOW] persisted Mode A via saveChat', { count: all.length });
+      } catch {
+        console.warn('[FLOW] warn: failed to persist Mode A via saveChat');
+      }
+    },
   });
   const streamStartedAt = Date.now();
   console.log('[FLOW] A stream start', new Date(streamStartedAt).toISOString());
 
-  // Return the streaming response in the format the AI SDK expects
+  // Ensure server-side finish handler runs even if client aborts
+  void result.consumeStream();
+
+  // Return the streaming response
   return result.toDataStreamResponse();
 }
 

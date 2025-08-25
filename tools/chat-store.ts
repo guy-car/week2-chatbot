@@ -5,7 +5,7 @@ import { generateId } from 'ai';
 import { type Message } from 'ai';
 import { db } from "~/server/db"
 import { chats, messages } from "~/server/db/schema"
-import { eq, and, isNotNull } from "drizzle-orm"
+import { eq, and, isNotNull, asc } from "drizzle-orm"
 import { extractToolResults } from './message-utils'
 import type { MovieData } from "~/app/types/index"
 
@@ -23,7 +23,8 @@ export async function loadChat(id: string): Promise<Message[]> {
   const result = await db
     .select()
     .from(messages)
-    .where(eq(messages.chatId, id));
+    .where(eq(messages.chatId, id))
+    .orderBy(asc(messages.createdAt));
 
   // Log raw database results
   console.log('🗄️ Raw database results for chat', id, ':', result.map(row => ({
