@@ -111,64 +111,70 @@ USER: "Hey Genie how is it going?"
 
 USER: "I liked Drive and Nightcrawler."
 → {"mode":"B","reason":"States likes; implies similar picks"}`;
+  const decideStartedAt = Date.now();
   const decideResponse = await openai.responses.create({
-    model: 'gpt-5',
+    model: 'gpt-4o-mini-2024-07-18',
     input: [
-      { role: 'developer', content: [{ type: 'input_text', text: decisionInstruction }] },
+      { role: 'developer', content: [{ type: 'input_text', text: 'Classify the USER message as A or B. Output a single character: A or B. A = conversational (no recommendations). B = recommendation planning. No extra text.' }] },
       { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] },
     ],
-    reasoning: { effort: 'low' },
     text: {
-      verbosity: 'low',
-      format: {
-        type: 'json_schema',
-        name: 'decide_mode',
-        schema: {
-          type: 'object', additionalProperties: false,
-          properties: {
-            mode: { type: 'string', enum: ['A','B'] },
-            reason: { type: 'string', maxLength: 160 },
-          },
-          required: ['mode','reason']
-        },
-        strict: true,
-      }
+      verbosity: 'medium'
     },
+    max_output_tokens: 16,
     ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
   });
+  const t_decide_mode = Date.now() - decideStartedAt;
 
   const decisionText: string = getResponseText(decideResponse);
   let mode: 'A' | 'B' = 'A';
   let decisionReason = '';
-  try {
-    const raw = getResponseParsed(decideResponse);
-    let candidate: unknown = raw;
-    if (!candidate && decisionText) {
-      candidate = JSON.parse(decisionText) as unknown;
+  // Fast path: plain single-character output
+  const ch = (decisionText || '').trim().toUpperCase()[0];
+  if (ch === 'A' || ch === 'B') {
+    mode = ch;
+  } else {
+    // Fallback: attempt old JSON schema parsing if model emitted JSON
+    try {
+      const raw = getResponseParsed(decideResponse);
+      let candidate: unknown = raw;
+      if (!candidate && decisionText) {
+        candidate = JSON.parse(decisionText) as unknown;
+      }
+      const validated = DecideModeSchema.parse(candidate);
+      mode = validated.mode;
+      decisionReason = validated.reason;
+    } catch {
+      console.warn('[FLOW] ❌ decide_mode parse failed; defaulting to A');
     }
-    const validated = DecideModeSchema.parse(candidate);
-    mode = validated.mode;
-    decisionReason = validated.reason;
-  } catch {
-    console.warn('[FLOW] ❌ decide_mode parse/validate failed; defaulting to A');
   }
 
-  console.log('[FLOW] decide_mode:', { mode, reason: decisionReason });
+  console.log('[FLOW] decide_mode:', { mode, reason: decisionReason, t_decide_mode });
 
   // If Mode B: plan picks (Stage 3)
   if (mode === 'B') {
+    // timings
+    let t_read_profile = 0;
+    let t_read_blocked = 0;
+    let t_plan_picks = 0;
+    let t_tmdb_lookups_total = 0;
+    let t_db_writes = 0;
     // Gather inputs: tasteProfile, blocked (chat + user lists)
     let tasteProfileSummary = '';
     try {
+      const _tp0 = Date.now();
       const session = await auth.api.getSession({ headers: await headers() });
       if (session?.user?.id) {
         const profile = await tasteProfileServerService.getProfileForChat(session.user.id, db);
         tasteProfileSummary = tasteProfileServerService.generateSummary(profile).slice(0, 600);
       }
+      t_read_profile = Date.now() - _tp0;
     } catch {
       console.warn('[FLOW] tasteProfile error, continuing without');
+      // keep t_read_profile as measured until error
     }
 
+    const _tb0 = Date.now();
     const chatBlocked = await listChatRecommendations(chatId);
     let userBlocked: { id_tmdb: number; media_type: 'movie'|'tv'; title: string; year: number }[] = [];
     try {
@@ -177,6 +183,7 @@ USER: "I liked Drive and Nightcrawler."
         userBlocked = await getUserBlockedList(session.user.id);
       }
     } catch {}
+    t_read_blocked = Date.now() - _tb0;
 
     const blocked = [
       ...chatBlocked.map(b => ({ id_tmdb: b.id_tmdb, media_type: b.media_type, title: b.title, year: b.year })),
@@ -186,6 +193,7 @@ USER: "I liked Drive and Nightcrawler."
     // use shared planInstruction
     const planInput = { blocked, tasteProfileSummary };
 
+    const _tplan0 = Date.now();
     const planResponse = await openai.responses.create({
       model: 'gpt-5',
       input: [
@@ -215,6 +223,7 @@ USER: "I liked Drive and Nightcrawler."
       },
       ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
     });
+    t_plan_picks = Date.now() - _tplan0;
 
     const planText: string = getResponseText(planResponse);
 
@@ -252,38 +261,61 @@ USER: "I liked Drive and Nightcrawler."
 
     // Dedup by blocked ids after TMDB lookup
     const blockedKey = new Set(blocked.map(b => `${b.media_type}:${b.id_tmdb}`));
-
-    // TMDB lookup helper
-    const tmdbLookup = (t: string, y?: number) => lookupBestByTitleYear(t, y);
-
+    const _ttmdb0 = Date.now();
+    const perPickTimings: Array<{ title: string; year: number; ms: number; found: boolean }> = [];
+    const lookupResults = await Promise.all(picks.map(async (p) => {
+      const s = Date.now();
+      const found = await lookupBestByTitleYear(p.title, p.year);
+      const ms = Date.now() - s;
+      perPickTimings.push({ title: p.title, year: p.year, ms, found: Boolean(found) });
+      return found;
+    }));
     const accepted: MovieData[] = [];
-    for (const p of picks) {
-      const found = await tmdbLookup(p.title, p.year);
+    for (let i = 0; i < lookupResults.length; i++) {
+      const found = lookupResults[i];
+      const p = picks[i]!;
       if (!found) continue;
       const key = `${found.media_type}:${found.id}`;
       if (blockedKey.has(key)) continue;
       accepted.push(found);
-      // persist to chat_recommendations
       await addChatRecommendation({ chatId, id_tmdb: found.id, media_type: found.media_type, title: found.title, year: Number((found.release_date ?? '').slice(0,4)) || p.year });
       blockedKey.add(key);
     }
+    t_tmdb_lookups_total = Date.now() - _ttmdb0;
 
     // Persist assistant intro + tool results to messages
+    const _tw0 = Date.now();
     const asstId = `asst_${Date.now()}`;
-    await db.insert(messagesTable).values({
-      id: asstId,
-      chatId,
-      role: 'assistant',
-      content: intro,
-      toolResults: accepted,
-    });
+    await db.insert(messagesTable).values({ id: asstId, chatId, role: 'assistant', content: intro, toolResults: accepted });
 
     // Update threading id from this plan response
     const planRespIdA = getResponseId(planResponse);
     if (planRespIdA) {
       await db.update(chats).set({ lastResponseId: planRespIdA }).where(eq(chats.id, chatId));
     }
+    t_db_writes = Date.now() - _tw0;
     const elapsedB = Date.now() - startedAt;
+    // Pretty timing summary
+    try {
+      const MAG = '\x1b[35m';
+      const CYA = '\x1b[36m';
+      const YEL = '\x1b[33m';
+      const RES = '\x1b[0m';
+      const pct = (ms: number) => (elapsedB > 0 ? Math.round((ms / elapsedB) * 1000) / 10 : 0);
+      console.log(`${MAG}───────────────── TIMINGS (Mode B) ─────────────────${RES}`);
+      console.log(`${CYA}total${RES}`, `${elapsedB} ms`);
+      console.log(`${CYA}decide_mode${RES}`, `${t_decide_mode} ms (${pct(t_decide_mode)}%)`);
+      console.log(`${CYA}read_profile${RES}`, `${t_read_profile} ms (${pct(t_read_profile)}%)`);
+      console.log(`${CYA}read_blocked${RES}`, `${t_read_blocked} ms (${pct(t_read_blocked)}%)`);
+      console.log(`${CYA}plan_picks${RES}`, `${t_plan_picks} ms (${pct(t_plan_picks)}%)`);
+      console.log(`${CYA}tmdb_lookups_total${RES}`, `${t_tmdb_lookups_total} ms (${pct(t_tmdb_lookups_total)}%)`);
+      perPickTimings.forEach((r, i) => {
+        const suf = String.fromCharCode(65 + i);
+        console.log(`${YEL}  tmdb_${suf}${RES}`, `${r.ms} ms`, r.found ? 'found' : 'miss', '-', r.title, r.year);
+      });
+      console.log(`${CYA}db_writes${RES}`, `${t_db_writes} ms (${pct(t_db_writes)}%)`);
+      console.log(`${MAG}──────────────────────────────────────────────────────${RES}`);
+    } catch {}
     console.log('[FLOW] chat-v2 end (mode B planned)', { ms: elapsedB, picks: accepted.length });
     return new Response(JSON.stringify({ text: intro, mode: 'B' as const, picks: accepted }), { headers: { 'Content-Type': 'application/json' } });
   }
@@ -404,9 +436,19 @@ console.log("‼️outputText", outputText)
     } catch {}
 
     const blockedKey = new Set(blocked.map(b => `${b.media_type}:${b.id_tmdb}`));
-    const accepted: MovieData[] = [];
-    for (const p of picks) {
+    const _ttmdbF0 = Date.now();
+    const perPickTimingsF: Array<{ title: string; year: number; ms: number; found: boolean }> = [];
+    const lookupResultsF = await Promise.all(picks.map(async (p) => {
+      const s = Date.now();
       const found = await lookupBestByTitleYear(p.title, p.year);
+      const ms = Date.now() - s;
+      perPickTimingsF.push({ title: p.title, year: p.year, ms, found: Boolean(found) });
+      return found;
+    }));
+    const accepted: MovieData[] = [];
+    for (let i = 0; i < lookupResultsF.length; i++) {
+      const found = lookupResultsF[i];
+      const p = picks[i]!;
       if (!found) continue;
       const key = `${found.media_type}:${found.id}`;
       if (blockedKey.has(key)) continue;
@@ -414,6 +456,7 @@ console.log("‼️outputText", outputText)
       await addChatRecommendation({ chatId, id_tmdb: found.id, media_type: found.media_type, title: found.title, year: Number((found.release_date ?? '').slice(0,4)) || p.year });
       blockedKey.add(key);
     }
+    const _twF0 = Date.now();
     const asstId = `asst_${Date.now()}`;
     await db.insert(messagesTable).values({ id: asstId, chatId, role: 'assistant', content: intro, toolResults: accepted });
     const planRespIdB = getResponseId(planResponse);
@@ -421,6 +464,24 @@ console.log("‼️outputText", outputText)
       await db.update(chats).set({ lastResponseId: planRespIdB }).where(eq(chats.id, chatId));
     }
     const elapsedB = Date.now() - startedAt;
+    try {
+      const MAG = '\x1b[35m';
+      const CYA = '\x1b[36m';
+      const YEL = '\x1b[33m';
+      const RES = '\x1b[0m';
+      const pct = (ms: number) => (elapsedB > 0 ? Math.round((ms / elapsedB) * 1000) / 10 : 0);
+      const t_tmdb_lookups_totalF = Date.now() - _ttmdbF0;
+      const t_db_writesF = Date.now() - _twF0;
+      console.log(`${MAG}────────────── TIMINGS (Mode B Fallback) ───────────${RES}`);
+      console.log(`${CYA}total${RES}`, `${elapsedB} ms`);
+      console.log(`${CYA}tmdb_lookups_total${RES}`, `${t_tmdb_lookups_totalF} ms (${pct(t_tmdb_lookups_totalF)}%)`);
+      perPickTimingsF.forEach((r, i) => {
+        const suf = String.fromCharCode(65 + i);
+        console.log(`${YEL}  tmdb_${suf}${RES}`, `${r.ms} ms`, r.found ? 'found' : 'miss', '-', r.title, r.year);
+      });
+      console.log(`${CYA}db_writes${RES}`, `${t_db_writesF} ms (${pct(t_db_writesF)}%)`);
+      console.log(`${MAG}────────────────────────────────────────────────────${RES}`);
+    } catch {}
     console.log('[FLOW] chat-v2 end (fallback to mode B planned)', { ms: elapsedB, picks: accepted.length });
     return new Response(JSON.stringify({ text: intro, mode: 'B' as const, picks: accepted }), { headers: { 'Content-Type': 'application/json' } });
   }
