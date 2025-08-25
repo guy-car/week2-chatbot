@@ -5,7 +5,7 @@ import { generateId } from 'ai';
 import { type Message } from 'ai';
 import { db } from "~/server/db"
 import { chats, messages } from "~/server/db/schema"
-import { eq, and, isNotNull } from "drizzle-orm"
+import { eq, and, isNotNull, asc } from "drizzle-orm"
 import { extractToolResults } from './message-utils'
 import type { MovieData } from "~/app/types/index"
 
@@ -23,7 +23,8 @@ export async function loadChat(id: string): Promise<Message[]> {
   const result = await db
     .select()
     .from(messages)
-    .where(eq(messages.chatId, id));
+    .where(eq(messages.chatId, id))
+    .orderBy(asc(messages.createdAt));
 
   // Log raw database results
   console.log('🗄️ Raw database results for chat', id, ':', result.map(row => ({
@@ -193,13 +194,10 @@ export async function saveChat({
           content = textParts.join('\n').trim() || msg.content;
         }
 
-        // Only update if we have new content to add
+        // Only update if we have new content to add. Never touch toolResults on updates.
         if (content && content.trim().length > 0) {
           await db.update(messages)
-            .set({
-              content: content,
-              toolResults: extractToolResults(msg),
-            })
+            .set({ content })
             .where(eq(messages.id, msg.id));
 
           console.log('✅ Successfully updated message:', msg.id, 'with content length:', content?.length || 0);

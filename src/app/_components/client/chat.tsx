@@ -48,6 +48,11 @@ export default function Chat({
 
   // ========== HOOKS SECTION START ==========
 
+  const [recommendedMovies, setRecommendedMovies] = useState<MovieData[]>([])
+  const [conversationChips, setConversationChips] = useState<Chip[]>([])
+  const [savedMovies, setSavedMovies] = useState<Map<string, MovieData[]>>(new Map());
+  const [modeBIntro, setModeBIntro] = useState<string>('')
+
   const apiVersion = process.env.NEXT_PUBLIC_CHAT_API_VERSION ?? 'v1'
   const { messages, input, status, error, handleInputChange, handleSubmit, reload, append } = useChat({
     api: apiVersion === 'v2' ? '/api/chat-v2' : '/api/chat-tmdb-tool',
@@ -55,6 +60,55 @@ export default function Chat({
     },
     id,
     initialMessages,
+    onResponse: async (response) => {
+      try {
+        const contentType = response.headers.get('content-type') ?? response.headers.get('Content-Type') ?? ''
+        if (!contentType.includes('application/json')) return
+
+        const cloned = response.clone()
+        const raw: unknown = await cloned.json().catch(() => undefined)
+
+        const isModeBResponse = (data: unknown): data is { mode: 'B'; picks: MovieData[] } => {
+          if (typeof data !== 'object' || data === null) return false
+          const obj = data as Record<string, unknown>
+          if (obj.mode !== 'B') return false
+          if (!Array.isArray(obj.picks)) return false
+          // Basic shape check for MovieData
+          return (obj.picks as unknown[]).every((p) => {
+            if (typeof p !== 'object' || p === null) return false
+            const m = p as { id?: unknown; title?: unknown; media_type?: unknown }
+            return typeof m.id === 'number' && typeof m.title === 'string' && (m.media_type === 'movie' || m.media_type === 'tv')
+          })
+        }
+
+        if (isModeBResponse(raw)) {
+          const introText = ((): string => {
+            const obj = raw as Record<string, unknown>
+            if (typeof obj.text === 'string') return obj.text
+            if (typeof obj.intro === 'string') return obj.intro
+            return ''
+          })()
+          setModeBIntro(introText)
+          setRecommendedMovies(raw.picks)
+          setConversationChips([])
+
+          if (id) {
+            try {
+              const movieData = await loadMoviesForChat(id)
+              const movieMap = new Map<string, MovieData[]>()
+              movieData.forEach(({ messageId, movies }) => {
+                movieMap.set(messageId, movies)
+              })
+              setSavedMovies(movieMap)
+            } catch {
+              // Posters already set from response
+            }
+          }
+        }
+      } catch {
+        // ignore parse issues; streaming path will handle Mode A
+      }
+    },
     onError: (error) => {
       console.log('useChat error:', error);
     },
@@ -113,10 +167,6 @@ export default function Chat({
 
   useChatTitle(id ?? '', messages);
 
-  const [recommendedMovies, setRecommendedMovies] = useState<MovieData[]>([])
-  const [conversationChips, setConversationChips] = useState<Chip[]>([])
-  const [savedMovies, setSavedMovies] = useState<Map<string, MovieData[]>>(new Map());
-
   useEffect(() => {
     if (id) {
       void (async () => {
@@ -132,6 +182,13 @@ export default function Chat({
       })();
     }
   }, [id]);
+
+  // Clear Mode B intro when a new request starts
+  useEffect(() => {
+    if (status === 'submitted') {
+      setModeBIntro('')
+    }
+  }, [status])
 
 
   useEffect(() => {
@@ -163,7 +220,9 @@ export default function Chat({
     const latestMovies = allMoviesWithTimestamp.slice(0, 3).map(item => item.movie);
 
     console.log('[CLIENT_RENDER_MOVIES] Final list of movies being set for rendering:', latestMovies);
-    setRecommendedMovies(latestMovies);
+    if (latestMovies.length > 0) {
+      setRecommendedMovies(latestMovies);
+    }
 
   }, [messages, savedMovies]);
 
@@ -211,6 +270,12 @@ export default function Chat({
             )}
           </div>
         ))}
+        {modeBIntro && (
+          <div className={`mb-4 text-xl leading-relaxed`}>
+            <strong>{'Genie '}</strong>
+            <div>{modeBIntro}</div>
+          </div>
+        )}
       </div>
       <MovieCardsSection movies={recommendedMovies} />
       <ConversationChips
@@ -221,7 +286,7 @@ export default function Chat({
           setConversationChips([])
         }}
       />
-      {error && (
+      {error && !modeBIntro && recommendedMovies.length === 0 && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <div className="text-red-700 mb-2">An error occurred.</div>
           <button
@@ -253,15 +318,15 @@ export default function Chat({
           onChange={handleInputChange}
           className={`flex-1 ${inputVariants.chat}`}
           placeholder="Type your message..."
-          disabled={status !== 'ready'}
+          disabled={status === 'submitted' || status === 'streaming'}
         />
         <button
           className={cn(
-            status !== 'ready'
+            status === 'submitted' || status === 'streaming'
               ? "px-6 py-2 rounded-lg bg-gray-400 text-gray-200 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
               : buttonVariants.primary
           )}
-          disabled={status !== 'ready'}
+          disabled={status === 'submitted' || status === 'streaming'}
         >
           Send
         </button>
