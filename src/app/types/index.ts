@@ -53,3 +53,30 @@ export function isMovieData(data: unknown): data is MovieData {
 export function isMovieDataArray(data: unknown): data is MovieData[] {
     return Array.isArray(data) && data.every(isMovieData);
 }
+
+// Tool schemas (Zod) — server validates Responses output against these
+import { z } from 'zod';
+
+export const DecideModeSchema = z.object({
+    mode: z.enum(['A', 'B']),
+    reason: z.string().max(160)
+});
+
+export const PlanPicksInputSchema = z.object({
+    blocked: z.array(z.object({
+        id_tmdb: z.number(),
+        media_type: z.enum(['movie','tv']),
+        title: z.string(),
+        year: z.number(),
+    })),
+    tasteProfileSummary: z.string().max(600)
+});
+
+export const PlanPicksOutputSchema = z.object({
+    intro: z.string(),
+    picks: z.array(z.object({
+        title: z.string(),
+        year: z.number(),
+        reason: z.string(),
+    })).min(1).max(3)
+});

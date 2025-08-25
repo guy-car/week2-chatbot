@@ -21,6 +21,7 @@ CREATE TABLE "chats" (
 	"id" text PRIMARY KEY NOT NULL,
 	"title" varchar(512),
 	"user_id" text NOT NULL,
+	"last_response_id" text,
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint

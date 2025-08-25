@@ -4,6 +4,7 @@ const config = {
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.json' }],
   },
+  setupFiles: ['<rootDir>/tests/setup-env.js'],
   moduleNameMapper: {
     '^~/(.*)$': '<rootDir>/src/$1',
   },

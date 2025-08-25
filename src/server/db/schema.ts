@@ -9,7 +9,8 @@ import {
   varchar,
   pgEnum,
   uniqueIndex,
-  real  // For rating as float
+  real,  // For rating as float
+  integer
 } from "drizzle-orm/pg-core";
 
 import { type MovieData } from "~/app/types/index"
@@ -26,6 +27,7 @@ export const chats = createTable("chats", {  // Changed from "chat" to "chats" f
   id: text('id').primaryKey(),
   title: varchar('title', { length: 512 }),
   userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  lastResponseId: text('last_response_id'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -93,6 +95,19 @@ export const movieInteractions = createTable("movie_interactions", {
     .notNull(),
 }, (t) => [
   index("movie_interactions_user_id_idx").on(t.userId)
+]);
+
+// Chat-level recommendations (persisted excludes for dedupe)
+export const chatRecommendations = createTable("chat_recommendations", {
+  chatId: text('chat_id').notNull().references(() => chats.id, { onDelete: 'cascade' }),
+  idTmdb: integer('id_tmdb').notNull(),
+  mediaType: mediaTypeEnum('media_type').notNull(),
+  title: text('title').notNull(),
+  year: integer('year').notNull(),
+  addedAt: timestamp('added_at', { withTimezone: true }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (t) => [
+  index('chat_recommendations_chat_id_idx').on(t.chatId),
+  uniqueIndex('chat_recommendations_unique').on(t.chatId, t.idTmdb, t.mediaType)
 ]);
 
 // Better-Auth schema
