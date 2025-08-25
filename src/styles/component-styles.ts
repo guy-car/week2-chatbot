@@ -447,9 +447,9 @@ export const modalVariants = {
   // Provider card
   providerCard: cn(
     'mt-3 p-5 w-full min-h-[64px]',
-    'bg-[rgba(2,255,251,0.07)]',
-    `border border-[${colors.border.secondary}]`,
-    `rounded-[${borderRadius.lg}]`,
+    'bg-[rgba(2,255,251,0.15)]', // Semi-transparent cyan like modal
+    'backdrop-blur-sm', // Glass-like effect
+    'rounded-[11px]', // Changed from rounded-[${borderRadius.lg}] to rounded-[11px]
     // Remove orange glow; use subtle cyan shadow
     'shadow-[0px_0px_14px_-2px_rgba(0,229,255,0.35)]'
   ),

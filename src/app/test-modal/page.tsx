@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
-import { X } from 'lucide-react'
 import { modalVariants } from '~/styles/component-styles'
 import movieData from './movie-data.json'
 
@@ -35,6 +34,33 @@ export default function TestModalPage() {
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0)
   
   const currentMovie = movieData[currentMovieIndex]
+  
+  // Dynamic title styling based on length
+  const getTitleStyles = (title: string) => {
+    const length = title.length;
+    if (length <= 20) return 'text-[28px]';
+    if (length <= 40) return 'text-[24px]';
+    return 'text-[20px]';
+  };
+  
+  // Smart title truncation with word boundary awareness
+  const truncateTitle = (title: string, maxLength = 20) => {
+    if (title.length <= maxLength) return title;
+    
+    // Try to break at word boundaries
+    const words = title.split(' ');
+    let result = '';
+    
+    for (const word of words) {
+      if ((result + ' ' + word).length <= maxLength) {
+        result += (result ? ' ' : '') + word;
+      } else {
+        break;
+      }
+    }
+    
+    return result + '...';
+  };
   
   const nextMovie = () => {
     setCurrentMovieIndex((prev) => (prev + 1) % movieData.length)
@@ -120,39 +146,47 @@ export default function TestModalPage() {
 
           {/* Container with cyan glow and dual gradient overlay from Figma */}
           <div className={modalVariants.containerGradient}>
-            <div className="relative max-w-[1166px] w-[96vw]  overflow-hidden">
+            <div className="relative max-w-[1166px] w-[96vw] overflow-hidden pt-14 pl-14 pb-14 pr-0">
               {/* Header row - removed title and ratings, just close button */}
-              <div className="pt-8 pr-6">
+              <div className="">
                 {/* Title and ratings moved to left column */}
               </div>
 
-              {/* Main content: left column + center + right rail */}
-              {/* Three columns with action rail extending to right edge */}
-              <div className="pl-14 pt-14 pr-0 pb-14 grid grid-cols-[240px_1fr_80px] gap-8 items-start">
-                {/* Left column: title + ratings + poster + providers */}
-                <div className="flex flex-col items-center">
-                  {/* Title centered in left column */}
-                  <div className="text-[36px] font-normal text-center text-[#FAFAFA] font-inter mb-4 w-full">
-                    {currentMovie.title} ({currentMovie.year})
+              {/* Main content: restructured to 5 sections */}
+              <div className="grid grid-cols-[240px_1fr_80px] gap-8 items-start">
+                {/* Left column: title/ratings + poster + where to watch */}
+                <div className="flex flex-col items-center pr-10">
+                  {/* Section 1: Title and Ratings */}
+                  <div className="flex flex-col justify-center mb-6 w-full">
+                    <div 
+                      className={`${getTitleStyles(currentMovie.title)} font-normal text-center text-[#FAFAFA] font-inter leading-tight`}
+                      title={currentMovie.title} // Tooltip shows full title on hover
+                    >
+                      {truncateTitle(currentMovie.title)}
+                    </div>
                   </div>
                   
-                  {/* Ratings below title with better styling */}
-                  <div className="flex justify-center gap-4 text-sm mb-6">
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-xs text-[#FAFAFA] opacity-60">IMDB</span>
+                  {/* Ratings below title */}
+                  <div className="flex justify-center gap-6 text-sm mb-6">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="/streaming_providers/IMDB.svg"
+                        alt="IMDB"
+                        className="w-6 h-6 object-contain"
+                      />
                       <span className="text-[#E5E5E5] font-semibold">{currentMovie.ratings.imdb}</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-xs text-[#FAFAFA] opacity-60">RT</span>
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="/streaming_providers/rottentomatoes.png"
+                        alt="Rotten Tomatoes"
+                        className="w-6 h-6 object-contain"
+                      />
                       <span className="text-[#E5E5E5] font-semibold">{currentMovie.ratings.rottenTomatoes}</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-xs text-[#FAFAFA] opacity-60">MC</span>
-                      <span className="text-[#E5E5E5] font-semibold">{currentMovie.ratings.metacritic}</span>
                     </div>
                   </div>
                   
-                  {/* Poster */}
+                  {/* Section 2: Poster */}
                   <div className={modalVariants.poster}>
                     <Image
                       src={currentMovie.poster_url}
@@ -164,7 +198,7 @@ export default function TestModalPage() {
                     />
                   </div>
                   
-                  {/* Providers */}
+                  {/* Section 3: Where to Watch */}
                   <div className="mt-6 text-[#FAFAFA] w-[188px]">
                     <div className="text-xl font-bold text-center mb-3">Where to watch</div>
                     <div className={modalVariants.providerCard}>
@@ -175,7 +209,7 @@ export default function TestModalPage() {
                               <img
                                 src={`https://image.tmdb.org${provider.logoPath}`}
                                 alt={provider.name}
-                                className="w-12 h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                                className="w-12 h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity rounded-[11px]"
                                 onClick={() => window.open(`https://www.${provider.name.toLowerCase().replace('+', 'plus')}.com`, '_blank')}
                               />
                             </div>
@@ -190,8 +224,9 @@ export default function TestModalPage() {
                   </div>
                 </div>
 
-                {/* Center: trailer + meta + sections */}
-                <div className="text-[#FAFAFA]">
+                {/* Center column: Section 4 - Trailer + Info + Content */}
+                <div className="text-[#FAFAFA] pr-10">
+                  {/* Trailer */}
                   <div className={modalVariants.trailerFrame}>
                     <div 
                       className="aspect-video w-full relative bg-gradient-to-br from-black/80 to-gray-900/80 flex items-center justify-center group cursor-pointer overflow-hidden"
@@ -205,24 +240,17 @@ export default function TestModalPage() {
                           className="w-full h-full object-cover"
                         />
                       )}
-                      
-                      {/* Video info overlay */}
-                      <div className="absolute bottom-3 left-3 bg-black/70 px-2 py-1 rounded text-xs text-white font-medium">
-                        {currentMovie.trailer?.name || 'TRAILER'}
-                      </div>
-                      
-                      {/* Duration overlay */}
-                      <div className="absolute bottom-3 right-3 bg-black/70 px-2 py-1 rounded text-xs text-white font-medium">
-                        1:58
-                      </div>
                     </div>
                   </div>
+                  
+                  {/* Info section: genre, duration, director, year */}
                   <div className="mt-3">
                     <div className={modalVariants.metaLine}>
-                      {currentMovie.genres?.join(', ')} | {currentMovie.duration}min | Dir. {currentMovie.director}
+                      {currentMovie.genres?.join(', ')} | {currentMovie.duration}min | Dir. {currentMovie.director} | {currentMovie.year}
                     </div>
                   </div>
 
+                  {/* Content sections */}
                   <div className="mt-8 space-y-6">
                     <section>
                       <h3 className="text-xl font-bold mb-2">Why it&apos;s right for you</h3>
@@ -236,7 +264,7 @@ export default function TestModalPage() {
                   </div>
                 </div>
 
-                {/* Right action rail - Updated to match poster hover panel */}
+                {/* Right column: Section 5 - Action Rail */}
                 <aside className={modalVariants.actionRail}>
                   {MODAL_ACTIONS.map((action, index) => (
                     <div key={action.actionName}>
