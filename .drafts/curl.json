@@ -1,0 +1,12 @@
+curl -s -X POST http://localhost:3000/api/chat-v2 \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "cVlLNxHEpPMEPSwL",
+    "messages": [
+      {
+        "id": "u2",
+        "role": "user",
+        "content": "I really like Terrence Malick, why is he so good?"
+      }
+    ]
+  }' | cat

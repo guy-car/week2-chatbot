@@ -44,6 +44,48 @@ INPUT:
 OUTPUT:
 {"intro":"Bleak, morally ambiguous crime stories with slow‑burn tension.","picks":[{"title":"The Night Of","year":2016,"reason":"Procedural unraveling with heavy mood and character focus."},{"title":"Top of the Lake","year":2013,"reason":"Remote setting, dark secrets, and patient investigative pace."}]}`;
 
+// Mode A (conversational) instruction
+const modeAInstruction = `
+You are Watch Genie, a friendly movie and TV guide.
+
+Style:
+- Concise, warm, and natural — like a friend who knows cinema well.
+- Add a subtle touch of personality: curious, lightly witty, or affectionate about film, but never over-the-top.
+- No emojis, hype, or exclamation marks.
+- Default to 1–3 polished sentences unless the user explicitly asks for detail.
+
+Behavior:
+- Answer conversational questions directly and relevantly.
+- Do not generate recommendations in this mode; if the user requests them, the system will handle that separately.
+- Avoid lists or structured answers unless the user requests them.
+- If ambiguity exists, ask a brief clarifying question (“Do you mean the 1977 *Suspiria* or the 2018 remake?”).
+
+Clarifications:
+- Ask at most one clarifying question, and only if you cannot reasonably answer otherwise.
+- If confident, proceed with your best assumption and note it briefly (“Assuming you meant the 1995 version…”).
+
+Constraints:
+- No tool/metadata chatter — surface only what’s relevant to the user’s query.
+- Do not show your reasoning steps — just deliver the polished answer.
+
+---
+
+# Examples (tone + subtle personality)
+
+User: Who directed Heat?  
+Assistant: That would be Michael Mann — his 1995 *Heat* is a cornerstone of modern crime cinema.
+
+User: Is Blade Runner streaming anywhere?  
+Assistant: I don’t have live streaming info here, but I can tell you it’s widely available on major platforms. Want me to share the basics about the film instead?
+
+User: Tell me about Suspiria.  
+Assistant: There are two films with that title: Dario Argento’s haunting 1977 original and Luca Guadagnino’s unsettling 2018 reimagining. Which one are you curious about?
+
+User: What’s your favorite crime show?  
+Assistant: I don’t play favorites, but I can’t help admiring how *The Wire* set the bar for gritty, layered storytelling on TV. It’s still a touchstone for the genre.
+`;
+
+
 // Safe access helpers to avoid any-casts from SDK responses
 function getResponseText(res: unknown): string {
   const r = res as { output_text?: unknown };
@@ -58,6 +100,17 @@ function getResponseParsed(res: unknown): unknown {
 function getResponseId(res: unknown): string | undefined {
   const r = res as { id?: unknown };
   return typeof r?.id === 'string' ? r.id : undefined;
+}
+
+// Type guards for streaming support (Responses SDK)
+function hasToReadableStream(obj: unknown): obj is { toReadableStream: () => ReadableStream<Uint8Array> } {
+  return !!obj && typeof (obj as { toReadableStream?: unknown }).toReadableStream === 'function';
+}
+function getFinalResponsePromise(obj: unknown): Promise<unknown> | undefined {
+  const maybe = obj as { finalResponse?: () => Promise<unknown>; final?: () => Promise<unknown> };
+  if (maybe && typeof maybe.finalResponse === 'function') return maybe.finalResponse();
+  if (maybe && typeof maybe.final === 'function') return maybe.final();
+  return undefined;
 }
 
 export async function POST(req: Request) {
@@ -320,17 +373,78 @@ USER: "I liked Drive and Nightcrawler."
     return new Response(JSON.stringify({ text: intro, mode: 'B' as const, picks: accepted }), { headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Mode A: generate conversational text
+  // Mode A: prefer streaming conversational text
+  console.log('[FLOW] MODE A responding (stream)');
+  const aStream = openai.responses.stream({
+    model: 'gpt-5-chat-latest',
+    input: [
+      { role: 'developer', content: [{ type: 'input_text', text: modeAInstruction }] },
+      { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] }
+    ],
+    text: { verbosity: 'medium'},
+    ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
+  });
+  const streamStartedAt = Date.now();
+  console.log('[FLOW] A stream start', new Date(streamStartedAt).toISOString());
+
+  if (hasToReadableStream(aStream)) {
+    const finalP = getFinalResponsePromise(aStream);
+    if (finalP) {
+      finalP.then(async (final) => {
+        const outputText = getResponseText(final);
+        const responseId = getResponseId(final);
+        const userMsg: Message = { id: lastUser.id, role: 'user', content: lastUser.content } as Message;
+        const assistantMsg: Message = { id: `asst_${Date.now()}`, role: 'assistant', content: outputText } as Message;
+        const w0 = Date.now();
+        await saveChat({ id: chatId, messages: [...previousMessages, userMsg, assistantMsg] });
+        if (responseId) {
+          await db.update(chats).set({ lastResponseId: responseId }).where(eq(chats.id, chatId));
+        }
+        const w1 = Date.now();
+        const endAt = Date.now();
+        try {
+          const MAG = '\x1b[35m';
+          const CYA = '\x1b[36m';
+          const RES = '\x1b[0m';
+          const total = endAt - startedAt;
+          const t_stream = endAt - streamStartedAt;
+          const t_db_writes = w1 - w0;
+          const preview = (outputText ?? '').slice(0, 300);
+          const pct = (ms: number) => (total > 0 ? Math.round((ms / total) * 1000) / 10 : 0);
+          console.log(`${MAG}───────────────── TIMINGS (Mode A Stream) ─────────${RES}`);
+          console.log(`${CYA}total${RES}`, `${total} ms`);
+          console.log(`${CYA}decide_mode${RES}`, `${t_decide_mode} ms (${pct(t_decide_mode)}%)`);
+          console.log(`${CYA}stream_duration${RES}`, `${t_stream} ms (${pct(t_stream)}%)`);
+          console.log(`${CYA}db_writes${RES}`, `${t_db_writes} ms (${pct(t_db_writes)}%)`);
+          console.log(`${CYA}response_preview${RES}`, preview);
+          console.log(`${MAG}────────────────────────────────────────────────────${RES}`);
+        } catch {}
+        console.log('[FLOW] A stream end', { ms: endAt - streamStartedAt, responseId, length: outputText?.length ?? 0 });
+      }).catch((e) => {
+        console.warn('[FLOW] A stream finalize error', e);
+      });
+    }
+
+    return new Response(aStream.toReadableStream(), {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+      }
+    });
+  }
+
+  // Fallback to non-streaming if stream interface unavailable
   const aRes = await openai.responses.create({
     model: 'gpt-5',
-    input: [ { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] } ],
-    reasoning: { effort: 'low' },
+    input: [
+      { role: 'developer', content: [{ type: 'input_text', text: modeAInstruction }] },
+      { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] }
+    ],
     text: { verbosity: 'low' },
     ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
   });
   const outputText: string = getResponseText(aRes);
   const responseId: string | undefined = getResponseId(aRes);
-console.log("‼️outputText", outputText)
   // If A produced empty text, treat as misclassification and fall back to planning (B)
   if (!outputText || outputText.trim().length === 0) {
     console.log('[FLOW] A produced empty text → falling back to B planning');
@@ -364,12 +478,12 @@ console.log("‼️outputText", outputText)
     // use shared planInstruction
     const planInput = { blocked, tasteProfileSummary };
     const planResponse = await openai.responses.create({
-      model: 'gpt-5',
+      model: 'gpt-5-mini-2025-08-07',
       input: [
         { role: 'developer', content: [{ type: 'input_text', text: planInstruction }] },
         { role: 'user', content: [{ type: 'input_text', text: `INPUT:\n${JSON.stringify(planInput)}` }] },
       ],
-      reasoning: { effort: 'medium' },
+      reasoning: { effort: 'low' },
       text: {
         verbosity: 'low',
         format: {
@@ -489,14 +603,32 @@ console.log("‼️outputText", outputText)
   // Persist messages (Mode A only: assistant text)
   const userMsg: Message = { id: lastUser.id, role: 'user', content: lastUser.content } as Message;
   const assistantMsg: Message = { id: `asst_${Date.now()}`, role: 'assistant', content: outputText } as Message;
+  const w0 = Date.now();
   await saveChat({ id: chatId, messages: [...previousMessages, userMsg, assistantMsg] });
 
   if (responseId) {
     await db.update(chats).set({ lastResponseId: responseId }).where(eq(chats.id, chatId));
   }
 
+  const w1 = Date.now();
   const elapsed = Date.now() - startedAt;
-  console.log('[FLOW] chat-v2 end', { ms: elapsed, responseId, mode: 'A' });
+  try {
+    const MAG = '\x1b[35m';
+    const CYA = '\x1b[36m';
+    const RES = '\x1b[0m';
+    const t_db_writes = w1 - w0;
+    const t_text_total = Math.max(0, elapsed - t_decide_mode - t_db_writes);
+    const preview = (outputText ?? '').slice(0, 300);
+    const pct = (ms: number) => (elapsed > 0 ? Math.round((ms / elapsed) * 1000) / 10 : 0);
+    console.log(`${MAG}────────────── TIMINGS (Mode A Non-Stream) ───────────${RES}`);
+    console.log(`${CYA}total${RES}`, `${elapsed} ms`);
+    console.log(`${CYA}decide_mode${RES}`, `${t_decide_mode} ms (${pct(t_decide_mode)}%)`);
+    console.log(`${CYA}text_total${RES}`, `${t_text_total} ms (${pct(t_text_total)}%)`);
+    console.log(`${CYA}db_writes${RES}`, `${t_db_writes} ms (${pct(t_db_writes)}%)`);
+    console.log(`${CYA}response_preview${RES}`, preview);
+    console.log(`${MAG}────────────────────────────────────────────────────${RES}`);
+  } catch {}
+  console.log('[FLOW] chat-v2 end (Mode A)', { ms: elapsed, responseId, mode: 'A' });
 
   return new Response(JSON.stringify({ text: outputText, mode: 'A' as const }), {
     headers: { 'Content-Type': 'application/json' }
