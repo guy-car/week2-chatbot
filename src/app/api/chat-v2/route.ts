@@ -10,22 +10,55 @@ import { tasteProfileServerService } from "~/server/services/taste-profile";
 import { listChatRecommendations, addChatRecommendation } from "~/server/db/chat-recommendations";
 import { getUserBlockedList } from "~/server/services/blocked-list";
 import { lookupBestByTitleYear } from "~/server/services/tmdb";
-
-type ResponsesRequest = {
-  model: string;
-  input: string | Array<{ role: 'developer' | 'user'; content: Array<{ type: 'input_text'; text: string }> }>;
-  reasoning: { effort: 'low' | 'medium' | 'high' };
-  text: { verbosity: 'low' | 'medium' | 'high'; format?: unknown };
-  previous_response_id?: string;
-};
-
-type ResponsesSuccess = {
-  id: string;
-  output_text?: string;
-  output_parsed?: unknown;
-};
+import OpenAI from 'openai';
 
 export const maxDuration = 30;
+
+// Shared planning instruction (Structured Outputs via json_schema)
+const planInstruction = `You are planning recommendations. Use INPUT as constraints.
+
+Output format (STRICT): JSON only. No prose. No markdown. No code fences. Must match exactly:
+{"intro":"string (<=160 chars)","picks":[{"title":"string","year":1234,"reason":"string"}]}
+
+Rules:
+- you MUST Avoid any items present in INPUT.blocked by title and year intent
+- up to 3 picks maximum
+- title: exact canonical title (no quotes, no year in title)
+- year: 4-digit number only
+- reason: 1 short sentence which answers the question "why it's right for the user", this must demonstrate consideration for the user's taste (<=160 chars)
+- Keep intro short (<=160 chars). Do not include lists, bullets, or extra text
+
+Examples (INPUT → OUTPUT):
+INPUT:
+{"blocked":[{"id_tmdb":603,"media_type":"movie","title":"The Matrix","year":1999}],"tasteProfileSummary":"Likes cerebral sci‑fi and stylish action"}
+OUTPUT:
+{"intro":"Smart, stylish sci‑fi that leans cerebral without losing momentum.","picks":[{"title":"Equilibrium","year":2002,"reason":"Gun‑kata action with authoritarian themes and sleek aesthetic."},{"title":"Dark City","year":1998,"reason":"Reality‑bending noir tone with strong cerebral mystery."},{"title":"Upgrade","year":2018,"reason":"Visceral tech‑noir with clever body‑hacking premise."}]}
+
+INPUT:
+{"blocked":[{"id_tmdb":49026,"media_type":"movie","title":"The Dark Knight Rises","year":2012}],"tasteProfileSummary":"Enjoys grounded crime dramas and neo‑noir"}
+OUTPUT:
+{"intro":"Gritty neo‑noir with grounded crime stakes and strong atmosphere.","picks":[{"title":"A Most Violent Year","year":2014,"reason":"Slow‑burn crime ethics with moody, wintry noir tone."},{"title":"Blue Ruin","year":2013,"reason":"Lean revenge noir with grounded tension and minimalism."},{"title":"Cold in July","year":2014,"reason":"Texas‑set crime spiral with pulpy neo‑noir energy."}]}
+
+INPUT:
+{"blocked":[{"id_tmdb":64686,"media_type":"tv","title":"True Detective","year":2014}],"tasteProfileSummary":"Likes bleak atmosphere and moral ambiguity"}
+OUTPUT:
+{"intro":"Bleak, morally ambiguous crime stories with slow‑burn tension.","picks":[{"title":"The Night Of","year":2016,"reason":"Procedural unraveling with heavy mood and character focus."},{"title":"Top of the Lake","year":2013,"reason":"Remote setting, dark secrets, and patient investigative pace."}]}`;
+
+// Safe access helpers to avoid any-casts from SDK responses
+function getResponseText(res: unknown): string {
+  const r = res as { output_text?: unknown };
+  return typeof r?.output_text === 'string' ? r.output_text : '';
+}
+
+function getResponseParsed(res: unknown): unknown {
+  const r = res as { output_parsed?: unknown };
+  return r?.output_parsed;
+}
+
+function getResponseId(res: unknown): string | undefined {
+  const r = res as { id?: unknown };
+  return typeof r?.id === 'string' ? r.id : undefined;
+}
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
@@ -47,6 +80,9 @@ export async function POST(req: Request) {
   // Threading: read lastResponseId for this chat
   const chatRow = await db.select().from(chats).where(eq(chats.id, chatId)).limit(1);
   const lastResponseId = chatRow[0]?.lastResponseId ?? undefined;
+
+  // Official OpenAI SDK client
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   // Stage 2: decide mode first (strict JSON) with explicit rules and few-shot
   const decisionInstruction = `You are a mode decider. Return ONLY JSON: {"mode":"A|B","reason":"<160 chars>"}.
@@ -75,54 +111,37 @@ USER: "Hey Genie how is it going?"
 
 USER: "I liked Drive and Nightcrawler."
 → {"mode":"B","reason":"States likes; implies similar picks"}`;
-  const decisionPayload: ResponsesRequest = {
+  const decideResponse = await openai.responses.create({
     model: 'gpt-5',
     input: [
       { role: 'developer', content: [{ type: 'input_text', text: decisionInstruction }] },
       { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] },
     ],
     reasoning: { effort: 'low' },
-    text: { verbosity: 'low' },
-    ...(lastResponseId ? { previous_response_id: lastResponseId } : {})
-  };
-  // Enforce structured output under text.format using JSON Schema
-  (decisionPayload.text).format = {
-    type: 'json_schema',
-    name: 'decide_mode',
-    schema: {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        mode: { type: 'string', enum: ['A','B'] },
-        reason: { type: 'string', maxLength: 160 },
-      },
-      required: ['mode','reason']
+    text: {
+      verbosity: 'low',
+      format: {
+        type: 'json_schema',
+        name: 'decide_mode',
+        schema: {
+          type: 'object', additionalProperties: false,
+          properties: {
+            mode: { type: 'string', enum: ['A','B'] },
+            reason: { type: 'string', maxLength: 160 },
+          },
+          required: ['mode','reason']
+        },
+        strict: true,
+      }
     },
-    strict: true,
-  };
-
-  const decisionRes = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(decisionPayload)
+    ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
   });
 
-  if (!decisionRes.ok) {
-    const errText = await decisionRes.text();
-    console.error('[FLOW] ❌ chat-v2 decide_mode error', errText);
-    return new Response(JSON.stringify({ error: 'openai_error', detail: errText }), { status: 502 });
-  }
-
-  const decisionData: unknown = await decisionRes.json();
-  const decisionParsed = (decisionData && typeof decisionData === 'object') ? decisionData as ResponsesSuccess : undefined;
-  const decisionText: string = decisionParsed?.output_text ?? '';
+  const decisionText: string = getResponseText(decideResponse);
   let mode: 'A' | 'B' = 'A';
   let decisionReason = '';
   try {
-    const raw = decisionParsed?.output_parsed as unknown;
+    const raw = getResponseParsed(decideResponse);
     let candidate: unknown = raw;
     if (!candidate && decisionText) {
       candidate = JSON.parse(decisionText) as unknown;
@@ -164,133 +183,45 @@ USER: "I liked Drive and Nightcrawler."
       ...userBlocked,
     ];
 
-    const planInstruction = `You are planning recommendations. Use INPUT as constraints.
-
-Output format (STRICT): JSON only. No prose. No markdown. No code fences. Must match exactly:
-{"intro":"string (<=160 chars)","picks":[{"title":"string","year":1234,"reason":"string"}]}
-
-Rules:
-- you MUST Avoid any items present in INPUT.blocked by title and year intent
-- up to 3 picks maximum
-- title: exact canonical title (no quotes, no year in title)
-- year: 4-digit number only
-- reason: 1 short sentence which answers the question "why it's right for the user", this must demonstrate consideration for the user's taste (<=160 chars)
-- Keep intro short (<=160 chars). Do not include lists, bullets, or extra text
-
-Examples (INPUT → OUTPUT):
-INPUT:
-{"blocked":[{"id_tmdb":603,"media_type":"movie","title":"The Matrix","year":1999}],"tasteProfileSummary":"Likes cerebral sci‑fi and stylish action"}
-OUTPUT:
-{"intro":"Smart, stylish sci‑fi that leans cerebral without losing momentum.","picks":[{"title":"Equilibrium","year":2002,"reason":"Gun‑kata action with authoritarian themes and sleek aesthetic."},{"title":"Dark City","year":1998,"reason":"Reality‑bending noir tone with strong cerebral mystery."},{"title":"Upgrade","year":2018,"reason":"Visceral tech‑noir with clever body‑hacking premise."}]}
-
-INPUT:
-{"blocked":[{"id_tmdb":49026,"media_type":"movie","title":"The Dark Knight Rises","year":2012}],"tasteProfileSummary":"Enjoys grounded crime dramas and neo‑noir"}
-OUTPUT:
-{"intro":"Gritty neo‑noir with grounded crime stakes and strong atmosphere.","picks":[{"title":"A Most Violent Year","year":2014,"reason":"Slow‑burn crime ethics with moody, wintry noir tone."},{"title":"Blue Ruin","year":2013,"reason":"Lean revenge noir with grounded tension and minimalism."},{"title":"Cold in July","year":2014,"reason":"Texas‑set crime spiral with pulpy neo‑noir energy."}]}
-
-INPUT:
-{"blocked":[{"id_tmdb":64686,"media_type":"tv","title":"True Detective","year":2014}],"tasteProfileSummary":"Likes bleak atmosphere and moral ambiguity"}
-OUTPUT:
-{"intro":"Bleak, morally ambiguous crime stories with slow‑burn tension.","picks":[{"title":"The Night Of","year":2016,"reason":"Procedural unraveling with heavy mood and character focus."},{"title":"Top of the Lake","year":2013,"reason":"Remote setting, dark secrets, and patient investigative pace."}]}`;
+    // use shared planInstruction
     const planInput = { blocked, tasteProfileSummary };
 
-    const planPayload: ResponsesRequest = {
+    const planResponse = await openai.responses.create({
       model: 'gpt-5',
       input: [
         { role: 'developer', content: [{ type: 'input_text', text: planInstruction }] },
         { role: 'user', content: [{ type: 'input_text', text: `INPUT:\n${JSON.stringify(planInput)}` }] },
       ],
       reasoning: { effort: 'low' },
-      text: { verbosity: 'low' },
-      ...(lastResponseId ? { previous_response_id: lastResponseId } : {})
-    };
-    (planPayload.text).format = {
-      type: 'json_schema',
-      name: 'plan_picks',
-      schema: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          intro: { type: 'string' },
-          picks: {
-            type: 'array',
-            minItems: 1,
-            maxItems: 3,
-            items: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                title: { type: 'string' },
-                year: { type: 'number' },
-                reason: { type: 'string' },
-              },
-              required: ['title','year','reason']
-            }
-          }
-        },
-        required: ['intro','picks']
+      text: {
+        verbosity: 'low',
+        format: {
+          type: 'json_schema',
+          name: 'plan_picks',
+          schema: {
+            type: 'object', additionalProperties: false,
+            properties: {
+              intro: { type: 'string' },
+              picks: { type: 'array', minItems: 1, maxItems: 3, items: {
+                type: 'object', additionalProperties: false,
+                properties: { title: { type: 'string' }, year: { type: 'number' }, reason: { type: 'string' } },
+                required: ['title','year','reason']
+              } }
+            },
+            required: ['intro','picks']
+          },
+          strict: true,
+        }
       },
-      strict: true,
-    };
-
-    {
-      const CYAN = '\x1b[36m';
-      const RESET = '\x1b[0m';
-      try {
-        console.log(`${CYAN}🧾 [PLAN_REQ_TEXT]${RESET}`, JSON.stringify(planPayload.text));
-      } catch {}
-    }
-
-    const planRes = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(planPayload)
+      ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
     });
 
-    if (!planRes.ok) {
-      const errText = await planRes.text();
-      console.error('[FLOW] ❌ chat-v2 plan_picks error', errText);
-      return new Response(JSON.stringify({ error: 'openai_error', detail: errText }), { status: 502 });
-    }
-
-    const planData: unknown = await planRes.json();
-    const planParsed = (planData && typeof planData === 'object') ? planData as ResponsesSuccess : undefined;
-    {
-      const anyPlan = planData as any;
-      // Temporary debug: log structure of plan response
-      // Colors
-      const CYAN = '\x1b[36m';
-      const YELLOW = '\x1b[33m';
-      const RESET = '\x1b[0m';
-      try {
-        console.log(`${CYAN}🧪 [PLAN_KEYS]${RESET}`, anyPlan ? Object.keys(anyPlan) : []);
-        if (Array.isArray(anyPlan?.output)) {
-          console.log(`${YELLOW}📦 [PLAN_OUTPUT]${RESET}`, anyPlan.output.map((o: any) => ({ type: o?.type, role: o?.role, status: o?.status, contentTypes: Array.isArray(o?.content) ? o.content.map((c: any) => c?.type) : undefined })));
-          const firstJson = anyPlan.output?.[0]?.content?.find((c: any) => c?.type === 'output_json' || c?.type === 'json')?.json;
-          if (firstJson) console.log(`${YELLOW}📝 [PLAN_OUTPUT_JSON_SAMPLE]${RESET}`, JSON.stringify(firstJson).slice(0, 600));
-        } else {
-          console.log(`${YELLOW}📦 [PLAN_OUTPUT]${RESET}`, 'no output array');
-        }
-        if (anyPlan?.output_parsed) {
-          console.log(`${CYAN}🧾 [PLAN_OUTPUT_PARSED]${RESET}`, JSON.stringify(anyPlan.output_parsed).slice(0, 600));
-        } else {
-          console.log(`${CYAN}🧾 [PLAN_OUTPUT_PARSED]${RESET}`, 'none');
-        }
-        const ot = anyPlan?.output_text ?? '';
-        console.log(`${CYAN}✂️  [PLAN_OUTPUT_TEXT_LEN]${RESET}`, typeof ot === 'string' ? ot.length : 0);
-      } catch (e) {
-        console.log('⚠️ [PLAN_DEBUG_LOG_ERROR]', e);
-      }
-    }
-    const planText: string = planParsed?.output_text ?? '';
+    const planText: string = getResponseText(planResponse);
 
     let intro = '';
     let picks: { title: string; year: number; reason: string }[] = [];
     try {
-      const raw = planParsed?.output_parsed as unknown;
+      const raw = getResponseParsed(planResponse);
       let candidate: unknown = raw;
       if (!candidate && planText) {
         candidate = JSON.parse(planText) as unknown;
@@ -303,6 +234,21 @@ OUTPUT:
       const dbg = planText.slice(0, 1200);
       return new Response(JSON.stringify({ text: '', mode: 'B' as const, debug: { raw: dbg } }), { headers: { 'Content-Type': 'application/json' } });
     }
+
+    // Pretty CLI log of planned intro and picks
+    try {
+      const DIV = '\x1b[35m' + '────────────────────────────────────────────────' + '\x1b[0m';
+      const LABEL = (text: string) => `\x1b[36m${text}\x1b[0m`;
+      console.log(DIV);
+      console.log(LABEL('general intro'), intro);
+      picks.forEach((p, i) => {
+        const suffix = String.fromCharCode(65 + i);
+        console.log(LABEL(`title ${suffix}`), p.title);
+        console.log(LABEL(`year ${suffix}`), p.year);
+        console.log(LABEL(`reason ${suffix}`), p.reason);
+      });
+      console.log(DIV);
+    } catch {}
 
     // Dedup by blocked ids after TMDB lookup
     const blockedKey = new Set(blocked.map(b => `${b.media_type}:${b.id_tmdb}`));
@@ -332,40 +278,27 @@ OUTPUT:
       toolResults: accepted,
     });
 
+    // Update threading id from this plan response
+    const planRespIdA = getResponseId(planResponse);
+    if (planRespIdA) {
+      await db.update(chats).set({ lastResponseId: planRespIdA }).where(eq(chats.id, chatId));
+    }
     const elapsedB = Date.now() - startedAt;
     console.log('[FLOW] chat-v2 end (mode B planned)', { ms: elapsedB, picks: accepted.length });
     return new Response(JSON.stringify({ text: intro, mode: 'B' as const, picks: accepted }), { headers: { 'Content-Type': 'application/json' } });
   }
 
   // Mode A: generate conversational text
-  const requestPayload: ResponsesRequest = {
+  const aRes = await openai.responses.create({
     model: 'gpt-5',
-    input: lastUser.content,
+    input: [ { role: 'user', content: [{ type: 'input_text', text: lastUser.content }] } ],
     reasoning: { effort: 'low' },
     text: { verbosity: 'low' },
-    ...(lastResponseId ? { previous_response_id: lastResponseId } : {})
-  };
-
-  const res = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(requestPayload)
+    ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
   });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('[FLOW] ❌ chat-v2 text error', errText);
-    return new Response(JSON.stringify({ error: 'openai_error', detail: errText }), { status: 502 });
-  }
-
-  const data: unknown = await res.json();
-  const parsed = (data && typeof data === 'object') ? data as ResponsesSuccess : undefined;
-  const outputText: string = parsed?.output_text ?? '';
-  const responseId: string | undefined = parsed?.id ?? undefined;
-
+  const outputText: string = getResponseText(aRes);
+  const responseId: string | undefined = getResponseId(aRes);
+console.log("‼️outputText", outputText)
   // If A produced empty text, treat as misclassification and fall back to planning (B)
   if (!outputText || outputText.trim().length === 0) {
     console.log('[FLOW] A produced empty text → falling back to B planning');
@@ -396,105 +329,52 @@ OUTPUT:
       ...userBlocked,
     ];
 
-    const planInstruction = `You are planning recommendations. Use INPUT as constraints.
-
-Output format (STRICT): JSON only. No prose. No markdown. No code fences. Must match exactly:
-{"intro":"string (<=160 chars)","picks":[{"title":"string","year":1234,"reason":"string"}]}
-
-Rules:
-- picks length 1..3
-- title: exact canonical title (no quotes, no year in title)
-- year: 4-digit number only
-- reason: 1 short sentence on fit (<=160 chars)
-- Avoid any items present in INPUT.blocked by title and year intent
-- Keep intro short (<=160 chars). Do not include lists, bullets, or extra text
-
-Examples (INPUT → OUTPUT):
-INPUT:
-{"blocked":[{"id_tmdb":603,"media_type":"movie","title":"The Matrix","year":1999}],"tasteProfileSummary":"Likes cerebral sci‑fi and stylish action"}
-OUTPUT:
-{"intro":"Smart, stylish sci‑fi that leans cerebral without losing momentum.","picks":[{"title":"Equilibrium","year":2002,"reason":"Gun‑kata action with authoritarian themes and sleek aesthetic."},{"title":"Dark City","year":1998,"reason":"Reality‑bending noir tone with strong cerebral mystery."},{"title":"Upgrade","year":2018,"reason":"Visceral tech‑noir with clever body‑hacking premise."}]}
-
-INPUT:
-{"blocked":[{"id_tmdb":49026,"media_type":"movie","title":"The Dark Knight Rises","year":2012}],"tasteProfileSummary":"Enjoys grounded crime dramas and neo‑noir"}
-OUTPUT:
-{"intro":"Gritty neo‑noir with grounded crime stakes and strong atmosphere.","picks":[{"title":"A Most Violent Year","year":2014,"reason":"Slow‑burn crime ethics with moody, wintry noir tone."},{"title":"Blue Ruin","year":2013,"reason":"Lean revenge noir with grounded tension and minimalism."},{"title":"Cold in July","year":2014,"reason":"Texas‑set crime spiral with pulpy neo‑noir energy."}]}
-
-INPUT:
-{"blocked":[{"id_tmdb":64686,"media_type":"tv","title":"True Detective","year":2014}],"tasteProfileSummary":"Likes bleak atmosphere and moral ambiguity"}
-OUTPUT:
-{"intro":"Bleak, morally ambiguous crime stories with slow‑burn tension.","picks":[{"title":"The Night Of","year":2016,"reason":"Procedural unraveling with heavy mood and character focus."},{"title":"Top of the Lake","year":2013,"reason":"Remote setting, dark secrets, and patient investigative pace."}]}`;
+    // use shared planInstruction
     const planInput = { blocked, tasteProfileSummary };
-    const planPayload: ResponsesRequest = {
+    const planResponse = await openai.responses.create({
       model: 'gpt-5',
       input: [
         { role: 'developer', content: [{ type: 'input_text', text: planInstruction }] },
         { role: 'user', content: [{ type: 'input_text', text: `INPUT:\n${JSON.stringify(planInput)}` }] },
       ],
       reasoning: { effort: 'medium' },
-      text: { verbosity: 'low' },
-      ...(lastResponseId ? { previous_response_id: lastResponseId } : {})
-    };
-    (planPayload.text).format = {
-      type: 'json_schema',
-      name: 'plan_picks',
-      schema: {
-        type: 'object', additionalProperties: false,
-        properties: {
-          intro: { type: 'string' },
-          picks: { type: 'array', minItems: 1, maxItems: 3, items: {
+      text: {
+        verbosity: 'low',
+        format: {
+          type: 'json_schema',
+          name: 'plan_picks',
+          schema: {
             type: 'object', additionalProperties: false,
-            properties: { title: { type: 'string' }, year: { type: 'number' }, reason: { type: 'string' } },
-            required: ['title','year','reason']
-          } }
-        },
-        required: ['intro','picks']
+            properties: {
+              intro: { type: 'string' },
+              picks: { type: 'array', minItems: 1, maxItems: 3, items: {
+                type: 'object', additionalProperties: false,
+                properties: { title: { type: 'string' }, year: { type: 'number' }, reason: { type: 'string' } },
+                required: ['title','year','reason']
+              } }
+            },
+            required: ['intro','picks']
+          },
+          strict: true,
+        }
       },
-      strict: true,
-    };
-
-    const planRes = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(planPayload)
+      ...(lastResponseId ? { previous_response_id: lastResponseId } as Record<string, unknown> : {})
     });
-    if (!planRes.ok) {
-      const errText = await planRes.text();
-      console.error('[FLOW] ❌ chat-v2 plan_picks error', errText);
-      return new Response(JSON.stringify({ error: 'openai_error', detail: errText }), { status: 502 });
-    }
-    const planData: unknown = await planRes.json();
-    const planParsed = (planData && typeof planData === 'object') ? planData as ResponsesSuccess : undefined;
-    {
-      const anyPlan = planData as any;
+    // Minimal safe debug (no any-casts)
+    try {
       const CYAN = '\x1b[36m';
-      const YELLOW = '\x1b[33m';
       const RESET = '\x1b[0m';
-      try {
-        console.log(`${CYAN}🧪 [PLAN_KEYS]${RESET}`, anyPlan ? Object.keys(anyPlan) : []);
-        if (Array.isArray(anyPlan?.output)) {
-          console.log(`${YELLOW}📦 [PLAN_OUTPUT]${RESET}`, anyPlan.output.map((o: any) => ({ type: o?.type, role: o?.role, status: o?.status, contentTypes: Array.isArray(o?.content) ? o.content.map((c: any) => c?.type) : undefined })));
-          const firstJson = anyPlan.output?.[0]?.content?.find((c: any) => c?.type === 'output_json' || c?.type === 'json')?.json;
-          if (firstJson) console.log(`${YELLOW}📝 [PLAN_OUTPUT_JSON_SAMPLE]${RESET}`, JSON.stringify(firstJson).slice(0, 600));
-        } else {
-          console.log(`${YELLOW}📦 [PLAN_OUTPUT]${RESET}`, 'no output array');
-        }
-        if (anyPlan?.output_parsed) {
-          console.log(`${CYAN}🧾 [PLAN_OUTPUT_PARSED]${RESET}`, JSON.stringify(anyPlan.output_parsed).slice(0, 600));
-        } else {
-          console.log(`${CYAN}🧾 [PLAN_OUTPUT_PARSED]${RESET}`, 'none');
-        }
-        const ot = anyPlan?.output_text ?? '';
-        console.log(`${CYAN}✂️  [PLAN_OUTPUT_TEXT_LEN]${RESET}`, typeof ot === 'string' ? ot.length : 0);
-      } catch (e) {
-        console.log('⚠️ [PLAN_DEBUG_LOG_ERROR]', e);
-      }
+      console.log(`${CYAN}✂️  [PLAN_OUTPUT_TEXT_LEN]${RESET}`, getResponseText(planResponse).length);
+      const parsed = getResponseParsed(planResponse);
+      console.log(`${CYAN}🧾 [PLAN_OUTPUT_PARSED]${RESET}`, parsed ? JSON.stringify(parsed).slice(0, 600) : 'none');
+    } catch (e) {
+      console.log('⚠️ [PLAN_DEBUG_LOG_ERROR]', e);
     }
-    const planText: string = planParsed?.output_text ?? '';
+    const planText: string = getResponseText(planResponse);
     let intro = '';
     let picks: { title: string; year: number; reason: string }[] = [];
     try {
-      const raw = planParsed?.output_parsed as unknown;
+      const raw = getResponseParsed(planResponse);
       let candidate: unknown = raw;
       if (!candidate && planText) {
         candidate = JSON.parse(planText) as unknown;
@@ -507,6 +387,21 @@ OUTPUT:
       const dbg = planText.slice(0, 1200);
       return new Response(JSON.stringify({ text: '', mode: 'B' as const, debug: { raw: dbg } }), { headers: { 'Content-Type': 'application/json' } });
     }
+
+    // Pretty CLI log of planned intro and picks (fallback path)
+    try {
+      const DIV = '\x1b[35m' + '────────────────────────────────────────────────' + '\x1b[0m';
+      const LABEL = (text: string) => `\x1b[36m${text}\x1b[0m`;
+      console.log(DIV);
+      console.log(LABEL('general intro'), intro);
+      picks.forEach((p, i) => {
+        const suffix = String.fromCharCode(65 + i);
+        console.log(LABEL(`title ${suffix}`), p.title);
+        console.log(LABEL(`year ${suffix}`), p.year);
+        console.log(LABEL(`reason ${suffix}`), p.reason);
+      });
+      console.log(DIV);
+    } catch {}
 
     const blockedKey = new Set(blocked.map(b => `${b.media_type}:${b.id_tmdb}`));
     const accepted: MovieData[] = [];
@@ -521,6 +416,10 @@ OUTPUT:
     }
     const asstId = `asst_${Date.now()}`;
     await db.insert(messagesTable).values({ id: asstId, chatId, role: 'assistant', content: intro, toolResults: accepted });
+    const planRespIdB = getResponseId(planResponse);
+    if (planRespIdB) {
+      await db.update(chats).set({ lastResponseId: planRespIdB }).where(eq(chats.id, chatId));
+    }
     const elapsedB = Date.now() - startedAt;
     console.log('[FLOW] chat-v2 end (fallback to mode B planned)', { ms: elapsedB, picks: accepted.length });
     return new Response(JSON.stringify({ text: intro, mode: 'B' as const, picks: accepted }), { headers: { 'Content-Type': 'application/json' } });
