@@ -291,8 +291,36 @@ export const sidepanelVariants = {
   // Movie poster container
   poster: cn(
     'relative overflow-hidden',
-    'bg-cover bg-center bg-no-repeat',
     'rounded-[3px]'
+  ),
+
+  // Poster overlay for magnifying glass
+  posterOverlay: cn(
+    'absolute inset-0 z-10',
+    'flex items-center justify-center',
+    'bg-black bg-opacity-0',
+    'transition-all duration-300 ease-in-out',
+    'opacity-0 pointer-events-none',
+    'group-hover:opacity-100 group-hover:pointer-events-auto group-hover:bg-opacity-10',
+    'rounded-[3px]'
+  ),
+
+  // Overlay button styling
+  overlayButton: cn(
+    'w-10 h-10',
+    'flex items-center justify-center',
+    'bg-[rgba(0,229,255,0.15)]',
+    'rounded-full',
+    'transition-all duration-200',
+    'hover:scale-105 hover:bg-[rgba(0,229,255,0.25)]',
+    'cursor-pointer'
+  ),
+
+  // Overlay icon styling
+  overlayIcon: cn(
+    'w-6 h-6',
+    'object-contain',
+    'transition-all duration-200'
   ),
   
   // Sliding panel container
@@ -332,7 +360,7 @@ export const sidepanelVariants = {
   // Mobile overlay variant
   mobileOverlay: cn(
     'fixed inset-0 z-50',
-    'bg-black bg-opacity-50',
+    'bg-red bg-opacity-100',
     'flex items-center justify-center',
     'p-4'
   ),

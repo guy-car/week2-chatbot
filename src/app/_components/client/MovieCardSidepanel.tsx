@@ -37,9 +37,6 @@ export function MovieCardSidepanel({
       case 'markAsWatched':
         onMarkAsWatched();
         break;
-      case 'moreInfo':
-        onMoreInfo();
-        break;
       case 'like':
         onLike();
         break;
@@ -56,17 +53,30 @@ export function MovieCardSidepanel({
     <div 
       className={`group ${sidepanelVariants.container} ${className ?? ''}`}
     >
-      {/* Movie Poster */}
+      {/* Movie Poster with Simple Icon Overlay */}
       <div 
-        className={sidepanelVariants.poster}
-        style={{
-          backgroundImage: `url(${posterUrl})`,
-          width: '150px',
-          height: '212px'
-        }}
-        role="img"
-        aria-label={`Movie poster for ${movieTitle}`}
-      />
+        className="relative w-[150px] h-[212px] overflow-hidden rounded-[3px]"
+      >
+        {/* Poster image */}
+        <img
+          src={posterUrl}
+          alt={`Poster for ${movieTitle}`}
+          className="w-full h-full object-cover"
+        />
+        
+        {/* Dark overlay - shows on hover */}
+        <div className="absolute inset-0 bg-black opacity-0 transition-opacity duration-300 group-hover:opacity-30"></div>
+        
+        {/* Magnifying glass icon overlay - shows on hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <img
+            src="/icons/new_cyan/glass.png"
+            alt="More Info"
+            className="w-12 h-12 cursor-pointer"
+            onClick={onMoreInfo}
+          />
+        </div>
+      </div>
       
       {/* Sliding Panel */}
       <div className={sidepanelVariants.panel}>

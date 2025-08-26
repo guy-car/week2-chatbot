@@ -22,12 +22,6 @@ export const MOVIE_CARD_ACTIONS: MovieCardAction[] = [
     tooltipText: 'Add to Watch History'
   },
   {
-    iconPath: '/icons/new_cyan/glass.png',
-    filledIconPath: '/icons/new_cyan/glass-filled.png',
-    actionName: 'moreInfo',
-    tooltipText: 'More Info'
-  },
-  {
     iconPath: '/icons/new_cyan/thumb-up.png',
     filledIconPath: '/icons/new_cyan/thumb-up-filled-2.png',
     actionName: 'like',
@@ -50,4 +44,4 @@ export const ICON_CONFIG = {
 };
 
 // Action type for TypeScript
-export type MovieCardActionType = 'addToWatchlist' | 'markAsWatched' | 'moreInfo' | 'like' | 'dislike'; 
+export type MovieCardActionType = 'addToWatchlist' | 'markAsWatched' | 'like' | 'dislike'; 
