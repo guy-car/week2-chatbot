@@ -281,3 +281,15 @@ h1,
   }
 }
 
+@layer utilities {
+  .bg-page-cinematic {
+    background-color: #0A0A0B;
+    background-image:
+      radial-gradient(120% 60% at 50% 115%, rgba(253, 142, 44, 0.22) 0%, rgba(253, 142, 44, 0) 60%),
+      radial-gradient(120% 60% at 50% 125%, rgba(0, 229, 255, 0.20) 0%, rgba(0, 229, 255, 0) 65%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+  }
+}
+
