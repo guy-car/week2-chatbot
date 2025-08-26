@@ -12,8 +12,32 @@ export interface MovieData {
     poster_url: string | null;
     media_type: 'movie' | 'tv';
     release_date?: string;
+    year?: number;      // Computed from release_date for easy access
     rating?: number;
     overview?: string;
+    
+    // Progressive enhancement fields (added as available)
+    reason?: string;  // "Why it's right for you" from AI planner
+    
+    // Enriched fields from enrichment.enrich query
+    imdbId?: string;
+    ratings?: { rottenTomatoes?: string; metacritic?: string; imdb?: string };
+    watch?: { country: 'US'; link?: string; flatrate?: { id: number; name: string; logoPath: string }[] };
+    duration?: number;  // Runtime in minutes
+    trailer?: { 
+      site: string; 
+      key: string; 
+      name: string; 
+      url: string;
+      thumbnails: {
+        default: string;    // 120x90
+        medium: string;     // 320x180
+        high: string;       // 480x360
+      };
+      embedUrl: string;     // YouTube embed URL
+    };
+    genres?: string[];  // First 1-2 genres
+    director?: string;
 }
 
 // Additional types for database operations
@@ -52,6 +76,23 @@ export function isMovieData(data: unknown): data is MovieData {
 // Type guard for MovieData array
 export function isMovieDataArray(data: unknown): data is MovieData[] {
     return Array.isArray(data) && data.every(isMovieData);
+}
+
+// Type guards for progressive enhancement fields
+export function hasEnrichment(movie: MovieData): movie is MovieData & Required<Pick<MovieData, 'imdbId' | 'ratings' | 'watch' | 'duration' | 'genres' | 'director' | 'trailer'>> {
+    return !!(movie.imdbId && movie.ratings && movie.watch && movie.duration && movie.genres && movie.director && movie.trailer);
+}
+
+export function hasReason(movie: MovieData): movie is MovieData & Required<Pick<MovieData, 'reason'>> {
+    return !!movie.reason;
+}
+
+export function hasRatings(movie: MovieData): movie is MovieData & Required<Pick<MovieData, 'ratings'>> {
+    return !!movie.ratings;
+}
+
+export function hasWatchProviders(movie: MovieData): movie is MovieData & Required<Pick<MovieData, 'watch'>> {
+    return !!movie.watch && !!movie.watch.flatrate;
 }
 
 // Tool schemas (Zod) — server validates Responses output against these

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Tooltip } from 'react-tooltip'
 import { sidepanelVariants } from '~/styles/component-styles'
 import { MOVIE_CARD_ACTIONS } from './movie-card-icons'
 import { cn } from '~/lib/utils'
@@ -13,6 +12,7 @@ interface MovieCardIconProps {
   tooltipText: string;
   onClick: () => void;
   movieId: number; // Add movieId for unique storage key
+  tooltipId: string; // NEW: receive shared tooltip ID from parent
   className?: string;
 }
 
@@ -22,9 +22,9 @@ export function MovieCardIcon({
   tooltipText, 
   onClick, 
   movieId,
+  tooltipId,
   className 
 }: MovieCardIconProps) {
-  const tooltipId = `movie-action-${actionType}-${movieId}`;
   const storageKey = `movie-${movieId}-${actionType}-clicked`;
   
   // State for clicked status
@@ -64,37 +64,28 @@ export function MovieCardIcon({
   };
 
   return (
-    <>
-      <button
-        className={cn(
-          sidepanelVariants.iconButton,
-          'focus:outline-none',
-          className ?? ''
-        )}
-        onClick={handleClick}
-        data-tooltip-id={tooltipId}
-        data-tooltip-content={tooltipText}
-        aria-label={tooltipText}
-        type="button"
-      >
-        <img
-          src={getIconPath()}
-          alt={tooltipText}
-          className={sidepanelVariants.iconImage}
-          style={{
-            width: '32px',
-            height: '32px',
-            objectFit: 'contain' as const
-          }}
-        />
-      </button>
-      
-      <Tooltip 
-        id={tooltipId} 
-        place="left" 
-        delayShow={0}
-        className="z-50"
+    <button
+      className={cn(
+        sidepanelVariants.iconButton,
+        'focus:outline-none',
+        className ?? ''
+      )}
+      onClick={handleClick}
+      data-tooltip-id={tooltipId}
+      data-tooltip-content={tooltipText}
+      aria-label={tooltipText}
+      type="button"
+    >
+      <img
+        src={getIconPath()}
+        alt={tooltipText}
+        className={sidepanelVariants.iconImage}
+        style={{
+          width: '32px',
+          height: '32px',
+          objectFit: 'contain' as const
+        }}
       />
-    </>
+    </button>
   );
 } 

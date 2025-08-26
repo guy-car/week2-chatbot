@@ -81,11 +81,15 @@ export async function lookupBestByTitleYear(title: string, year?: number): Promi
   const best = scored[0]?.item;
   if (!best) return undefined;
 
+  const releaseDate = best.release_date ?? best.first_air_date;
+  const computedYear = releaseDate ? parseInt(releaseDate.slice(0, 4)) : undefined;
+  
   return {
     id: best.id,
     title: best.title ?? best.name ?? '',
     poster_url: best.poster_path ? `https://image.tmdb.org/t/p/w500${best.poster_path}` : null,
-    release_date: best.release_date ?? best.first_air_date,
+    release_date: releaseDate,
+    year: computedYear,
     rating: Number(best.vote_average ?? 0),
     overview: best.overview ?? '',
     media_type: (best.media_type === 'tv') ? 'tv' : 'movie',

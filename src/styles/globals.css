@@ -8,6 +8,7 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-display: var(--font-noto-sans-display), var(--font-noto-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme inline {
@@ -156,6 +157,10 @@ h1,
 .font-noto-bold {
   font-family: var(--font-noto-sans), sans-serif;
   font-weight: 700;
+}
+
+.font-inter {
+  font-family: var(--font-inter), sans-serif;
 }
 
 .mask-vignette {

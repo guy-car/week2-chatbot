@@ -1,9 +1,10 @@
 // server/api/routers/movies.ts
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { movieInteractions, userPreferences } from "~/server/db/schema";
 import { eq, and, desc, count } from "drizzle-orm";
 import { userMovies } from "~/server/db/schema";
+import type { MovieData } from "~/app/types";
 
 
 export const moviesRouter = createTRPCRouter({
@@ -255,6 +256,62 @@ export const moviesRouter = createTRPCRouter({
                     count: historyCount[0]?.count ?? 0
                 }
             };
+        }),
+
+    // Get MovieData by TMDB ID (reverse lookup)
+    getMovieData: publicProcedure
+        .input(z.object({
+            type: z.enum(['movie', 'tv']),
+            id: z.number(),
+        }))
+        .query(async ({ input }) => {
+            const { type, id } = input;
+            
+            try {
+                // Fetch basic movie details from TMDB
+                const url = `https://api.themoviedb.org/3/${type}/${id}?language=en-US`;
+                const response = await fetch(url, {
+                    headers: {
+                        accept: 'application/json',
+                        Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`TMDB API error: ${response.status}`);
+                }
+                
+                const data = await response.json() as {
+                    id: number;
+                    title?: string;
+                    name?: string;
+                    poster_path?: string | null;
+                    release_date?: string;
+                    first_air_date?: string;
+                    vote_average?: number;
+                    overview?: string;
+                };
+                
+                // Convert to MovieData format
+                const releaseDate = data.release_date ?? data.first_air_date;
+                const computedYear = releaseDate ? parseInt(releaseDate.slice(0, 4)) : undefined;
+                
+                const movieData: MovieData = {
+                    id: data.id,
+                    title: data.title ?? data.name ?? '',
+                    poster_url: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null,
+                    media_type: type,
+                    release_date: releaseDate,
+                    year: computedYear,
+                    rating: Number(data.vote_average ?? 0),
+                    overview: data.overview ?? '',
+                };
+                
+                return movieData;
+            } catch (error) {
+                console.error('Error fetching movie data:', error);
+                throw new Error('Failed to fetch movie data');
+            }
         }),
 
 });

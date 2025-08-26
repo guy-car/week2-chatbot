@@ -3,7 +3,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Noto_Sans, Noto_Sans_Display } from "next/font/google";
+import { Noto_Sans, Noto_Sans_Display, Inter } from "next/font/google";
 import { headers } from "next/headers";
 import { Toaster } from 'react-hot-toast'
 
@@ -26,6 +26,12 @@ const notoSansDisplay = Noto_Sans_Display({
   subsets: ["latin"],
   weight: ['300', '400', '500', '700'],
   variable: "--font-noto-sans-display",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ['400'],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -63,7 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 
   return (
-    <html lang="en" className={`${notoSans.variable} ${notoSansDisplay.variable} dark`}>
+    <html lang="en" className={`${notoSans.variable} ${notoSansDisplay.variable} ${inter.variable} dark`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

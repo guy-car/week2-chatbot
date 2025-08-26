@@ -1,0 +1,134 @@
+[
+{
+    "id": 13,
+    "title": "Forrest Gump",
+    "poster_url": "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+    "media_type": "movie",
+    "release_date": "1994-06-23",
+    "year": 1994,
+    "rating": 8.466,
+    "overview": "A man with a low IQ has accomplished great things in his life and been present during significant historic events—in each case, far exceeding what anyone imagined he could do. But despite all he has achieved, his one true love eludes him.",
+    "imdbId": "tt0109830",
+    "ratings": {
+      "imdb": "8.8/10",
+      "rottenTomatoes": "75%",
+      "metacritic": "82/100"
+    },
+    "watch": {
+      "country": "US",
+      "link": "https://www.themoviedb.org/movie/13-forrest-gump/watch?locale=US",
+      "flatrate": [
+        {
+          "id": 337,
+          "name": "Disney+",
+          "logoPath": "/t/p/w92/97yvRBw1GzX7fXprcF80er19ot.jpg"
+        },
+        {
+          "id": 15,
+          "name": "Hulu",
+          "logoPath": "/t/p/w92/bxBlRPEPpMVDc4jMhSrTf2339DW.jpg"
+        },
+        {
+          "id": 582,
+          "name": "Paramount+",
+          "logoPath": "/t/p/w92/hExO4PtimLIYn3kBOrzsejNv7cT.jpg"
+        }
+      ]
+    },
+    "duration": 142,
+    "genres": [
+      "Comedy",
+      "Drama"
+    ],
+    "trailer": {
+      "site": "YouTube",
+      "key": "Mj9IA9tTfio",
+      "name": "Official 25th Anniversary Trailer",
+      "url": "https://www.youtube.com/watch?v=Mj9IA9tTfio"
+    },
+    "director": "Robert Zemeckis",
+    "reason": "This movie is perfect for you because..."
+  },
+{
+  "id": 1392,
+  "title": "Born Into Brothels: Calcutta's Red Light Kids",
+  "poster_url": "https://image.tmdb.org/t/p/w500/e7OWmWptBRCnUKj6MJ2qbxj5ZY5.jpg",
+  "media_type": "movie",
+  "release_date": "2004-12-08",
+  "year": 2004,
+  "rating": 6.81,
+  "overview": "Documentary depicting the lives of child prostitutes in the red light district of Songachi, Calcutta. Director Zana Briski went to photograph the prostitutes when she met and became friends with their children. Briski began giving photography lessons to the children and became aware that their photography might be a way for them to lead better lives.",
+  "imdbId": "tt0388789",
+  "ratings": {
+    "imdb": "7.2/10",
+    "rottenTomatoes": "95%",
+    "metacritic": "78/100"
+  },
+  "watch": {
+    "country": "US",
+    "link": "https://www.themoviedb.org/movie/1392-born-into-brothels-calcutta-s-red-light-kids/watch?locale=US"
+  },
+  "duration": 85,
+  "genres": [
+    "Documentary"
+  ],
+  "trailer": {
+    "site": "YouTube",
+    "key": "AODZ6k8LgEI",
+    "name": "Born Into Brothels - Trailer.flv",
+    "url": "https://www.youtube.com/watch?v=AODZ6k8LgEI"
+  },
+  "director": "Zana Briski",
+  "reason": "This movie is perfect for you because..."
+},
+{
+    "id": 550,
+    "title": "Fight Club",
+    "poster_url": "https://image.tmdb.org/t/p/w500/jSziioSwPVrOy9Yow3XhWIBDjq1.jpg",
+    "media_type": "movie",
+    "release_date": "1999-10-15",
+    "year": 1999,
+    "rating": 8.438,
+    "overview": "A ticking-time-bomb insomniac and a slippery soap salesman channel primal male aggression into a shocking new form of therapy. Their concept catches on, with underground \"fight clubs\" forming in every town, until an eccentric gets in the way and ignites an out-of-control spiral toward oblivion.",
+    "imdbId": "tt0137523",
+    "ratings": {
+      "imdb": "8.8/10",
+      "rottenTomatoes": "81%",
+      "metacritic": "67/100"
+    },
+    "watch": {
+      "country": "US",
+      "link": "https://www.themoviedb.org/movie/550-fight-club/watch?locale=US",
+      "flatrate": [
+        {
+          "id": 337,
+          "name": "Disney+",
+          "logoPath": "/t/p/w92/97yvRBw1GzX7fXprcF80er19ot.jpg"
+        },
+        {
+          "id": 1899,
+          "name": "Max",
+          "logoPath": "/t/p/w92/jbe4gVSfRlbPTdESXhEKpornsfu.jpg"
+        },
+        {
+          "id": 15,
+          "name": "Hulu",
+          "logoPath": "/t/p/w92/bxBlRPEPpMVDc4jMhSrTf2339DW.jpg"
+        }
+      ]
+    },
+    "duration": 139,
+    "genres": [
+      "Drama",
+      "Thriller"
+    ],
+    "trailer": {
+      "site": "YouTube",
+      "key": "dfeUzm6KF4g",
+      "name": "20th Anniversary Trailer",
+      "url": "https://www.youtube.com/watch?v=dfeUzm6KF4g"
+    },
+    "director": "David Fincher",
+    "reason": "This movie is perfect for you because..."
+  }
+]
