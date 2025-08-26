@@ -245,92 +245,109 @@ export default function Chat({
   }
 
   return (
-    <div className="w-full git max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div
-        ref={chatContainerRef}
-        className={`h-64 p-6 mb-6 overflow-y-auto ${cardVariants.chat}`}>
-        {messages.map(message => (
-          <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-xl'}`}>
-            <strong>{message.role === 'user' ? 'Me: ' : 'Genie '}</strong>
-            {message.parts ? (
-              // Handle messages with parts (new messages)
-              message.parts
-                ?.filter(part => part.type === 'text')
-                .map((part, index) => {
-                  if (part.type === 'text') {
-                    const text = part.text;
-                    // ... your existing chip logic ...
-                    return <div key={index}>{text}</div>;
-                  }
-                  return null;
-                })
-            ) : (
-              // Handle messages without parts (loaded from DB)
-              <div>{message.content}</div>
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* New Layout: Genie on left, center content area */}
+      <div className="flex gap-8 items-start">
+        {/* Genie Image - Left Side */}
+        <div className="hidden lg:block flex-shrink-0">
+          <img 
+            src="/genie/genie-1.png" 
+            alt="Watch Genie" 
+            className="w-36 h-48 object-contain"
+          />
+        </div>
+
+        {/* Center Content Area */}
+        <div className="flex-1 min-w-0">
+          {/* Chat Messages */}
+          <div
+            ref={chatContainerRef}
+            className={`h-64 p-6 mb-6 overflow-y-auto ${cardVariants.chat}`}>
+            
+            {/* Chat Messages Content */}
+            {messages.map(message => (
+              <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-xl'}`}>
+                <strong>{message.role === 'user' ? 'Me: ' : 'Genie '}</strong>
+                {message.parts ? (
+                  // Handle messages with parts (new messages)
+                  message.parts
+                    ?.filter(part => part.type === 'text')
+                    .map((part, index) => {
+                      if (part.type === 'text') {
+                        const text = part.text;
+                        // ... your existing chip logic ...
+                        return <div key={index}>{text}</div>;
+                      }
+                      return null;
+                    })
+                ) : (
+                  // Handle messages without parts (loaded from DB)
+                  <div>{message.content}</div>
+                )}
+              </div>
+            ))}
+            {modeBIntro && (
+              <div className={`mb-4 text-xl leading-relaxed`}>
+                <strong>{'Genie '}</strong>
+                <div>{modeBIntro}</div>
+              </div>
             )}
           </div>
-        ))}
-        {modeBIntro && (
-          <div className={`mb-4 text-xl leading-relaxed`}>
-            <strong>{'Genie '}</strong>
-            <div>{modeBIntro}</div>
-          </div>
-        )}
-      </div>
-      <MovieCardsSection movies={recommendedMovies} />
-      <ConversationChips
-        chips={conversationChips}
-        isAiThinking={status === 'submitted' || status === 'streaming'}
-        onChipClick={(text) => {
-          void append({ role: 'user', content: text })
-          setConversationChips([])
-        }}
-      />
-      {error && !modeBIntro && recommendedMovies.length === 0 && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <div className="text-red-700 mb-2">An error occurred.</div>
-          <button
-            type="button"
-            onClick={() => reload()}
-            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      )}
 
+          {/* Movie Recommendations */}
+          <MovieCardsSection movies={recommendedMovies} />
 
+          {/* Input and Send Button */}
+          <form onSubmit={handleSubmit} className="flex gap-3 mb-4">
+            <input
+              name="prompt"
+              value={input}
+              onChange={handleInputChange}
+              className={`flex-1 ${inputVariants.chat}`}
+              placeholder="Type your message..."
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              disabled={status === 'submitted' || status === 'streaming'}
+            />
+            <button
+              className={cn(
+                status === 'submitted' || status === 'streaming'
+                  ? "px-6 py-3 rounded-[11px] bg-[rgba(0,229,255,0.02)] border-[0.5px] border-[#02fffb]/30 text-white/50 font-medium opacity-50 cursor-default transition-all pointer-events-none"
+                  : buttonVariants.primary
+              )}
+              disabled={status === 'submitted' || status === 'streaming'}
+            >
+              Send
+            </button>
+          </form>
 
-      <form onSubmit={handleSubmit} className="flex gap-3">
+          {/* Conversation Chips - Now below input/send button */}
+          <ConversationChips
+            chips={conversationChips}
+            isAiThinking={status === 'submitted' || status === 'streaming'}
+            onChipClick={(text) => {
+              void append({ role: 'user', content: text })
+              setConversationChips([])
+            }}
+          />
 
-        <button
-          type="button"
-          onClick={handleNewChat}
-          className={buttonVariants.primary}
-          title="Start new chat"
-        >
-          New chat
-        </button>
-
-        <input
-          name="prompt"
-          value={input}
-          onChange={handleInputChange}
-          className={`flex-1 ${inputVariants.chat}`}
-          placeholder="Type your message..."
-          disabled={status === 'submitted' || status === 'streaming'}
-        />
-        <button
-          className={cn(
-            status === 'submitted' || status === 'streaming'
-              ? "px-6 py-2 rounded-lg bg-gray-400 text-gray-200 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
-              : buttonVariants.primary
+          {/* Error Handling */}
+          {error && !modeBIntro && recommendedMovies.length === 0 && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-red-700 mb-2">An error occurred.</div>
+              <button
+                type="button"
+                onClick={() => reload()}
+                className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
           )}
-          disabled={status === 'submitted' || status === 'streaming'}
-        >
-          Send
-        </button>
-      </form>
+        </div>
+      </div>
     </div>
   );
 }

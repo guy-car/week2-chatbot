@@ -7,12 +7,16 @@ import { buttonVariants } from '~/styles/component-styles'
 
 // Cinema icons for the loading state
 const CINEMA_ICONS = [
-  '/icons/footer/camera-2-modern.png',
-  '/icons/footer/clap.png', 
-  '/icons/footer/crew-1.png',
-  '/icons/footer/light.png',
-  '/icons/footer/pop-corn.png',
-  '/icons/footer/reel-1.png'
+  '/icons/animation/lamp-alt-2.png',
+  '/icons/animation/lamp-alt-1.png', 
+  '/icons/animation/star-alt.png',
+  '/icons/animation/reel-1.png',
+  '/icons/animation/pop-corn.png',
+  '/icons/animation/light.png',
+  '/icons/animation/gem.png',
+  '/icons/animation/clap.png',
+  '/icons/animation/camera-2-modern.png',
+  '/icons/animation/camera-1.png'
 ];
 
 // Context for managing promoted icons
@@ -151,7 +155,7 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
     // Show cinema icons when AI is thinking
     if (isAiThinking && randomIcons.length > 0) {
         return (
-            <div className="mb-3 flex justify-evenly items-center">
+            <div className="-mb-5 flex justify-evenly items-center">
                 {randomIcons.map((icon, index) => {
                     const isPromoting = promotingIcon === icon
                     
@@ -170,14 +174,17 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
                             }}
                             onClick={() => !isPromoting && handleIconClick(icon)}
                         >
-                            <Image 
-                                src={icon} 
-                                alt="Cinema equipment" 
-                                width={80}
-                                height={80}
-                                className="object-contain"
-                                style={getIconStyles(icon)}
-                            />
+                            {/* Fixed-size container for consistent icon sizing */}
+                            <div className="w-20 h-20 flex items-center justify-center">
+                                <Image 
+                                    src={icon} 
+                                    alt="Cinema equipment" 
+                                    width={80}
+                                    height={80}
+                                    className="object-contain w-full h-full"
+                                    style={getIconStyles(icon)}
+                                />
+                            </div>
                         </div>
                     )
                 })}
