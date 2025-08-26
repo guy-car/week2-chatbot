@@ -1,5 +1,6 @@
 # PRIORITY FOR DEMO DAY
 
+- hero modal needs to use eye icons and icons need to be clickable / show filled when approapriate
 - gallery poster onhover logos
 - animation for chatpage
 - new buttons

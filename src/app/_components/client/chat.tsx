@@ -263,6 +263,8 @@ export default function Chat({
           <div
             ref={chatContainerRef}
             className={`h-64 p-6 mb-6 overflow-y-auto ${cardVariants.chat}`}>
+            
+            {/* Chat Messages Content */}
             {messages.map(message => (
               <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-xl'}`}>
                 <strong>{message.role === 'user' ? 'Me: ' : 'Genie '}</strong>
@@ -297,27 +299,22 @@ export default function Chat({
 
           {/* Input and Send Button */}
           <form onSubmit={handleSubmit} className="flex gap-3 mb-4">
-            <button
-              type="button"
-              onClick={handleNewChat}
-              className={buttonVariants.primary}
-              title="Start new chat"
-            >
-              New chat
-            </button>
-
             <input
               name="prompt"
               value={input}
               onChange={handleInputChange}
               className={`flex-1 ${inputVariants.chat}`}
               placeholder="Type your message..."
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
               disabled={status === 'submitted' || status === 'streaming'}
             />
             <button
               className={cn(
                 status === 'submitted' || status === 'streaming'
-                  ? "px-6 py-2 rounded-lg bg-gray-400 text-gray-200 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
+                  ? "px-6 py-3 rounded-[11px] bg-[rgba(0,229,255,0.02)] border-[0.5px] border-[#02fffb]/30 text-white/50 font-medium opacity-50 cursor-default transition-all pointer-events-none"
                   : buttonVariants.primary
               )}
               disabled={status === 'submitted' || status === 'streaming'}

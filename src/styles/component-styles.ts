@@ -52,24 +52,29 @@ const tokens = {
 export const buttonVariants = {
   // Primary button (Send button) - Orange outline, dark gray background
   primary: cn(
-    'px-6 py-3 transition-all',
-    tokens.radius.md,
-    `bg-transparent border ${tokens.border.primary}`,
-    `${tokens.text.accent} font-medium`,
-    tokens.hover.primary,
-          'focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C] focus:animate-[glow-fade_2500ms_ease-out_forwards]'
+    'px-6 py-3 transition-all relative',
+    'rounded-[11px]',
+    'bg-[rgba(0,229,255,0.05)]',
+    'before:absolute before:inset-0 before:rounded-[11px] before:bg-gradient-to-br before:from-orange-500/0 before:to-orange-500/12 before:opacity-100',
+    'after:absolute after:inset-0 after:rounded-[11px] after:bg-gradient-to-br after:from-cyan-500/0 after:to-cyan-500/4 after:opacity-100',
+    'border-[0.5px] border-[#02fffb]',
+    'text-white font-medium',
+    'hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25',
+    'focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:ring-offset-1 focus:ring-offset-black',
+    'focus:animate-[glow-fade_2500ms_ease-out_forwards]'
   ),
   
   // Chip button (Conversation chips) - Orange glow effect
   chip: cn(
-    'px-4 py-2 transition-all',
-    tokens.radius.lg,
-    tokens.bg.chip,
-    `border ${tokens.border.subtle}`,
-    `${tokens.text.accent} text-sm font-medium`,
-    'shadow-[0px_0px_18px_-2px_#fd8e2c,0px_0px_22px_-4px_#fd8e2c]',
-    tokens.hover.chip,
-    'cursor-pointer'
+    'px-4 py-2 transition-all relative',
+    'rounded-[11px]',
+    'bg-gradient-to-r from-black/20 to-black/20',
+    'before:absolute before:inset-0 before:rounded-[11px] before:bg-gradient-to-b before:from-orange-500/25 before:to-transparent before:opacity-100',
+    'border-[0.5px] border-[#ca7223]',
+    'text-white text-base font-medium font-inter',
+    'text-center cursor-pointer',
+    'hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25',
+    'focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:ring-offset-1 focus:ring-offset-black'
   ),
   
   // Sidebar button - Cyan outline, cyan transparent background
@@ -105,8 +110,11 @@ export const cardVariants = {
   
   // Chat container
   chat: cn(
-    `${tokens.radius.md} border ${tokens.border.primary}`,
-    `${tokens.bg.secondary} p-6`,
+    'rounded-[11px] relative overflow-hidden',
+    'bg-[rgba(0,229,255,0.05)]',
+    'bg-gradient-to-br from-orange-500/0 via-orange-500/6 to-cyan-500/2',
+    'border-[0.5px] border-[#02fffb]',
+    'p-6',
     'shadow-lg'
   ),
   
@@ -122,11 +130,16 @@ export const cardVariants = {
 export const inputVariants = {
   // Chat input field
   chat: cn(
-    'px-4 py-2',
-    tokens.radius.md,
-    `${tokens.bg.secondary} border-2 ${tokens.border.primary}`,
-    `${tokens.text.accent} placeholder-gray-400`,
-    'focus:outline-none focus:ring-2 focus:ring-[rgba(253,142,44,0.3)] focus:border-[#FD8E2C]',
+    'px-4 py-2 relative',
+    'rounded-[11px]',
+    'bg-[rgba(0,229,255,0.05)]',
+    'before:absolute before:inset-0 before:rounded-[11px] before:bg-gradient-to-r before:from-black/45 before:to-black/45 before:opacity-100',
+    'after:absolute after:inset-0 after:rounded-[11px] after:bg-gradient-to-br after:from-orange-500/0 after:to-orange-500/12 after:opacity-100',
+    'border-[0.5px] border-[#02fffb]',
+    'text-white placeholder-gray-400',
+    'focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:ring-offset-1 focus:ring-offset-black',
+    'focus:bg-[rgba(0,229,255,0.05)] focus:before:opacity-100 focus:after:opacity-100',
+    'active:bg-[rgba(0,229,255,0.05)] active:before:opacity-100 active:after:opacity-100',
     'transition-all'
   ),
   
