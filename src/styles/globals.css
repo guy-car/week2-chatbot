@@ -130,7 +130,6 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
     font-family: var(--font-noto-sans), sans-serif;
     font-weight: 400;
     min-height: 100vh;
