@@ -354,7 +354,7 @@ export const modalVariants = {
   backdrop: cn(
     'absolute inset-0',
     `bg-[${colors.system.pure.blackAlpha}]`,
-    'backdrop-blur-sm',
+    'backdrop-blur-md', // Changed from backdrop-blur-sm to backdrop-blur-md for darker blur
     'transition-opacity duration-300'
   ),
   
@@ -447,7 +447,7 @@ export const modalVariants = {
   
   // Provider card
   providerCard: cn(
-    'mt-3 p-3 w-[160px] min-h-[48px]',
+    'mt-3 p-3 w-[188px] min-h-[48px]', // Changed from w-[160px] to w-[188px] to match poster width
     'bg-[rgba(2,255,251,0.15)]', // Semi-transparent cyan like modal
     'backdrop-blur-sm', // Glass-like effect
     'rounded-[11px]', // Changed from rounded-[${borderRadius.lg}] to rounded-[11px]

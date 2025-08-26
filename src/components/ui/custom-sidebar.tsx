@@ -119,14 +119,14 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
 
         <CustomSidebarButton 
           href="/history" 
-          icon="/icons/sidebar/film-can-1.png"
+          icon="/icons/new_cyan/eye.png"
         >
           Watch History
         </CustomSidebarButton>
         
         <CustomSidebarButton 
           href="/profile" 
-          icon="/icons/sidebar/pop-corn.png"
+          icon="/icons/new_cyan/popcorn.png"
         >
           Taste Profile
         </CustomSidebarButton>

@@ -8,22 +8,22 @@ import movieData from './movie-data.json'
 // Custom action set for the modal that matches the original design
 const MODAL_ACTIONS = [
   {
-    iconPath: '/icons/posters/star.png',
+    iconPath: '/icons/new_cyan/star.png',
     actionName: 'watchlist',
     tooltipText: 'Watchlist'
   },
   {
-    iconPath: '/icons/posters/checked.png',
+    iconPath: '/icons/new_cyan/eye.png',
     actionName: 'seen',
     tooltipText: 'Seen'
   },
   {
-    iconPath: '/icons/posters/thumb-up.png',
+    iconPath: '/icons/new_cyan/thumb-up.png',
     actionName: 'showMore',
     tooltipText: 'Show more like this'
   },
   {
-    iconPath: '/icons/posters/thumb-down-2.png',
+    iconPath: '/icons/new_cyan/thumb-down.png',
     actionName: 'showLess',
     tooltipText: 'Show less like this'
   }

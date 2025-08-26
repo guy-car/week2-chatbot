@@ -10,32 +10,32 @@ export interface MovieCardAction {
 
 export const MOVIE_CARD_ACTIONS: MovieCardAction[] = [
   {
-    iconPath: '/icons/posters/star.png',
-    filledIconPath: '/icons/posters/star-filled.png',
+    iconPath: '/icons/new_cyan/star.png',
+    filledIconPath: '/icons/new_cyan/star-filled-2.png',
     actionName: 'addToWatchlist',
     tooltipText: 'Add to Watchlist'
   },
   {
-    iconPath: '/icons/posters/checked.png',
-    filledIconPath: '/icons/posters/checked-filled.png',
+    iconPath: '/icons/new_cyan/eye.png',
+    filledIconPath: '/icons/new_cyan/eye-filled-70-opct-dark.png',
     actionName: 'markAsWatched',
     tooltipText: 'Add to Watch History'
   },
   {
-    iconPath: '/icons/posters/light-bulb.png',
-    filledIconPath: '/icons/posters/light-bulb.png', // Same icon for "More Info"
+    iconPath: '/icons/new_cyan/glass.png',
+    filledIconPath: '/icons/new_cyan/glass-filled.png',
     actionName: 'moreInfo',
     tooltipText: 'More Info'
   },
   {
-    iconPath: '/icons/posters/thumb-up.png',
-    filledIconPath: '/icons/posters/thumb-up-filled.png',
+    iconPath: '/icons/new_cyan/thumb-up.png',
+    filledIconPath: '/icons/new_cyan/thumb-up-filled-2.png',
     actionName: 'like',
     tooltipText: 'Like'
   },
   {
-    iconPath: '/icons/posters/thumb-down-2.png',
-    filledIconPath: '/icons/posters/thumb-down-filled.png',
+    iconPath: '/icons/new_cyan/thumb-down.png',
+    filledIconPath: '/icons/new_cyan/thumb-down-filled-2.png',
     actionName: 'dislike',
     tooltipText: 'Dislike'
   }
