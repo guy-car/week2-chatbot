@@ -1,5 +1,6 @@
 'use client'
 
+import { Tooltip } from 'react-tooltip'
 import { sidepanelVariants } from '~/styles/component-styles'
 import { MovieCardIcon } from './MovieCardIcon'
 import { MOVIE_CARD_ACTIONS } from './movie-card-icons'
@@ -48,6 +49,9 @@ export function MovieCardSidepanel({
     }
   };
 
+  // Create a single shared tooltip ID for all icons in this sidepanel
+  const tooltipId = `movie-actions-${movieId}`;
+
   return (
     <div 
       className={`group ${sidepanelVariants.container} ${className ?? ''}`}
@@ -74,11 +78,20 @@ export function MovieCardSidepanel({
               actionType={action.actionName as MovieCardActionType}
               tooltipText={action.tooltipText}
               movieId={movieId} // Pass movieId to each icon
+              tooltipId={tooltipId} // Pass shared tooltip ID to each icon
               onClick={() => handleAction(action.actionName as MovieCardActionType)}
             />
           ))}
         </div>
       </div>
+
+      {/* Single tooltip instance for the whole sidepanel */}
+      <Tooltip 
+        id={tooltipId} 
+        place="left" 
+        delayShow={0}
+        className="z-50"
+      />
     </div>
   );
 } 
