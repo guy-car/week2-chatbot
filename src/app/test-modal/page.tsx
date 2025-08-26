@@ -44,7 +44,7 @@ export default function TestModalPage() {
   };
   
   // Smart title truncation with word boundary awareness
-  const truncateTitle = (title: string, maxLength = 20) => {
+  const truncateTitle = (title: string, maxLength = 35) => {
     if (title.length <= maxLength) return title;
     
     // Try to break at word boundaries
@@ -153,7 +153,7 @@ export default function TestModalPage() {
               </div>
 
               {/* Main content: restructured to 5 sections */}
-              <div className="grid grid-cols-[240px_1fr_80px] gap-8 items-start">
+              <div className="grid grid-cols-[240px_1fr_100px] gap-8 items-start">
                 {/* Left column: title/ratings + poster + where to watch */}
                 <div className="flex flex-col items-center pr-10">
                   {/* Section 1: Title and Ratings */}
@@ -199,7 +199,7 @@ export default function TestModalPage() {
                   </div>
                   
                   {/* Section 3: Where to Watch */}
-                  <div className="mt-6 text-[#FAFAFA] w-[188px]">
+                  <div className="mt-6 text-[#FAFAFA] w-[188px] flex flex-col items-center">
                     <div className="text-xl font-bold text-center mb-3">Where to watch</div>
                     <div className={modalVariants.providerCard}>
                       {currentMovie.watch?.flatrate ? (
@@ -209,7 +209,7 @@ export default function TestModalPage() {
                               <img
                                 src={`https://image.tmdb.org${provider.logoPath}`}
                                 alt={provider.name}
-                                className="w-12 h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity rounded-[11px]"
+                                className="w-10 h-10 object-contain cursor-pointer hover:opacity-80 transition-opacity rounded-[11px]"
                                 onClick={() => window.open(`https://www.${provider.name.toLowerCase().replace('+', 'plus')}.com`, '_blank')}
                               />
                             </div>
@@ -225,7 +225,7 @@ export default function TestModalPage() {
                 </div>
 
                 {/* Center column: Section 4 - Trailer + Info + Content */}
-                <div className="text-[#FAFAFA] pr-10">
+                <div className="text-[#FAFAFA] pr-10 flex flex-col">
                   {/* Trailer */}
                   <div className={modalVariants.trailerFrame}>
                     <div 
@@ -250,17 +250,19 @@ export default function TestModalPage() {
                     </div>
                   </div>
 
-                  {/* Content sections */}
-                  <div className="mt-8 space-y-6">
-                    <section>
-                      <h3 className="text-xl font-bold mb-2">Why it&apos;s right for you</h3>
-                      <p className="text-[#E5E5E5]">{currentMovie.reason}</p>
-                    </section>
+                  {/* Content sections - scrollable container */}
+                  <div className="mt-8 flex-1 overflow-y-auto max-h-[400px]">
+                    <div className="space-y-6 pr-2">
+                      <section>
+                        <h3 className="text-xl font-bold mb-2">Why it&apos;s right for you</h3>
+                        <p className="text-[#E5E5E5]">{currentMovie.reason}</p>
+                      </section>
 
-                    <section>
-                      <h3 className="text-xl font-bold mb-2">Synopsis</h3>
-                      <p className="text-[#E5E5E5]">{currentMovie.overview}</p>
-                    </section>
+                      <section>
+                        <h3 className="text-xl font-bold mb-2">Synopsis</h3>
+                        <p className="text-[#E5E5E5]">{currentMovie.overview}</p>
+                      </section>
+                    </div>
                   </div>
                 </div>
 
@@ -269,7 +271,7 @@ export default function TestModalPage() {
                   {MODAL_ACTIONS.map((action, index) => (
                     <div key={action.actionName}>
                       <div className={modalVariants.actionRailSection}>
-                        <div className="w-10 h-10 flex items-center justify-center mb-2">
+                        <div className="w-20 h-20 flex items-center justify-center">
                           <img
                             src={action.iconPath}
                             alt={action.tooltipText}
@@ -277,7 +279,9 @@ export default function TestModalPage() {
                             onClick={() => handleAction(action.actionName)}
                           />
                         </div>
-                        <div className="text-sm text-center leading-tight px-1">{action.tooltipText}</div>
+                        <div className={`text-center leading-tight px-1 ${action.tooltipText.length > 15 ? 'text-sm' : 'text-m'}`} style={{ color: 'rgba(0,229,255,0.99)' }}>
+                          {action.tooltipText}
+                        </div>
                       </div>
                       {index < MODAL_ACTIONS.length - 1 && (
                         <div className={modalVariants.actionRailSeparator} />

@@ -401,11 +401,13 @@ export const modalVariants = {
     'w-[188px] h-[282px]',
     'rounded-[3px] overflow-hidden',
     'bg-black/30',
-    'shadow-md'
+    // Same subtle glow as trailer
+    'shadow-[0px_0px_18px_-2px_rgba(0,229,255,0.75)]'
   ),
   
   // Trailer frame area with subtle glow
   trailerFrame: cn(
+    'max-w-[500px]',
     'rounded-[11px] overflow-hidden',
     'bg-black/50',
     'border border-[rgba(244,243,241,0.05)]',
@@ -429,29 +431,28 @@ export const modalVariants = {
   // Right action rail - Updated to match poster hover panel styling
   actionRail: cn(
     'flex flex-col items-center justify-start',
-    'w-[80px] py-4 h-full', // Wider width for better proportions
+    'py-4', // Wider width for better proportions
     'bg-[rgba(0,229,255,0.15)]', // Same glass-like background as poster panel
-    'border border-[rgba(0,229,255,0.99)]', // Cyan border like poster panel
     'rounded-tl-[11px] rounded-bl-[11px]', // Rounded left corners only, extend to right edge
-    'shadow-[0px_0px_22px_0px_rgba(0,229,255,0.99),0px_0px_35px_0px_rgba(0,229,255,0.25),0px_0px_12px_-4px_rgba(0,229,255,0.99)]' // Same cyan glow as poster panel
+    'shadow-[0px_0px_22px_0px_rgba(0,229,255,0.19),0px_0px_35px_0px_rgba(0,229,255,0.25),0px_0px_12px_-4px_rgba(0,229,255,0.99)]' // Same cyan glow as poster panel
   ),
   actionRailSection: cn(
-    'flex flex-col items-center text-center gap-3 py-4', // More padding for better spacing
+    'flex flex-col items-center text-center gap-1 ', // More padding for better spacing
     `text-[${colors.text.primary}]`
   ),
   actionRailSeparator: cn(
-    'w-8 h-px my-2', // Wider separator for better proportions
+    'w-8 h-px my-2 mx-auto', // Wider separator with auto margins for centering
     'bg-[rgba(0,229,255,0.5)]' // Cyan separator
   ),
   
   // Provider card
   providerCard: cn(
-    'mt-3 p-5 w-full min-h-[64px]',
+    'mt-3 p-3 w-[160px] min-h-[48px]',
     'bg-[rgba(2,255,251,0.15)]', // Semi-transparent cyan like modal
     'backdrop-blur-sm', // Glass-like effect
     'rounded-[11px]', // Changed from rounded-[${borderRadius.lg}] to rounded-[11px]
-    // Remove orange glow; use subtle cyan shadow
-    'shadow-[0px_0px_14px_-2px_rgba(0,229,255,0.35)]'
+    // Same subtle glow as trailer
+    'shadow-[0px_0px_18px_-2px_rgba(0,229,255,0.75)]'
   ),
   
   // Close button with design system styling
