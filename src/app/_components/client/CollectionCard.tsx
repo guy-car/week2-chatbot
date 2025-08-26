@@ -1,12 +1,11 @@
-/* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { Trash2, Eye, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
-import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-hot-toast'
 import type { MovieData } from '~/app/types'
 import { useTasteProfile } from '~/app/_services/tasteProfile'
 import { textVariants } from '~/styles/component-styles'
+import { MovieCardSidepanel } from './MovieCardSidepanel'
+import { HISTORY_ACTIONS, WATCHLIST_ACTIONS } from './movie-card-icons'
 
 interface CollectionCardProps {
     movie: MovieData & { addedAt?: string; watchedAt?: string }
@@ -14,6 +13,7 @@ interface CollectionCardProps {
     onRemove: (movieId: number) => void
     onMarkWatched?: (movie: MovieData) => void
     onMoreInfo: (movieId: number, mediaType: 'movie' | 'tv', title: string) => void
+    onAddToWatchlist?: (movie: MovieData) => void
 }
 
 export function CollectionCard({
@@ -21,11 +21,11 @@ export function CollectionCard({
     variant,
     onRemove,
     onMarkWatched,
-    onMoreInfo
+    onMoreInfo,
+    onAddToWatchlist
 }: CollectionCardProps) {
     const { addLikedMovie, addDislikedMovie } = useTasteProfile();
     const year = movie.release_date?.substring(0, 4)
-    const buttonClasses = "bg-black bg-opacity-50 rounded-lg transition-all flex items-center justify-center hover:bg-opacity-70"
 
     const handleLike = async () => {
         toast.dismiss()
@@ -69,76 +69,23 @@ export function CollectionCard({
                 </p>
             </div>
 
-            {/* Poster */}
+            {/* Poster with chat-mode hover UI */}
             {movie.poster_url ? (
-                <div className="relative group w-48 h-72 mb-4">
-                    <img
-                        src={movie.poster_url}
-                        alt={movie.title}
-                        className="w-full h-full object-cover rounded-lg shadow-md"
+                <div className="mb-4">
+                    <MovieCardSidepanel
+                        posterUrl={movie.poster_url}
+                        movieTitle={movie.title}
+                        movieId={movie.id}
+                        onMoreInfo={() => onMoreInfo(movie.id, movie.media_type, movie.title)}
+                        onLike={handleLike}
+                        onDislike={handleDislike}
+                        onRemove={() => onRemove(movie.id)}
+                        onMarkAsWatched={variant === 'watchlist' && onMarkWatched ? () => onMarkWatched(movie) : undefined}
+                        onAddToWatchlist={variant === 'history' && onAddToWatchlist ? () => onAddToWatchlist(movie) : undefined}
+                        actions={variant === 'watchlist' ? WATCHLIST_ACTIONS : HISTORY_ACTIONS}
+                        posterWidth={192}
+                        posterHeight={288}
                     />
-
-                    <div className="absolute inset-0 pointer-events-none">
-                        {/* Top row */}
-                        <div className="absolute top-4 left-4 right-4 flex justify-between pointer-events-auto">
-                            <button
-                                className={`${buttonClasses} opacity-0 group-hover:opacity-100`}
-                                style={{ width: '3.5rem', height: '3.5rem' }}
-                                data-tooltip-id="movie-actions"
-                                data-tooltip-content="Remove"
-                                onClick={() => onRemove(movie.id)}
-                            >
-                                <Trash2 className="w-5 h-5 text-white" />
-                            </button>
-
-                            {variant === 'watchlist' && onMarkWatched && (
-                                <button
-                                    className={`${buttonClasses} opacity-0 group-hover:opacity-100`}
-                                    style={{ width: '3.5rem', height: '3.5rem' }}
-                                    data-tooltip-id="movie-actions"
-                                    data-tooltip-content="Mark as watched"
-                                    onClick={() => onMarkWatched(movie)}
-                                >
-                                    <Eye className="w-5 h-5 text-white" />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Center - More Info */}
-                        <button
-                            className={`${buttonClasses} absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto opacity-0 group-hover:opacity-100`}
-                            style={{ width: '3.5rem', height: '3.5rem' }}
-                            data-tooltip-id="movie-actions"
-                            data-tooltip-content="More info"
-                            onClick={() => onMoreInfo(movie.id, movie.media_type, movie.title)}
-                        >
-                            <MessageCircle className="w-6 h-6 text-white" />
-                        </button>
-
-                        {/* Bottom row - Like/Dislike */}
-                        <div className="absolute bottom-4 left-4 right-4 flex justify-between pointer-events-auto">
-                            <button
-                                className={`${buttonClasses} opacity-0 group-hover:opacity-100`}
-                                style={{ width: '3.5rem', height: '3.5rem' }}
-                                data-tooltip-id="movie-actions"
-                                data-tooltip-content="Like"
-                                onClick={handleLike}
-                            >
-                                <ThumbsUp className="w-5 h-5 text-white" />
-                            </button>
-
-                            <button
-                                className={`${buttonClasses} opacity-0 group-hover:opacity-100`}
-                                style={{ width: '3.5rem', height: '3.5rem' }}
-                                data-tooltip-id="movie-actions"
-                                data-tooltip-content="Dislike"
-                                onClick={handleDislike}
-                            >
-                                <ThumbsDown className="w-5 h-5 text-white" />
-                            </button>
-                        </div>
-                    </div>
-                    <Tooltip id="movie-actions" place="top" delayShow={0} />
                 </div>
             ) : (
                 <div className="w-48 h-72 bg-gray-200 rounded-lg flex items-center justify-center">

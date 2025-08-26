@@ -6,6 +6,8 @@
 - homepage layout
 - consistent font
 - style toast notifications [07.25.25-2303-toast-design-system-integration]
+- watch providers not always showing up
+- new chat button with genie lamp in sidebar
 
 
 Whole sheabang 

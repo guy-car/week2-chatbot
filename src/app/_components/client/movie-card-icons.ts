@@ -36,6 +36,13 @@ export const MOVIE_CARD_ACTIONS: MovieCardAction[] = [
     actionName: 'dislike',
     tooltipText: 'Dislike',
     customClasses: 'transform translate-y-[2px] translate-x-[-1px]' // Adjust thumb down position
+  },
+  // Remove action (only used in galleries: watchlist/history). Unfilled-only.
+  {
+    iconPath: '/icons/new_cyan/trash.png',
+    filledIconPath: '/icons/new_cyan/trash.png',
+    actionName: 'remove',
+    tooltipText: 'Remove'
   }
 ];
 
@@ -48,4 +55,8 @@ export const ICON_CONFIG = {
 };
 
 // Action type for TypeScript
-export type MovieCardActionType = 'addToWatchlist' | 'markAsWatched' | 'like' | 'dislike'; 
+export type MovieCardActionType = 'addToWatchlist' | 'markAsWatched' | 'like' | 'dislike' | 'remove';
+
+// Curated action sets for different contexts
+export const WATCHLIST_ACTIONS: MovieCardActionType[] = ['remove', 'markAsWatched', 'like', 'dislike'];
+export const HISTORY_ACTIONS: MovieCardActionType[] = ['remove', 'addToWatchlist', 'like', 'dislike'];

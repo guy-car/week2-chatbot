@@ -16,7 +16,7 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
     const [modalOpen, setModalOpen] = useState(false)
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
-    const { removeFromWatchlist, removeFromHistory, markAsWatched } = useMovieCollections();
+    const { removeFromWatchlist, removeFromHistory, markAsWatched, addToWatchlist } = useMovieCollections();
 
     const handleRemove = async (movieId: number) => {
         try {
@@ -38,6 +38,14 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
             toast.success(`Moved "${movie.title}" to watch history`);
         } catch {
             toast.error('Failed to mark as watched');
+        }
+    }
+    const handleAddToWatchlist = async (movie: MovieData) => {
+        try {
+            await addToWatchlist(movie);
+            toast.success(`Added "${movie.title}" to watchlist`);
+        } catch {
+            toast.error('Failed to add to watchlist');
         }
     }
     const handleMoreInfo = (movieId: number, mediaType: 'movie' | 'tv', _title: string) => {
@@ -63,6 +71,7 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
                         variant={variant}
                         onRemove={handleRemove}
                         onMarkWatched={variant === 'watchlist' ? handleMarkWatched : undefined}
+                        onAddToWatchlist={variant === 'history' ? handleAddToWatchlist : undefined}
                         onMoreInfo={handleMoreInfo}
                     />
                 ))}

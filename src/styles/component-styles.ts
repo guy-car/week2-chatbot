@@ -336,8 +336,8 @@ export const sidepanelVariants = {
   
   // Icon container within panel
   iconContainer: cn(
-    'flex flex-col items-center justify-between',
-    'space-y-4', // 12px spacing between icons
+    'flex flex-col items-center justify-evenly',
+    'h-full',
     'p-4' // 16px padding
   ),
   
