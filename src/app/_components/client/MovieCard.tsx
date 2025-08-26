@@ -112,9 +112,9 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
     return (
         <div className="flex flex-col items-center" ref={posterContainerRef}>
             <div className="text-center mb-2 w-40 px-2 h-12 flex items-center justify-center">
-                <h3 className="font-semibold text-gray-100 line-clamp-2">
+                <p className="font-semibold text-white line-clamp-2 text-movie-title-chat">
                     {movie.title}{year && ` (${year})`}
-                </h3>
+                </p>
             </div>
             {movie.poster_url ? (
                 <MovieCardSidepanel

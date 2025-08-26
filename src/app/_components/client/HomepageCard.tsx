@@ -30,7 +30,7 @@ export function HomepageCard({
 }: HomepageCardProps) {
     return (
         <Link href={href} className="block group">
-            <div className="relative h-80 rounded-lg overflow-hidden shadow-lg transition-transform group-hover:scale-105">
+            <div className="relative h-80 overflow-hidden shadow-lg transition-transform group-hover:scale-105" style={{ borderRadius: '11px' }}>
                 {/* Background image or gradient */}
                 {latestMovie?.posterUrl ? (
                     <div
@@ -47,7 +47,9 @@ export function HomepageCard({
                 {/* Content */}
                 <div className="relative h-full p-6 flex flex-col justify-between text-white">
                     <div className="flex items-center gap-3">
-                        {icon}
+                        <div className="w-8 h-8 flex items-center justify-center">
+                            {icon}
+                        </div>
                         <h3 className="text-2xl font-bold">{title}</h3>
                     </div>
 

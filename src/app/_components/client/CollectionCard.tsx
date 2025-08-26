@@ -59,11 +59,11 @@ export function CollectionCard({
     return (
         <div className="flex flex-col h-full items-center">
             {/* Title + Metadata block */}
-            <div className="text-center mb-2 w-48 px-2 min-h-[4.5rem]">
-                <h3 className={`font-semibold text-sm line-clamp-2 ${textVariants.primary}`}>
+            <div className="text-center w-48 px-2 min-h-[4.5rem]">
+                <p className={`font-normal line-clamp-2 text-movie-title ${textVariants.primary}`}>
                     {movie.title}{year && ` (${year})`}
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">
+                </p>
+                <p className="text-xs  mt-1">
                     {variant === 'watchlist' && movie.addedAt && `Added ${formatDate(movie.addedAt)}`}
                     {variant === 'history' && movie.watchedAt && `Watched ${formatDate(movie.watchedAt)}`}
                 </p>

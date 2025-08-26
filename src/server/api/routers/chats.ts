@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { chats } from "~/server/db/schema";
 import { createChat } from 'tools/chat-store'
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export const chatRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -29,6 +29,22 @@ export const chatRouter = createTRPCRouter({
       await ctx.db.update(chats)
         .set({ title: input.title })
         .where(eq(chats.id, input.chatId));
+      return { success: true };
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({
+      chatId: z.string()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Ensure only the owner can delete their chat
+      await ctx.db.delete(chats)
+        .where(
+          and(
+            eq(chats.id, input.chatId),
+            eq(chats.userId, ctx.user!.id)
+          )
+        );
       return { success: true };
     })
 })

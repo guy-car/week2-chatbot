@@ -1,12 +1,13 @@
 # PRIORITY FOR DEMO DAY
 
-- hero modal should use latest icons
+- hero modal buttons should work!
+- conversational chips :(
+- animation needs to be more fun
 - homepage layout
-- consistent font
 - style toast notifications [07.25.25-2303-toast-design-system-integration]
 - watch providers not always showing up
-- new chat button with genie lamp in sidebar
-- fomnt color on tadte profile page
+- play button on trailer
+- 
 
 If I have time:
 - border gradients

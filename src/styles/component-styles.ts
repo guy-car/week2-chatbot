@@ -77,6 +77,20 @@ export const buttonVariants = {
     'focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:ring-offset-1 focus:ring-offset-black'
   ),
   
+  // Genie button (Homepage "Ask the Genie") - Enhanced version of chip with more prominence
+  genie: cn(
+    'px-6 py-3 transition-all relative',
+    'rounded-[11px]',
+    'bg-gradient-to-r from-black/30 to-black/30',
+    'before:absolute before:inset-0 before:rounded-[11px] before:bg-gradient-to-b before:from-orange-500/30 before:to-transparent before:opacity-100',
+    'border-[0.5px] border-[#fd8e2c]',
+    'text-white text-lg font-medium font-inter',
+    'text-center cursor-pointer',
+    'hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30',
+    'focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:ring-offset-1 focus:ring-offset-black',
+    'shadow-[0px_0px_18px_-2px_#fd8e2c,0px_0px_22px_-4px_#fd8e2c]'
+  ),
+  
   // Sidebar button - Cyan outline, cyan transparent background
   sidebar: cn(
     'px-6 py-3 rounded-br-[11px] rounded-tr-[11px] transition-all',

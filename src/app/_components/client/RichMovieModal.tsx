@@ -250,7 +250,7 @@ export function RichMovieModal({
                 <div className={modalVariants.actionRailSection}>
                   <div className="w-20 h-20 flex items-center justify-center">
                     <img
-                      src="/icons/posters/checked.png"
+                      src="/icons/new_cyan/eye.png"
                       alt="Seen"
                       className="w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer"
                       onClick={() => movie && markAsWatched(movie)}

@@ -23,7 +23,7 @@ export default function HistoryPage() {
         return (
             <div className="max-w-7xl mx-auto p-6">
                 <h1 className="text-3xl font-bold mb-6">Watch History</h1>
-                <p className="text-gray-600">Loading your watch history...</p>
+                <p className="text-white">Loading your watch history...</p>
             </div>
         );
     }
@@ -32,7 +32,7 @@ export default function HistoryPage() {
         return (
             <div className="max-w-7xl mx-auto p-6">
                 <h1 className="text-3xl font-bold mb-6">Watch History</h1>
-                <p className="text-gray-600">You haven&apos;t watched any movies yet. Mark movies as watched from your watchlist!</p>
+                <p className="text-white">You haven&apos;t watched any movies yet. Mark movies as watched from your watchlist!</p>
             </div>
         );
     }
@@ -40,7 +40,7 @@ export default function HistoryPage() {
     return (
         <div className="max-w-7xl mx-auto p-6">
             <h1 className="text-3xl font-bold mb-6">Watch History</h1>
-            <p className="text-gray-600 mb-8">{movies.length} movie{movies.length !== 1 ? 's' : ''} watched</p>
+            <p className="text-white mb-8">{movies.length} movie{movies.length !== 1 ? 's' : ''} watched</p>
             <MovieGrid
                 movies={movies}
                 variant="history"

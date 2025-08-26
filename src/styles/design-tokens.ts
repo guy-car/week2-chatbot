@@ -123,6 +123,8 @@ export const typography = {
     lg: '18px',
     xl: '21px',
     xxl: '24px',
+    movieTitle: '30px', // Gallery view movie titles (watchlist, history)
+    movieTitleChat: '16px', // Chat view movie titles (smaller, more compact)
   },
   
   fontWeight: {

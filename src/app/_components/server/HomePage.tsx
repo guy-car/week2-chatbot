@@ -1,11 +1,11 @@
 import { auth } from "~/lib/auth";
 import { headers } from "next/headers";
 import { NewChatComponent } from '../client/NewChatComponent';
-import { Bookmark, History } from 'lucide-react'
 import { HomepageCard } from '~/app/_components/client/HomepageCard'
 import { api } from "~/trpc/server";
 import { WelcomeMessage } from "../client/WelcomeMessage";
 import { HomepageGenie } from "../client/HomepageGenie";
+import Image from 'next/image';
 
 export async function HomePage() {
     const session = await auth.api.getSession({
@@ -37,7 +37,15 @@ export async function HomePage() {
                     <HomepageCard
                         title="Watchlist"
                         href="/watchlist"
-                        icon={<Bookmark className="w-8 h-8" />}
+                        icon={
+                            <Image
+                                src="/icons/new_cyan/star.png"
+                                alt="Star icon"
+                                width={32}
+                                height={32}
+                                className="object-contain"
+                            />
+                        }
                         latestMovie={latestMovies.watchlist.latest}
                         count={latestMovies.watchlist.count}
                         emptyMessage="No movies saved yet"
@@ -46,7 +54,15 @@ export async function HomePage() {
                     <HomepageCard
                         title="Watch History"
                         href="/history"
-                        icon={<History className="w-8 h-8" />}
+                        icon={
+                            <Image
+                                src="/icons/new_cyan/eye.png"
+                                alt="Eye icon"
+                                width={32}
+                                height={32}
+                                className="object-contain"
+                            />
+                        }
                         latestMovie={latestMovies.history.latest}
                         count={latestMovies.history.count}
                         emptyMessage="No movies watched yet"
