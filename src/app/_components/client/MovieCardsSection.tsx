@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { MovieCard } from './MovieCard'
-import { MovieDetailsModal } from './MovieDetailsModal'
+import { RichMovieModal } from './RichMovieModal'
 
 import { type MovieData } from "~/app/types/index"
 
@@ -14,9 +14,7 @@ export function MovieCardsSection({ movies }: MovieCardsSectionProps) {
     const [isVisible, setIsVisible] = useState(false)
 
     const [modalOpen, setModalOpen] = useState(false)
-    const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null)
-    const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
-    const [selectedMovieTitle, setSelectedMovieTitle] = useState('')
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
     useEffect(() => {
         if (movies.length > 0) {
@@ -25,9 +23,8 @@ export function MovieCardsSection({ movies }: MovieCardsSectionProps) {
     }, [movies.length])
 
     const handleMoreInfo = (movieId: number, mediaType: 'movie' | 'tv', title: string) => {
-        setSelectedMovieId(movieId)
-        setSelectedMediaType(mediaType)
-        setSelectedMovieTitle(title)
+        const idx = movies.findIndex(m => m.id === movieId && m.media_type === mediaType)
+        setSelectedIndex(idx >= 0 ? idx : 0)
         setModalOpen(true)
     }
 
@@ -35,9 +32,7 @@ export function MovieCardsSection({ movies }: MovieCardsSectionProps) {
         setModalOpen(false)
         // Clear state after modal animation completes
         setTimeout(() => {
-            setSelectedMovieId(null)
-            setSelectedMediaType(null)
-            setSelectedMovieTitle('')
+            setSelectedIndex(null)
         }, 300)
     }
 
@@ -61,13 +56,17 @@ export function MovieCardsSection({ movies }: MovieCardsSectionProps) {
                 </div>
             </div>
 
-            {/* Add the modal */}
-            <MovieDetailsModal
+            {/* Add the new rich modal */}
+            <RichMovieModal
                 isOpen={modalOpen}
                 onClose={handleCloseModal}
-                movieId={selectedMovieId}
-                mediaType={selectedMediaType}
-                movieTitle={selectedMovieTitle}
+                movieId={selectedIndex !== null ? movies[selectedIndex]?.id ?? null : null}
+                mediaType={selectedIndex !== null ? movies[selectedIndex]?.media_type ?? null : null}
+                adjacent={selectedIndex !== null ? {
+                    items: movies.map(m => ({ id: m.id, media_type: m.media_type })),
+                    currentIndex: selectedIndex,
+                    onIndexChange: (next) => setSelectedIndex(next),
+                } : undefined}
             />
         </>
     )
