@@ -291,8 +291,36 @@ export const sidepanelVariants = {
   // Movie poster container
   poster: cn(
     'relative overflow-hidden',
-    'bg-cover bg-center bg-no-repeat',
     'rounded-[3px]'
+  ),
+
+  // Poster overlay for magnifying glass
+  posterOverlay: cn(
+    'absolute inset-0 z-10',
+    'flex items-center justify-center',
+    'bg-black bg-opacity-0',
+    'transition-all duration-300 ease-in-out',
+    'opacity-0 pointer-events-none',
+    'group-hover:opacity-100 group-hover:pointer-events-auto group-hover:bg-opacity-10',
+    'rounded-[3px]'
+  ),
+
+  // Overlay button styling
+  overlayButton: cn(
+    'w-10 h-10',
+    'flex items-center justify-center',
+    'bg-[rgba(0,229,255,0.15)]',
+    'rounded-full',
+    'transition-all duration-200',
+    'hover:scale-105 hover:bg-[rgba(0,229,255,0.25)]',
+    'cursor-pointer'
+  ),
+
+  // Overlay icon styling
+  overlayIcon: cn(
+    'w-6 h-6',
+    'object-contain',
+    'transition-all duration-200'
   ),
   
   // Sliding panel container
@@ -308,8 +336,8 @@ export const sidepanelVariants = {
   
   // Icon container within panel
   iconContainer: cn(
-    'flex flex-col items-center justify-center',
-    'space-y-3', // 12px spacing between icons
+    'flex flex-col items-center justify-between',
+    'space-y-4', // 12px spacing between icons
     'p-4' // 16px padding
   ),
   
@@ -319,7 +347,8 @@ export const sidepanelVariants = {
     'flex items-center justify-center',
     'transition-all duration-200',
     'hover:scale-110', // Slight scale on hover
-    'cursor-pointer'
+    'cursor-pointer',
+    'gap-5' 
   ),
   
   // Icon image styling
@@ -332,7 +361,7 @@ export const sidepanelVariants = {
   // Mobile overlay variant
   mobileOverlay: cn(
     'fixed inset-0 z-50',
-    'bg-black bg-opacity-50',
+    'bg-red bg-opacity-100',
     'flex items-center justify-center',
     'p-4'
   ),
@@ -354,7 +383,7 @@ export const modalVariants = {
   backdrop: cn(
     'absolute inset-0',
     `bg-[${colors.system.pure.blackAlpha}]`,
-    'backdrop-blur-sm',
+    'backdrop-blur-md', // Changed from backdrop-blur-sm to backdrop-blur-md for darker blur
     'transition-opacity duration-300'
   ),
   
@@ -447,7 +476,7 @@ export const modalVariants = {
   
   // Provider card
   providerCard: cn(
-    'mt-3 p-3 w-[160px] min-h-[48px]',
+    'mt-3 p-3 w-[188px] min-h-[48px]', // Changed from w-[160px] to w-[188px] to match poster width
     'bg-[rgba(2,255,251,0.15)]', // Semi-transparent cyan like modal
     'backdrop-blur-sm', // Glass-like effect
     'rounded-[11px]', // Changed from rounded-[${borderRadius.lg}] to rounded-[11px]

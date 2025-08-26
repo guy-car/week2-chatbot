@@ -6,38 +6,36 @@ export interface MovieCardAction {
   filledIconPath: string;
   actionName: string;
   tooltipText: string;
+  customClasses?: string; // Optional custom styling for individual icons
 }
 
 export const MOVIE_CARD_ACTIONS: MovieCardAction[] = [
   {
-    iconPath: '/icons/posters/star.png',
-    filledIconPath: '/icons/posters/star-filled.png',
+    iconPath: '/icons/new_cyan/star.png',
+    filledIconPath: '/icons/new_cyan/star-filled-2.png',
     actionName: 'addToWatchlist',
     tooltipText: 'Add to Watchlist'
   },
   {
-    iconPath: '/icons/posters/checked.png',
-    filledIconPath: '/icons/posters/checked-filled.png',
+    iconPath: '/icons/new_cyan/eye.png',
+    filledIconPath: '/icons/new_cyan/eye-filled-70-opct-dark.png',
     actionName: 'markAsWatched',
-    tooltipText: 'Add to Watch History'
+    tooltipText: 'Add to Watch History',
+    customClasses: 'py-[0px]' // Reduce top/bottom padding by 1px (from 4px to 3px)
   },
   {
-    iconPath: '/icons/posters/light-bulb.png',
-    filledIconPath: '/icons/posters/light-bulb.png', // Same icon for "More Info"
-    actionName: 'moreInfo',
-    tooltipText: 'More Info'
-  },
-  {
-    iconPath: '/icons/posters/thumb-up.png',
-    filledIconPath: '/icons/posters/thumb-up-filled.png',
+    iconPath: '/icons/new_cyan/thumb-up.png',
+    filledIconPath: '/icons/new_cyan/thumb-up-filled-2.png',
     actionName: 'like',
-    tooltipText: 'Like'
+    tooltipText: 'Like',
+    customClasses: 'transform translate-y-[-2px] translate-x-[1px]' // Adjust thumb up position
   },
   {
-    iconPath: '/icons/posters/thumb-down-2.png',
-    filledIconPath: '/icons/posters/thumb-down-filled.png',
+    iconPath: '/icons/new_cyan/thumb-down.png',
+    filledIconPath: '/icons/new_cyan/thumb-down-filled-2.png',
     actionName: 'dislike',
-    tooltipText: 'Dislike'
+    tooltipText: 'Dislike',
+    customClasses: 'transform translate-y-[2px] translate-x-[-1px]' // Adjust thumb down position
   }
 ];
 
@@ -50,4 +48,4 @@ export const ICON_CONFIG = {
 };
 
 // Action type for TypeScript
-export type MovieCardActionType = 'addToWatchlist' | 'markAsWatched' | 'moreInfo' | 'like' | 'dislike'; 
+export type MovieCardActionType = 'addToWatchlist' | 'markAsWatched' | 'like' | 'dislike'; 

@@ -39,11 +39,9 @@ export function MovieCardIcon({
   }, [storageKey]);
 
   const handleClick = () => {
-    // Don't mark "More Info" as clicked since it shouldn't change appearance
-    if (actionType !== 'moreInfo') {
-      setIsClicked(true);
-      localStorage.setItem(storageKey, 'true');
-    }
+    // Mark action as clicked and store in localStorage
+    setIsClicked(true);
+    localStorage.setItem(storageKey, 'true');
     
     // Call the original onClick handler
     onClick();
@@ -54,20 +52,19 @@ export function MovieCardIcon({
     const action = MOVIE_CARD_ACTIONS.find(a => a.actionName === actionType);
     if (!action) return iconPath;
     
-    // For "More Info", always return the default icon
-    if (actionType === 'moreInfo') {
-      return action.iconPath;
-    }
-    
-    // For other actions, return filled icon if clicked, default icon otherwise
+    // Return filled icon if clicked, default icon otherwise
     return isClicked ? action.filledIconPath : action.iconPath;
   };
 
+  // Get the action to access custom classes
+  const action = MOVIE_CARD_ACTIONS.find(a => a.actionName === actionType);
+  
   return (
     <button
       className={cn(
         sidepanelVariants.iconButton,
         'focus:outline-none',
+        action?.customClasses, // Apply custom classes for individual icons
         className ?? ''
       )}
       onClick={handleClick}
