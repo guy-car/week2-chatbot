@@ -22,7 +22,7 @@ export default function WatchlistPage() {
         return (
             <div className="max-w-7xl mx-auto p-6">
                 <h1 className="text-3xl font-bold mb-6">My Watchlist</h1>
-                <p className="text-gray-600">Loading your watchlist...</p>
+                <p className="text-white">Loading your watchlist...</p>
             </div>
         );
     }
@@ -34,7 +34,7 @@ export default function WatchlistPage() {
                 <div className="text-center py-8">
                     <div className="text-center space-y-4">
                         <p className="text-[#A1A1A1] text-lg">Your watchlist is empty...</p>
-                        <p className="text-gray-400 italic">Fill it up to satiate the Genie</p>
+                        <p className="text-white italic">Fill it up to satiate the Genie</p>
                     </div>
                 </div>
             </div>
@@ -44,7 +44,7 @@ export default function WatchlistPage() {
     return (
         <div className="max-w-7xl mx-auto p-6">
             <h1 className="text-3xl font-bold mb-6">My Watchlist</h1>
-            <p className="text-gray-600 mb-8">{movies.length} movie{movies.length !== 1 ? 's' : ''} to watch</p>
+            <p className="text-white mb-8 ">{movies.length} movie{movies.length !== 1 ? 's' : ''} to watch</p>
             <MovieGrid
                 movies={movies}
                 variant="watchlist"

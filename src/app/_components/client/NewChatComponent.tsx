@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { api } from "~/trpc/react";
 import { magicButtonStyles } from '~/components/ui/button-magic';
+import Image from 'next/image';
 
 interface NewChatComponentProps {
     user: {
@@ -32,7 +33,16 @@ export function NewChatComponent({ user }: NewChatComponentProps) {
                 className={magicButtonStyles.caramel}
                 onClick={handleNewChat}
             >
-                Ask the Genie
+                <div className="flex items-center gap-3">
+                    <Image
+                        src="/icons/new_cyan/lamp-bicolor-1.png"
+                        alt="Lamp icon"
+                        width={24}
+                        height={24}
+                        className="object-contain"
+                    />
+                    <span>Ask the Genie</span>
+                </div>
             </button>
         </div>
     );

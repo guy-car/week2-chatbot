@@ -1,14 +1,17 @@
 # PRIORITY FOR DEMO DAY
 
-- hero modal needs to use eye icons and icons need to be clickable / show filled when approapriate
-- gallery poster onhover logos
-- animation for chatpage
-- new buttons
+- hero modal buttons should work!
+- conversational chips :(
+- animation needs to be more fun
 - homepage layout
-- consistent font
 - style toast notifications [07.25.25-2303-toast-design-system-integration]
 - watch providers not always showing up
-- new chat button with genie lamp in sidebar
+- play button on trailer
+- 
+
+If I have time:
+- border gradients
+- animation for chat page
 
 
 Whole sheabang 

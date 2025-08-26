@@ -1,6 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { api } from "~/trpc/react"
 import { buttonVariants } from "~/styles/component-styles"
 import RecentChatsSection from "~/app/_components/client/RecentChatsSection"
 import { useCustomSidebar } from "./custom-sidebar-context"
@@ -98,6 +100,37 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
     }
   }, [isOpen, closeSidebar])
 
+  // New Chat Button Component (client-side action)
+  function NewChatButton({ icon, children, className }: { icon: string; children: React.ReactNode; className?: string }) {
+    const router = useRouter()
+    const createChatMutation = api.chat.create.useMutation()
+
+    const handleNewChat = async () => {
+      try {
+        const result = await createChatMutation.mutateAsync()
+        router.push(`/chat/${result.chatId}`)
+      } catch (error) {
+        console.error('Failed to create chat:', error)
+      }
+    }
+
+    return (
+      <button 
+        onClick={handleNewChat}
+        className={`${buttonVariants.sidebar} flex items-center gap-3 w-full h-[51px] pl-4 pr-8 mb-6 ${className ?? ''}`}
+      >
+        <Image 
+          src={icon} 
+          alt="" 
+          width={40} 
+          height={40}
+          className="flex-shrink-0"
+        />
+        <span className="text-white font-bold text-[21px]">{children}</span>
+      </button>
+    )
+  }
+
   return (
     <div 
       ref={sidebarRef}
@@ -110,6 +143,9 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
     >
       {/* Navigation Buttons - Each as standalone button */}
       <div className="flex flex-col space-y-[21px] mb-0 pr-8 pt-8">
+        <NewChatButton icon="/icons/new_cyan/lamp-bicolor-1.png">
+          Ask the Genie
+        </NewChatButton>
         <CustomSidebarButton 
           href="/watchlist" 
           icon="/icons/sidebar/star.png"
@@ -134,8 +170,8 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
 
       </div>
 
-      {/* Recent Chats Section - Client-side interactive */}
-      <div className="flex-1 mt-0 pr-8">
+      {/* Recent Chats Section - occupies remaining space; list itself handles scrolling */}
+      <div className="flex-1 mt-0 pr-8 min-h-0">
         <RecentChatsSection chats={chats} />
       </div>
 

@@ -92,10 +92,10 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold mb-2">Your Taste Profile</h1>
-                    <p className="text-gray-600">
+                    <p className="text-white">
                         {isEditing ? 'Customize your preferences' : 'Based on your movie interactions'}
                         {isEditing && (
-                            <span className={`ml-2 ${charCount > MAX_CHARS ? 'text-red-500' : 'text-gray-500'}`}>
+                            <span className={`ml-2 ${charCount > MAX_CHARS ? 'text-red-500' : 'text-white'}`}>
                                 {charCount}/{MAX_CHARS} characters
                             </span>
                         )}
@@ -115,7 +115,7 @@ export default function ProfilePage() {
 
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
+                    <label className="block text-sm font-medium mb-2 text-white">
                         Favorite Genres
                     </label>
                     <input
@@ -132,7 +132,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
+                    <label className="block text-sm font-medium mb-2 text-white">
                         Movies You Love
                     </label>
                     <textarea
@@ -148,7 +148,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
+                    <label className="block text-sm font-medium mb-2 text-white">
                         Movies You Dislike
                     </label>
                     <textarea
@@ -164,7 +164,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
+                    <label className="block text-sm font-medium mb-2 text-white">
                         Other Preferences
                     </label>
                     <textarea
