@@ -80,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <CustomSidebarProvider>
               <PromotedIconsProvider>
                 {isLoggedIn ? loggedInLayout : loggedOutLayout}
-                <Toaster />
+                <Toaster position="top-center" containerStyle={{ zIndex: 999999 }} />
               </PromotedIconsProvider>
             </CustomSidebarProvider>
           </TRPCReactProvider>
