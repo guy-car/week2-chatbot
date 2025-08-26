@@ -144,7 +144,7 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
       {/* Navigation Buttons - Each as standalone button */}
       <div className="flex flex-col space-y-[21px] mb-0 pr-8 pt-8">
         <NewChatButton icon="/icons/new_cyan/lamp-bicolor-1.png">
-          ask the genie
+          Ask the Genie
         </NewChatButton>
         <CustomSidebarButton 
           href="/watchlist" 
