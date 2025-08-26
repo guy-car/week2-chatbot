@@ -22,7 +22,7 @@ export function MovieCardsSection({ movies }: MovieCardsSectionProps) {
         }
     }, [movies.length])
 
-    const handleMoreInfo = (movieId: number, mediaType: 'movie' | 'tv', title: string) => {
+    const handleMoreInfo = (movieId: number, mediaType: 'movie' | 'tv', _title: string) => {
         const idx = movies.findIndex(m => m.id === movieId && m.media_type === mediaType)
         setSelectedIndex(idx >= 0 ? idx : 0)
         setModalOpen(true)
