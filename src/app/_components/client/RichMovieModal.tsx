@@ -1,7 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
+import { toast } from 'react-hot-toast'
 import { api } from '~/trpc/react'
 import { modalVariants } from '~/styles/component-styles'
 import type { MovieData } from '~/app/types'
@@ -90,13 +91,124 @@ export function RichMovieModal({
     return () => window.removeEventListener('keydown', onKey)
   }, [isOpen, onClose, goPrev, goNext])
 
-  const { addToWatchlist, markAsWatched } = useMovieCollections()
-  const { addLikedMovie, addDislikedMovie } = useTasteProfile()
+  const { addToWatchlist, markAsWatched, removeFromWatchlist, removeFromHistory, watchlist, watchHistory } = useMovieCollections()
+  const { addLikedMovie, addDislikedMovie, profile } = useTasteProfile()
 
   const handleProviderClick = useCallback((name: string) => {
     const host = name.toLowerCase().replace('+', 'plus')
     window.open(`https://www.${host}.com`, '_blank')
   }, [])
+
+  // Determine if current movie is already in the user's watchlist
+  const isInWatchlist = useMemo(() => {
+    if (!movie) return false
+    return watchlist.some((item: { movieId: string }) => item.movieId === movie.id.toString())
+  }, [movie, watchlist])
+
+  // Determine if current movie is already in the user's watch history
+  const isInWatchHistory = useMemo(() => {
+    if (!movie) return false
+    return watchHistory.some((item: { movieId: string }) => item.movieId === movie.id.toString())
+  }, [movie, watchHistory])
+
+  // Optimistic UI state and pending guards
+  const [optimistic, setOptimistic] = useState<{ watchlist?: boolean; history?: boolean }>({})
+  const [pending, setPending] = useState<{ watchlist: boolean; history: boolean }>({ watchlist: false, history: false })
+  const [pulse, setPulse] = useState<{ watchlist: boolean; history: boolean; like: boolean; dislike: boolean }>({ watchlist: false, history: false, like: false, dislike: false })
+  const [reaction, setReaction] = useState<'like' | 'dislike' | null>(null)
+
+  const isWatchlisted = (optimistic.watchlist ?? isInWatchlist)
+  const isWatched = (optimistic.history ?? isInWatchHistory)
+
+  const triggerPulse = (key: 'watchlist' | 'history') => {
+    setPulse(prev => ({ ...prev, [key]: true }))
+    setTimeout(() => setPulse(prev => ({ ...prev, [key]: false })), 250)
+  }
+
+  const triggerPulseReaction = (key: 'like' | 'dislike') => {
+    setPulse(prev => ({ ...prev, [key]: true }))
+    setTimeout(() => setPulse(prev => ({ ...prev, [key]: false })), 250)
+  }
+
+  const onToggleWatchlist = async () => {
+    if (!movie || pending.watchlist) return
+    const next = !isWatchlisted
+    setOptimistic(o => ({ ...o, watchlist: next }))
+    setPending(p => ({ ...p, watchlist: true }))
+    triggerPulse('watchlist')
+    try {
+      if (next) {
+        await addToWatchlist(movie)
+        toast.success(`Added "${movie.title}" to watchlist`)
+      } else {
+        await removeFromWatchlist(movie.id)
+        toast.success(`Removed "${movie.title}" from watchlist`)
+      }
+    } catch {
+      setOptimistic(o => ({ ...o, watchlist: !next }))
+      toast.error('Watchlist update failed')
+    } finally {
+      setPending(p => ({ ...p, watchlist: false }))
+    }
+  }
+
+  const onToggleWatched = async () => {
+    if (!movie || pending.history) return
+    const next = !isWatched
+    setOptimistic(o => ({ ...o, history: next }))
+    setPending(p => ({ ...p, history: true }))
+    triggerPulse('history')
+    try {
+      if (next) {
+        await markAsWatched(movie)
+        toast.success(`Marked "${movie.title}" as watched`)
+      } else {
+        await removeFromHistory(movie.id)
+        toast.success(`Removed "${movie.title}" from history`)
+      }
+    } catch {
+      setOptimistic(o => ({ ...o, history: !next }))
+      toast.error('Watch history update failed')
+    } finally {
+      setPending(p => ({ ...p, history: false }))
+    }
+  }
+
+  // Initialize reaction from profile when available
+  useEffect(() => {
+    if (!movie) return
+    const liked = profile?.likedMovies?.split(', ').includes(movie.title) ?? false
+    const disliked = profile?.dislikedMovies?.split(', ').includes(movie.title) ?? false
+    if (liked) setReaction('like')
+    else if (disliked) setReaction('dislike')
+    else setReaction(null)
+  }, [movie, profile?.likedMovies, profile?.dislikedMovies])
+
+  const onLike = async () => {
+    if (!movie) return
+    // Optimistic flip to like
+    setReaction('like')
+    triggerPulseReaction('like')
+    try {
+      await addLikedMovie(movie)
+      toast.success(`You liked "${movie.title}"`)
+    } catch {
+      // silent fail, keep UI as-is
+    }
+  }
+
+  const onDislike = async () => {
+    if (!movie) return
+    // Optimistic flip to dislike
+    setReaction('dislike')
+    triggerPulseReaction('dislike')
+    try {
+      await addDislikedMovie(movie)
+      toast.success(`You disliked "${movie.title}"`)
+    } catch {
+      // silent fail
+    }
+  }
 
   
 
@@ -236,10 +348,10 @@ export function RichMovieModal({
                 <div className={modalVariants.actionRailSection}>
                   <div className="w-20 h-20 flex items-center justify-center">
                     <img
-                      src="/icons/posters/star.png"
+                      src={isWatchlisted ? "/icons/new_cyan/star-filled-2.png" : "/icons/new_cyan/star.png"}
                       alt="Watchlist"
-                      className="w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer"
-                      onClick={() => movie && addToWatchlist(movie)}
+                      className={`w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer ${pulse.watchlist ? 'pulse-once' : ''}`}
+                      onClick={onToggleWatchlist}
                     />
                   </div>
                   <div className="text-center leading-tight px-1" style={{ color: 'rgba(0,229,255,0.99)' }}>
@@ -250,10 +362,10 @@ export function RichMovieModal({
                 <div className={modalVariants.actionRailSection}>
                   <div className="w-20 h-20 flex items-center justify-center">
                     <img
-                      src="/icons/new_cyan/eye.png"
+                      src={isWatched ? "/icons/new_cyan/eye-filled-70-opct-dark.png" : "/icons/new_cyan/eye.png"}
                       alt="Seen"
-                      className="w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer"
-                      onClick={() => movie && markAsWatched(movie)}
+                      className={`w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer ${pulse.history ? 'pulse-once' : ''}`}
+                      onClick={onToggleWatched}
                     />
                   </div>
                   <div className="text-center leading-tight px-1" style={{ color: 'rgba(0,229,255,0.99)' }}>
@@ -264,10 +376,10 @@ export function RichMovieModal({
                 <div className={modalVariants.actionRailSection}>
                   <div className="w-20 h-20 flex items-center justify-center">
                     <img
-                      src="/icons/posters/thumb-up.png"
+                      src={reaction === 'like' ? '/icons/new_cyan/thumb-up-filled-2.png' : '/icons/new_cyan/thumb-up.png'}
                       alt="Show more like this"
-                      className="w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer"
-                      onClick={() => movie && addLikedMovie(movie)}
+                      className={`w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer ${pulse.like ? 'pulse-once' : ''}`}
+                      onClick={onLike}
                     />
                   </div>
                   <div className="text-center leading-tight px-1" style={{ color: 'rgba(0,229,255,0.99)' }}>
@@ -278,10 +390,10 @@ export function RichMovieModal({
                 <div className={modalVariants.actionRailSection}>
                   <div className="w-20 h-20 flex items-center justify-center">
                     <img
-                      src="/icons/posters/thumb-down-2.png"
+                      src={reaction === 'dislike' ? '/icons/new_cyan/thumb-down-filled-2.png' : '/icons/new_cyan/thumb-down.png'}
                       alt="Show less like this"
-                      className="w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer"
-                      onClick={() => movie && addDislikedMovie(movie)}
+                      className={`w-full h-full object-contain transition-all duration-200 hover:scale-110 cursor-pointer ${pulse.dislike ? 'pulse-once' : ''}`}
+                      onClick={onDislike}
                     />
                   </div>
                   <div className="text-center leading-tight px-1" style={{ color: 'rgba(0,229,255,0.99)' }}>
