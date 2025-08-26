@@ -56,11 +56,15 @@ export function MovieCardIcon({
     return isClicked ? action.filledIconPath : action.iconPath;
   };
 
+  // Get the action to access custom classes
+  const action = MOVIE_CARD_ACTIONS.find(a => a.actionName === actionType);
+  
   return (
     <button
       className={cn(
         sidepanelVariants.iconButton,
         'focus:outline-none',
+        action?.customClasses, // Apply custom classes for individual icons
         className ?? ''
       )}
       onClick={handleClick}

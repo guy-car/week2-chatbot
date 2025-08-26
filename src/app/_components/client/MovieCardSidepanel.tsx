@@ -55,7 +55,8 @@ export function MovieCardSidepanel({
     >
       {/* Movie Poster with Simple Icon Overlay */}
       <div 
-        className="relative w-[150px] h-[212px] overflow-hidden rounded-[3px]"
+        className="relative w-[150px] h-[212px] overflow-hidden rounded-[3px] cursor-pointer"
+        onClick={onMoreInfo}
       >
         {/* Poster image */}
         <img
@@ -72,8 +73,7 @@ export function MovieCardSidepanel({
           <img
             src="/icons/new_cyan/glass.png"
             alt="More Info"
-            className="w-12 h-12 cursor-pointer"
-            onClick={onMoreInfo}
+            className="w-12 h-12"
           />
         </div>
       </div>

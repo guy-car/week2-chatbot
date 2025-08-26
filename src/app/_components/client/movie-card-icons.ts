@@ -6,6 +6,7 @@ export interface MovieCardAction {
   filledIconPath: string;
   actionName: string;
   tooltipText: string;
+  customClasses?: string; // Optional custom styling for individual icons
 }
 
 export const MOVIE_CARD_ACTIONS: MovieCardAction[] = [
@@ -19,19 +20,22 @@ export const MOVIE_CARD_ACTIONS: MovieCardAction[] = [
     iconPath: '/icons/new_cyan/eye.png',
     filledIconPath: '/icons/new_cyan/eye-filled-70-opct-dark.png',
     actionName: 'markAsWatched',
-    tooltipText: 'Add to Watch History'
+    tooltipText: 'Add to Watch History',
+    customClasses: 'py-[0px]' // Reduce top/bottom padding by 1px (from 4px to 3px)
   },
   {
     iconPath: '/icons/new_cyan/thumb-up.png',
     filledIconPath: '/icons/new_cyan/thumb-up-filled-2.png',
     actionName: 'like',
-    tooltipText: 'Like'
+    tooltipText: 'Like',
+    customClasses: 'transform translate-y-[-2px] translate-x-[1px]' // Adjust thumb up position
   },
   {
     iconPath: '/icons/new_cyan/thumb-down.png',
     filledIconPath: '/icons/new_cyan/thumb-down-filled-2.png',
     actionName: 'dislike',
-    tooltipText: 'Dislike'
+    tooltipText: 'Dislike',
+    customClasses: 'transform translate-y-[2px] translate-x-[-1px]' // Adjust thumb down position
   }
 ];
 
