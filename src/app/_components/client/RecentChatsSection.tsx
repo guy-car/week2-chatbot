@@ -43,7 +43,7 @@ export default function RecentChatsSection({ chats }: RecentChatsSectionProps) {
 
       {/* Recent Chats List - Expandable */}
       {isExpanded && (
-        <div className="bg-[rgba(2,255,251,0.25)] border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] pl-0 pr-4 pt-4 pb-4 max-h-[300px] overflow-y-auto">
+        <div className="bg-[rgba(2,255,251,0.25)] border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] pl-0 pr-4 pt-4 pb-4 mb-6 max-h-[22vh] overflow-y-auto">
           <div className="text-white text-[18px] font-normal space-y-3">
                           {chats?.slice(0, 10).map((chat) => (
                 <Link 
