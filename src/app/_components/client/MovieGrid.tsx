@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CollectionCard } from './CollectionCard'
-import { MovieDetailsModal } from './MovieDetailsModal'
+import { RichMovieModal } from './RichMovieModal'
 import type { MovieData } from '~/app/types'
 import { toast } from 'react-hot-toast'
 import { useMovieCollections } from '~/app/_services/useMovieCollections';
@@ -14,11 +14,9 @@ interface MovieGridProps {
 
 export function MovieGrid({ movies, variant }: MovieGridProps) {
     const [modalOpen, setModalOpen] = useState(false)
-    const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null)
-    const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
-    const [selectedMovieTitle, setSelectedMovieTitle] = useState('')
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
-    const { removeFromWatchlist, removeFromHistory, markAsWatched } = useMovieCollections();
+    const { removeFromWatchlist, removeFromHistory, markAsWatched, addToWatchlist } = useMovieCollections();
 
     const handleRemove = async (movieId: number) => {
         try {
@@ -42,19 +40,24 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
             toast.error('Failed to mark as watched');
         }
     }
-    const handleMoreInfo = (movieId: number, mediaType: 'movie' | 'tv', title: string) => {
-        setSelectedMovieId(movieId)
-        setSelectedMediaType(mediaType)
-        setSelectedMovieTitle(title)
+    const handleAddToWatchlist = async (movie: MovieData) => {
+        try {
+            await addToWatchlist(movie);
+            toast.success(`Added "${movie.title}" to watchlist`);
+        } catch {
+            toast.error('Failed to add to watchlist');
+        }
+    }
+    const handleMoreInfo = (movieId: number, mediaType: 'movie' | 'tv', _title: string) => {
+        const idx = movies.findIndex(m => m.id === movieId && m.media_type === mediaType)
+        setSelectedIndex(idx >= 0 ? idx : 0)
         setModalOpen(true)
     }
 
     const handleCloseModal = () => {
         setModalOpen(false)
         setTimeout(() => {
-            setSelectedMovieId(null)
-            setSelectedMediaType(null)
-            setSelectedMovieTitle('')
+            setSelectedIndex(null)
         }, 300)
     }
 
@@ -68,17 +71,22 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
                         variant={variant}
                         onRemove={handleRemove}
                         onMarkWatched={variant === 'watchlist' ? handleMarkWatched : undefined}
+                        onAddToWatchlist={variant === 'history' ? handleAddToWatchlist : undefined}
                         onMoreInfo={handleMoreInfo}
                     />
                 ))}
             </div>
 
-            <MovieDetailsModal
+            <RichMovieModal
                 isOpen={modalOpen}
                 onClose={handleCloseModal}
-                movieId={selectedMovieId}
-                mediaType={selectedMediaType}
-                movieTitle={selectedMovieTitle}
+                movieId={selectedIndex !== null ? movies[selectedIndex]?.id ?? null : null}
+                mediaType={selectedIndex !== null ? movies[selectedIndex]?.media_type ?? null : null}
+                adjacent={selectedIndex !== null ? {
+                    items: movies.map(m => ({ id: m.id, media_type: m.media_type })),
+                    currentIndex: selectedIndex,
+                    onIndexChange: (next) => setSelectedIndex(next),
+                } : undefined}
             />
         </>
     )

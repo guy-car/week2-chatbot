@@ -9,39 +9,63 @@ import type { MovieCardActionType } from './movie-card-icons'
 interface MovieCardSidepanelProps {
   posterUrl: string;
   movieTitle: string;
-  movieId: number; // Add movieId prop
-  onAddToWatchlist: () => void;
-  onMarkAsWatched: () => void;
+  movieId: number;
+  onAddToWatchlist?: () => void;
+  onMarkAsWatched?: () => void;
   onMoreInfo: () => void;
   onLike: () => void;
   onDislike: () => void;
+  onRemove?: () => void;
+  actions?: MovieCardActionType[]; // Optional per-context actions
+  posterWidth?: number; // px
+  posterHeight?: number; // px
   className?: string;
 }
 
 export function MovieCardSidepanel({ 
   posterUrl, 
   movieTitle, 
-  movieId, // Add movieId to destructuring
+  movieId,
   onAddToWatchlist,
   onMarkAsWatched,
   onMoreInfo,
   onLike,
   onDislike,
+  onRemove,
+  actions,
+  posterWidth,
+  posterHeight,
   className 
 }: MovieCardSidepanelProps) {
+  // Defaults maintain chat-mode sizing if not provided
+  const widthPx = posterWidth ?? 150;
+  const heightPx = posterHeight ?? 212;
+
+  // Default chat action set (no remove by default)
+  const defaultActions: MovieCardActionType[] = ['addToWatchlist', 'markAsWatched', 'like', 'dislike'];
+  const actionsToRender: MovieCardActionType[] = actions ?? defaultActions;
   const handleAction = (actionType: MovieCardActionType) => {
     switch (actionType) {
       case 'addToWatchlist':
-        onAddToWatchlist();
+        if (onAddToWatchlist) {
+          onAddToWatchlist();
+        }
         break;
       case 'markAsWatched':
-        onMarkAsWatched();
+        if (onMarkAsWatched) {
+          onMarkAsWatched();
+        }
         break;
       case 'like':
         onLike();
         break;
       case 'dislike':
         onDislike();
+        break;
+      case 'remove':
+        if (onRemove) {
+          onRemove();
+        }
         break;
     }
   };
@@ -52,10 +76,12 @@ export function MovieCardSidepanel({
   return (
     <div 
       className={`group ${sidepanelVariants.container} ${className ?? ''}`}
+      style={{ width: widthPx }}
     >
       {/* Movie Poster with Simple Icon Overlay */}
       <div 
-        className="relative w-[150px] h-[212px] overflow-hidden rounded-[3px] cursor-pointer"
+        className="relative overflow-hidden rounded-[3px] cursor-pointer"
+        style={{ width: widthPx, height: heightPx }}
         onClick={onMoreInfo}
       >
         {/* Poster image */}
@@ -79,19 +105,21 @@ export function MovieCardSidepanel({
       </div>
       
       {/* Sliding Panel */}
-      <div className={sidepanelVariants.panel}>
+      <div className={sidepanelVariants.panel} style={{ left: widthPx, height: heightPx }}>
         <div className={sidepanelVariants.iconContainer}>
-          {MOVIE_CARD_ACTIONS.map((action) => (
-            <MovieCardIcon
-              key={action.actionName}
-              iconPath={action.iconPath}
-              actionType={action.actionName as MovieCardActionType}
-              tooltipText={action.tooltipText}
-              movieId={movieId} // Pass movieId to each icon
-              tooltipId={tooltipId} // Pass shared tooltip ID to each icon
-              onClick={() => handleAction(action.actionName as MovieCardActionType)}
-            />
-          ))}
+          {MOVIE_CARD_ACTIONS
+            .filter((action) => actionsToRender.includes(action.actionName as MovieCardActionType))
+            .map((action) => (
+              <MovieCardIcon
+                key={action.actionName}
+                iconPath={action.iconPath}
+                actionType={action.actionName as MovieCardActionType}
+                tooltipText={action.tooltipText}
+                movieId={movieId}
+                tooltipId={tooltipId}
+                onClick={() => handleAction(action.actionName as MovieCardActionType)}
+              />
+            ))}
         </div>
       </div>
 

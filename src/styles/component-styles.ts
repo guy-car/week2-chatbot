@@ -336,8 +336,8 @@ export const sidepanelVariants = {
   
   // Icon container within panel
   iconContainer: cn(
-    'flex flex-col items-center justify-between',
-    'space-y-4', // 12px spacing between icons
+    'flex flex-col items-center justify-evenly',
+    'h-full',
     'p-4' // 16px padding
   ),
   
@@ -383,7 +383,8 @@ export const modalVariants = {
   backdrop: cn(
     'absolute inset-0',
     `bg-[${colors.system.pure.blackAlpha}]`,
-    'backdrop-blur-md', // Changed from backdrop-blur-sm to backdrop-blur-md for darker blur
+    'bg-black/50',
+    'backdrop-blur-lg', // Changed from backdrop-blur-sm to backdrop-blur-md for darker blur
     'transition-opacity duration-300'
   ),
   

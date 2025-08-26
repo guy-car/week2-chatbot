@@ -103,6 +103,12 @@ export function MovieCard({ movie, onMoreInfo }: MovieCardProps) {
         { enabled: isVisible, staleTime: 1000 * 60 * 10 }
     );
 
+    // Prefetch base movie data so modal opens with minimal loading
+    api.movies.getMovieData.useQuery(
+        { type: movie.media_type, id: movie.id },
+        { enabled: isVisible, staleTime: 1000 * 60 * 10 }
+    );
+
     return (
         <div className="flex flex-col items-center" ref={posterContainerRef}>
             <div className="text-center mb-2 w-40 px-2 h-12 flex items-center justify-center">

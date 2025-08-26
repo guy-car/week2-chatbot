@@ -1,5 +1,15 @@
 # PRIORITY FOR DEMO DAY
 
+- gallery poster onhover logos
+- animation for chatpage
+- new buttons
+- homepage layout
+- consistent font
+- style toast notifications [07.25.25-2303-toast-design-system-integration]
+- watch providers not always showing up
+- new chat button with genie lamp in sidebar
+
+
 Whole sheabang 
 
 two modes for LLM:
@@ -19,11 +29,7 @@ two modes for LLM:
 - why does the font look weird for "My Watchlist" and basically all main titles on pages (tate profile, watch history)
 - change font color for Taste Profile page
 
-- icon shift around when hovering (maybe tooltip issue) - happens with icon at the very bottom only
-
 - text box above poster (in chat view) sometimes crops info (too small)
-
-- style toast notifications [07.25.25-2303-toast-design-system-integration]
 
 ## UX
 - movies without a poster don't have a clickable link -- can we not show them at all?
