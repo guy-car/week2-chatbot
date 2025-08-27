@@ -7,6 +7,8 @@ ideas: clicking an icon makes it bounce
 continue scrolling in header
 make them rain on chat
 clicking several times ejects an icon
+Clicking chips calls mode B!! Or a variation of it?
+Clicking genie speeds us icons and make it bigger  
 
 
 If I have time:

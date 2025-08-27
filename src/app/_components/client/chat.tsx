@@ -20,19 +20,57 @@ import { buttonVariants, cardVariants, inputVariants, textVariants } from '~/sty
 
 
 
-function extractMoviesFromMessage(message: Message): MovieData[] {
+type MinimalMessage = {
+  parts?: ReadonlyArray<unknown> | unknown[];
+  id?: string;
+  role?: string;
+  createdAt?: Date;
+};
+
+type ToolInvocationLike = {
+  toolName?: unknown;
+  state?: unknown;
+  result?: unknown;
+};
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isToolResultPart(part: unknown): part is {
+  type: 'tool-invocation';
+  toolInvocation: ToolInvocationLike;
+} {
+  if (!isPlainObject(part)) return false;
+  if ((part as { type?: unknown }).type !== 'tool-invocation') return false;
+  if (!('toolInvocation' in part)) return false;
+  const tiUnknown = (part as { toolInvocation: unknown }).toolInvocation;
+  if (!isPlainObject(tiUnknown)) return false;
+  const ti = tiUnknown as ToolInvocationLike;
+  const hasToolName = typeof ti.toolName === 'string' && ti.toolName === 'media_lookup';
+  const hasStateResult = typeof ti.state === 'string' && ti.state === 'result';
+  return hasToolName && hasStateResult;
+}
+
+function isMovieData(value: unknown): value is MovieData {
+  if (!isPlainObject(value)) return false;
+  const obj = value as { id?: unknown; title?: unknown; media_type?: unknown };
+  return (
+    typeof obj.id === 'number' &&
+    typeof obj.title === 'string' &&
+    (obj.media_type === 'movie' || obj.media_type === 'tv')
+  );
+}
+
+function extractMoviesFromMessage(message: MinimalMessage): MovieData[] {
   const movies: MovieData[] = [];
 
-  message.parts?.forEach(part => {
-    if (
-      part.type === 'tool-invocation' &&
-      part.toolInvocation.toolName === 'media_lookup' &&
-      part.toolInvocation.state === 'result' &&
-      'result' in part.toolInvocation &&
-      part.toolInvocation.result &&
-      !('error' in part.toolInvocation.result)
-    ) {
-      movies.push(part.toolInvocation.result as MovieData);
+  message.parts?.forEach((part) => {
+    if (isToolResultPart(part)) {
+      const result = part.toolInvocation.result;
+      if (isPlainObject(result) && !('error' in result) && isMovieData(result)) {
+        movies.push(result);
+      }
     }
   });
 
@@ -247,13 +285,15 @@ export default function Chat({
     const candidate: MovieData[] = []
     for (let i = messages.length - 1; i >= 0; i--) {
       const m = messages[i]
+      if (!m) continue
       if (m.role !== 'assistant') continue
       const live = extractMoviesFromMessage(m)
       if (live.length > 0) {
         candidate.push(...live)
         break
       }
-      const saved = savedMovies.get(m.id)
+      const messageId = 'id' in m ? m.id : undefined
+      const saved = messageId ? savedMovies.get(messageId) : undefined
       if (saved && saved.length > 0) {
         candidate.push(...saved)
         break
