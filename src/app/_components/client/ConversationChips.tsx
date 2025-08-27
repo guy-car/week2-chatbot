@@ -8,7 +8,6 @@ import { buttonVariants } from '~/styles/component-styles'
 
 // Cinema icons for the loading state
 const CINEMA_ICONS = [
-  '/icons/animation/lamp-alt-2.png',
   '/icons/animation/lamp-alt-1.png', 
   '/icons/animation/star-alt.png',
   '/icons/animation/reel-1.png',
@@ -16,8 +15,7 @@ const CINEMA_ICONS = [
   '/icons/animation/light.png',
   '/icons/animation/gem.png',
   '/icons/animation/clap.png',
-  '/icons/animation/camera-2-modern.png',
-  '/icons/animation/camera-1.png'
+  '/icons/animation/camera-2-modern.png'
 ];
 
 // Cache successful/failed icon loads to avoid repeated network checks
