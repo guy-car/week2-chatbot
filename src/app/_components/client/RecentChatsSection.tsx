@@ -37,7 +37,11 @@ export default function RecentChatsSection({ chats }: RecentChatsSectionProps) {
         router.push('/');
       }
 
-      toast.success('Chat deleted')
+      toast.success('Chat deleted', {
+        icon: (
+          <Image src="/icons/new_cyan/trash.png" alt="" width={18} height={18} aria-hidden />
+        ),
+      })
     },
     onError: (error) => {
       console.error('Failed to delete chat:', error)

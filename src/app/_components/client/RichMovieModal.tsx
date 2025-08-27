@@ -139,10 +139,18 @@ export function RichMovieModal({
     try {
       if (next) {
         await addToWatchlist(movie)
-        toast.success(`Added "${movie.title}" to watchlist`)
+        toast.success(`Added "${movie.title}" to watchlist`, {
+          icon: (
+            <Image src="/icons/new_cyan/star.png" alt="" width={18} height={18} aria-hidden />
+          ),
+        })
       } else {
         await removeFromWatchlist(movie.id)
-        toast.success(`Removed "${movie.title}" from watchlist`)
+        toast.success(`Removed "${movie.title}" from watchlist`, {
+          icon: (
+            <Image src="/icons/new_cyan/star.png" alt="" width={18} height={18} aria-hidden />
+          ),
+        })
       }
     } catch {
       setOptimistic(o => ({ ...o, watchlist: !next }))
@@ -161,10 +169,18 @@ export function RichMovieModal({
     try {
       if (next) {
         await markAsWatched(movie)
-        toast.success(`Marked "${movie.title}" as watched`)
+        toast.success(`Marked "${movie.title}" as watched`, {
+          icon: (
+            <Image src="/icons/new_cyan/eye.png" alt="" width={18} height={18} aria-hidden />
+          ),
+        })
       } else {
         await removeFromHistory(movie.id)
-        toast.success(`Removed "${movie.title}" from history`)
+        toast.success(`Removed "${movie.title}" from history`, {
+          icon: (
+            <Image src="/icons/new_cyan/eye.png" alt="" width={18} height={18} aria-hidden />
+          ),
+        })
       }
     } catch {
       setOptimistic(o => ({ ...o, history: !next }))
@@ -191,7 +207,11 @@ export function RichMovieModal({
     triggerPulseReaction('like')
     try {
       await addLikedMovie(movie)
-      toast.success(`You liked "${movie.title}"`)
+      toast.success('Taste profile updated', {
+        icon: (
+          <Image src="/icons/new_cyan/popcorn.png" alt="" width={18} height={18} aria-hidden />
+        ),
+      })
     } catch {
       // silent fail, keep UI as-is
     }
@@ -204,7 +224,11 @@ export function RichMovieModal({
     triggerPulseReaction('dislike')
     try {
       await addDislikedMovie(movie)
-      toast.success(`You disliked "${movie.title}"`)
+      toast.success('Taste profile updated', {
+        icon: (
+          <Image src="/icons/new_cyan/popcorn.png" alt="" width={18} height={18} aria-hidden />
+        ),
+      })
     } catch {
       // silent fail
     }
