@@ -299,22 +299,21 @@ export default function Chat({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Centered content with floating genie positioned relative to this area */}
-      <div className="relative flex justify-center">
-        {/* Genie - absolutely positioned to the left of the content, not affecting layout */}
-        <div
-          className="hidden lg:block absolute left-0 top-1/4 -translate-y-1/2 -translate-x-full ml-32 cursor-pointer"
-          onClick={() => setDebugThinking(v => !v)}
-        >
-          <img
-            src="/genie/genie-1.png"
-            alt="Watch Genie"
-            className={cn("w-36 h-48 object-contain", debugThinking ? "genie-animated" : "")}
-          />
+      <div className="grid grid-cols-12 gap-8">
+        {/* Left column - Genie */}
+        <div className="hidden lg:block col-span-2 flex justify-center">
+          <div className="sticky top-32">
+            <img 
+              src="/genie/genie-1.png" 
+              alt="Watch Genie" 
+              className={cn("w-32 h-40 object-contain", debugThinking ? "genie-animated" : "")}
+              onClick={() => setDebugThinking(v => !v)}
+            />
+          </div>
         </div>
 
-        {/* Center Content Area */}
-        <div className="w-full max-w-4xl min-w-0">
+        {/* Center column - Chat content */}
+        <div className="col-span-12 lg:col-span-8">
           {/* Chat Messages */}
           <div
             ref={chatContainerRef}
@@ -410,6 +409,9 @@ export default function Chat({
             </div>
           )}
         </div>
+
+        {/* Right column - Empty space */}
+        <div className="hidden lg:block col-span-2" />
       </div>
     </div>
   );
