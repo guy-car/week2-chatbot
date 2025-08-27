@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import { api } from "~/trpc/react"
 import { loadMoviesForChat } from 'tools/chat-store';
 import { cn } from "~/lib/utils"
-import { buttonVariants, cardVariants, inputVariants } from '~/styles/component-styles';
+import { buttonVariants, cardVariants, inputVariants, textVariants } from '~/styles/component-styles';
 
 
 
@@ -267,7 +267,13 @@ export default function Chat({
             {/* Chat Messages Content */}
             {messages.map(message => (
               <div key={message.id} className={`mb-4 ${message.role === 'assistant' ? 'text-xl leading-relaxed' : 'text-xl'}`}>
-                <strong>{message.role === 'user' ? 'Me: ' : 'Genie '}</strong>
+                <span className={cn(
+                  message.role === 'user'
+                    ? cn(textVariants.labelUser, 'text-[#00E5FF]')
+                    : textVariants.labelAssistant
+                )}>
+                  {message.role === 'user' ? 'Me: ' : 'Genie: '}
+                </span>
                 {message.parts ? (
                   // Handle messages with parts (new messages)
                   message.parts
@@ -282,14 +288,14 @@ export default function Chat({
                     })
                 ) : (
                   // Handle messages without parts (loaded from DB)
-                  <div>{message.content}</div>
+                  <div className="font-normal">{message.content}</div>
                 )}
               </div>
             ))}
             {modeBIntro && (
               <div className={`mb-4 text-xl leading-relaxed`}>
-                <strong>{'Genie '}</strong>
-                <div>{modeBIntro}</div>
+                <span className={textVariants.labelAssistant}>{'Genie: '}</span>
+                <div className="font-normal">{modeBIntro}</div>
               </div>
             )}
           </div>

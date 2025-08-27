@@ -198,6 +198,15 @@ export const textVariants = {
   secondary: cn(tokens.text.secondary), // Secondary text (muted)
   accent: cn(tokens.text.accent),       // Pure white for emphasis
   muted: cn(tokens.text.muted),         // Subtle text
+  // Sender labels for chat (uses brand colors)
+  labelUser: cn(
+    'font-medium',
+    `text-[${colors.glow.cyan}]`
+  ),
+  labelAssistant: cn(
+    'font-medium',
+    `text-[${colors.glow.orange}]`
+  ),
   
   // Heading styles
   h1: cn(
