@@ -3,6 +3,7 @@
 import { toast } from 'react-hot-toast'
 import type { MovieData } from '~/app/types'
 import { useTasteProfile } from '~/app/_services/tasteProfile'
+import Image from 'next/image'
 import { textVariants } from '~/styles/component-styles'
 import { MovieCardSidepanel } from './MovieCardSidepanel'
 import { HISTORY_ACTIONS, WATCHLIST_ACTIONS } from './movie-card-icons'
@@ -30,12 +31,20 @@ export function CollectionCard({
     const handleLike = async () => {
         toast.dismiss()
         await addLikedMovie(movie)
-        toast.success(`You liked "${movie.title}"`)
+        toast.success('Taste profile updated', {
+            icon: (
+                <Image src="/icons/new_cyan/popcorn.png" alt="" width={18} height={18} aria-hidden />
+            ),
+        })
     }
 
     const handleDislike = async () => {
         await addDislikedMovie(movie)
-        toast.success(`You disliked "${movie.title}"`)
+        toast.success('Taste profile updated', {
+            icon: (
+                <Image src="/icons/new_cyan/popcorn.png" alt="" width={18} height={18} aria-hidden />
+            ),
+        })
     }
 
     const formatDate = (dateString?: string) => {

@@ -1,6 +1,7 @@
 # PRIORITY FOR DEMO DAY
 
 - conversational chips :(
+- style text in chat
 - homepage layout
 - style toast notifications [07.25.25-2303-toast-design-system-integration]
 - watch providers not always showing up

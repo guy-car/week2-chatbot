@@ -5,6 +5,7 @@ import { CollectionCard } from './CollectionCard'
 import { RichMovieModal } from './RichMovieModal'
 import type { MovieData } from '~/app/types'
 import { toast } from 'react-hot-toast'
+import Image from 'next/image'
 import { useMovieCollections } from '~/app/_services/useMovieCollections';
 
 interface MovieGridProps {
@@ -26,7 +27,11 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
                 await removeFromHistory(movieId);
             }
             const movie = movies.find(m => m.id === movieId);
-            toast.success(`Removed "${movie?.title}" from ${variant}`);
+            toast.success(`Removed "${movie?.title}" from ${variant}`, {
+                icon: (
+                    <Image src="/icons/new_cyan/trash.png" alt="" width={18} height={18} aria-hidden />
+                ),
+            });
         } catch {
             toast.error('Failed to remove movie');
         }
@@ -35,7 +40,11 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
     const handleMarkWatched = async (movie: MovieData) => {
         try {
             await markAsWatched(movie);
-            toast.success(`Moved "${movie.title}" to watch history`);
+            toast.success(`Moved "${movie.title}" to watch history`, {
+                icon: (
+                    <Image src="/icons/new_cyan/eye.png" alt="" width={18} height={18} aria-hidden />
+                ),
+            });
         } catch {
             toast.error('Failed to mark as watched');
         }
@@ -43,7 +52,11 @@ export function MovieGrid({ movies, variant }: MovieGridProps) {
     const handleAddToWatchlist = async (movie: MovieData) => {
         try {
             await addToWatchlist(movie);
-            toast.success(`Added "${movie.title}" to watchlist`);
+            toast.success(`Added "${movie.title}" to watchlist`, {
+                icon: (
+                    <Image src="/icons/new_cyan/star.png" alt="" width={18} height={18} aria-hidden />
+                ),
+            });
         } catch {
             toast.error('Failed to add to watchlist');
         }

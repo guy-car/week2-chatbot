@@ -1,6 +1,7 @@
 'use client'
 
 import { toast } from 'react-hot-toast'
+import Image from 'next/image'
 import { useMovieCollections } from '~/app/_services/useMovieCollections'
 import { useTasteProfile } from '~/app/_services/tasteProfile'
 import { MovieCardSidepanel } from './MovieCardSidepanel'
@@ -26,7 +27,11 @@ export function MovieCardWithSidepanel({ movie, onMoreInfo }: MovieCardWithSidep
 
         try {
             await addToWatchlist(movie);
-            toast.success(`Added "${movie.title}" to watchlist`);
+            toast.success(`Added "${movie.title}" to watchlist`, {
+                icon: (
+                    <Image src="/icons/new_cyan/star.png" alt="" width={18} height={18} aria-hidden />
+                ),
+            });
         } catch (error) {
             if (error instanceof Error && error.message === 'Already in watchlist') {
                 toast.error(`"${movie.title}" is already in your watchlist`);
@@ -41,7 +46,11 @@ export function MovieCardWithSidepanel({ movie, onMoreInfo }: MovieCardWithSidep
 
         try {
             await markAsWatched(movie);
-            toast.success(`Marked "${movie.title}" as watched`);
+            toast.success(`Marked "${movie.title}" as watched`, {
+                icon: (
+                    <Image src="/icons/new_cyan/eye.png" alt="" width={18} height={18} aria-hidden />
+                ),
+            });
         } catch (error) {
             if (error instanceof Error && error.message === 'Already watched') {
                 toast(`"${movie.title}" is already in your watch history`);
@@ -54,12 +63,20 @@ export function MovieCardWithSidepanel({ movie, onMoreInfo }: MovieCardWithSidep
     const handleLike = async () => {
         toast.dismiss()
         await addLikedMovie(movie)
-        toast.success(`You liked "${movie.title}"`)
+        toast.success('Taste profile updated', {
+            icon: (
+                <Image src="/icons/new_cyan/popcorn.png" alt="" width={18} height={18} aria-hidden />
+            ),
+        })
     }
 
     const handleDislike = async () => {
         await addDislikedMovie(movie)
-        toast.success(`You disliked "${movie.title}"`)
+        toast.success('Taste profile updated', {
+            icon: (
+                <Image src="/icons/new_cyan/popcorn.png" alt="" width={18} height={18} aria-hidden />
+            ),
+        })
     }
 
     const handleMoreInfo = () => {

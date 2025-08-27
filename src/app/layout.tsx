@@ -6,6 +6,7 @@ import { type Metadata } from "next";
 import { Noto_Sans, Noto_Sans_Display, Inter } from "next/font/google";
 import { headers } from "next/headers";
 import { Toaster } from 'react-hot-toast'
+import { colors, borderRadius } from '~/styles/design-tokens'
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { HeaderServer } from '~/app/_components/server/HeaderServer'
@@ -80,7 +81,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <CustomSidebarProvider>
               <PromotedIconsProvider>
                 {isLoggedIn ? loggedInLayout : loggedOutLayout}
-                <Toaster position="top-center" containerStyle={{ zIndex: 999999 }} />
+                <Toaster 
+                  position="top-center" 
+                  containerStyle={{ zIndex: 999999 }}
+                  toastOptions={{
+                    style: {
+                      color: colors.text.primary,
+                      background: `linear-gradient(135deg, rgba(2,255,251,0.09) 0%, rgba(0,0,0,0.00) 55%, rgba(2,255,251,0.06) 100%), ${colors.background.secondary}`,
+                      borderRadius: borderRadius.md,
+                      border: `0.5px solid ${colors.border.subtle}`,
+                      boxShadow: 'none',
+                    },
+                  }}
+                />
               </PromotedIconsProvider>
             </CustomSidebarProvider>
           </TRPCReactProvider>
