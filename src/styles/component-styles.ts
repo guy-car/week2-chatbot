@@ -496,7 +496,7 @@ export const modalVariants = {
   
   // Right action rail - Updated to match poster hover panel styling
   actionRail: cn(
-    'flex flex-col items-center justify-start',
+    'flex flex-col items-center self-center gap-y-1',
     'py-4', // Wider width for better proportions
     'bg-[rgba(0,229,255,0.15)]', // Same glass-like background as poster panel
     'rounded-tl-[11px] rounded-bl-[11px]', // Rounded left corners only, extend to right edge
