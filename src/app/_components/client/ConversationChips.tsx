@@ -76,6 +76,7 @@ interface ConversationChipsProps {
     isAiThinking?: boolean
     onChipClick: (chipText: string) => void
     thinkingVariant?: 'static' | 'scroll'
+    onMouseEnter?: () => void
 }
 
 export function ConversationChips({ chips, isAiThinking = false, onChipClick, thinkingVariant = 'static' }: ConversationChipsProps) {
@@ -196,7 +197,7 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick, th
                 {sequence.map((icon, i) => (
                     <div
                         key={`${icon}-scroll-${i}`}
-                        className="chip-scroll-icon pointer-events-none select-none"
+                        className="chip-scroll-icon select-none"
                         style={{ animationDelay: `${i * staggerSeconds}s`, opacity: 0 }}
                     >
                         <div className="w-20 h-20 flex items-center justify-center">

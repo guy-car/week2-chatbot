@@ -182,6 +182,11 @@ export default function Chat({
 
   useChatTitle(id ?? '', messages);
 
+  // Start genie animation once when the chat mounts
+  useEffect(() => {
+    setDebugThinking(true)
+  }, [])
+
   // Load chips from localStorage or set defaults on chat open/new chat
   useEffect(() => {
     try {
@@ -315,7 +320,10 @@ export default function Chat({
             <img 
               src="/genie/genie-1.png" 
               alt="Watch Genie" 
-              className={cn("w-50 h-50 object-contain", debugThinking ? "genie-animated" : "")}
+              className={cn(
+                "w-50 h-50 object-contain transition-opacity duration-500",
+                debugThinking ? "genie-animated opacity-100" : "opacity-100"
+              )}
               onClick={() => setDebugThinking(v => !v)}
             />
           </div>
@@ -380,6 +388,10 @@ export default function Chat({
               autoCapitalize="off"
               spellCheck="false"
               disabled={status === 'submitted' || status === 'streaming'}
+              onMouseEnter={debugThinking ? () => {
+                console.log("stopping animation");
+                setDebugThinking(false);
+              } : undefined}
             />
             <button
               className={cn(
@@ -388,6 +400,10 @@ export default function Chat({
                   : buttonVariants.primary
               )}
               disabled={status === 'submitted' || status === 'streaming'}
+              onMouseEnter={debugThinking ? () => {
+                console.log("stopping animation");
+                setDebugThinking(false);
+              } : undefined}
             >
               Send
             </button>
@@ -402,6 +418,10 @@ export default function Chat({
               void append({ role: 'user', content: text })
               setConversationChips([])
             }}
+            onMouseEnter={debugThinking ? () => {
+              console.log("stopping animation");
+              setDebugThinking(false);
+            } : undefined}
           />
 
           {/* Error Handling */}
