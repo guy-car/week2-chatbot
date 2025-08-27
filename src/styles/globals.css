@@ -308,3 +308,31 @@ h1,
   animation: success-pulse 220ms ease-out 1;
 }
 
+
+/* Chat thinking: left-to-right scrolling icons with edge fade */
+@keyframes chipSlideRight {
+  0%   { transform: translateX(-20%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+
+.chip-scroll {
+  position: relative;
+  height: 80px; /* match current icon size (80x80) */
+  overflow: hidden;
+}
+
+.chip-scroll-mask {
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 10%, rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 10%, rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%);
+}
+
+.chip-scroll-icon {
+  position: absolute;
+  top: 0;
+  left: -20%;
+  animation: chipSlideRight var(--chip-speed, 4s) linear infinite;
+  will-change: transform, opacity;
+}
+

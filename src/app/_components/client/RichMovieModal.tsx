@@ -335,6 +335,18 @@ export function RichMovieModal({
                         className="w-full h-full object-cover"
                       />
                     )}
+                    {/* Play overlay icon (temporary popcorn icon) */}
+                    {movie?.trailer?.url && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <img
+                          src="/icons/new_cyan/play-circle.svg"
+                          alt=""
+                          aria-hidden
+                          className="w-16 h-16 opacity-90 drop-shadow-[0_0_16px_rgba(0,229,255,0.35)] transition-transform duration-200 ease-out group-hover:scale-110"
+                        />
+                        <span className="sr-only">Play trailer</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

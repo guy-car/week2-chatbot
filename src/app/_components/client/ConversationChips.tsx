@@ -196,7 +196,7 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
     if (chips.length === 0) return null
 
     return (
-        <div className="mb-3 flex flex-wrap gap-2 justify-center">
+        <div className="mb-3 flex w-full flex-wrap gap-2 justify-evenly">
             {chips.map((chip, index) => (
                 <button
                     key={index}

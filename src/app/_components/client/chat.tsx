@@ -53,6 +53,14 @@ export default function Chat({
   const [savedMovies, setSavedMovies] = useState<Map<string, MovieData[]>>(new Map());
   const [modeBIntro, setModeBIntro] = useState<string>('')
 
+  const DEFAULT_CHIPS: Chip[] = [
+    { text: 'Broaden my horizon', type: 'broaden' },
+    { text: 'What should I watch?', type: 'reset' },
+    { text: 'Surprise me', type: 'curveball' },
+  ]
+  const chipsStorageKey = (chatId?: string) => (chatId ? `chat:${chatId}:chips` : '')
+  const DISABLE_GENERATED_CHIPS = true
+
   const apiVersion = process.env.NEXT_PUBLIC_CHAT_API_VERSION ?? 'v1'
   const { messages, input, status, error, handleInputChange, handleSubmit, reload, append } = useChat({
     api: apiVersion === 'v2' ? '/api/chat-v2' : '/api/chat-tmdb-tool',
@@ -90,7 +98,7 @@ export default function Chat({
           })()
           setModeBIntro(introText)
           setRecommendedMovies(raw.picks)
-          setConversationChips([])
+          setConversationChips(prev => (prev.length > 0 ? prev : DEFAULT_CHIPS))
 
           if (id) {
             try {
@@ -123,6 +131,9 @@ export default function Chat({
           .pop();
 
         if (lastUserMsg?.content && message.role === 'assistant' && message.content) {
+          if (DISABLE_GENERATED_CHIPS) {
+            return
+          }
           // Get conversation context
           const recentMessages = [...messages, message].slice(-6).map(m => ({
             role: m.role,
@@ -152,7 +163,7 @@ export default function Chat({
 
           } catch (error) {
             console.error('Failed to generate chips:', error);
-            setConversationChips([]);
+            setConversationChips(prev => (prev.length > 0 ? prev : DEFAULT_CHIPS));
           }
         }
       })();
@@ -166,6 +177,29 @@ export default function Chat({
   }) // <-- useChat ends here
 
   useChatTitle(id ?? '', messages);
+
+  // Load chips from localStorage or set defaults on chat open/new chat
+  useEffect(() => {
+    try {
+      if (!id) {
+        setConversationChips(prev => (prev.length > 0 ? prev : DEFAULT_CHIPS))
+        return
+      }
+      const key = chipsStorageKey(id)
+      if (!key) return
+      const raw = localStorage.getItem(key)
+      if (raw) {
+        const parsed = JSON.parse(raw) as Chip[]
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setConversationChips(parsed)
+          return
+        }
+      }
+      setConversationChips(prev => (prev.length > 0 ? prev : DEFAULT_CHIPS))
+    } catch {
+      setConversationChips(prev => (prev.length > 0 ? prev : DEFAULT_CHIPS))
+    }
+  }, [id])
 
   useEffect(() => {
     if (id) {
@@ -182,6 +216,16 @@ export default function Chat({
       })();
     }
   }, [id]);
+
+  // Persist chips per chat whenever they change
+  useEffect(() => {
+    if (!id) return
+    try {
+      if (conversationChips.length > 0) {
+        localStorage.setItem(chipsStorageKey(id), JSON.stringify(conversationChips))
+      }
+    } catch {}
+  }, [conversationChips, id])
 
   // Clear Mode B intro when a new request starts
   useEffect(() => {
@@ -225,6 +269,13 @@ export default function Chat({
     }
 
   }, [messages, savedMovies]);
+
+  // Ensure chips show up when posters render
+  useEffect(() => {
+    if (recommendedMovies.length > 0 && conversationChips.length === 0) {
+      setConversationChips(DEFAULT_CHIPS)
+    }
+  }, [recommendedMovies, conversationChips.length])
 
   useEffect(() => {
     if (chatContainerRef.current) {
