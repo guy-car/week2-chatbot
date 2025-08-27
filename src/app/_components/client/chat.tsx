@@ -306,7 +306,7 @@ export default function Chat({
             <img 
               src="/genie/genie-1.png" 
               alt="Watch Genie" 
-              className={cn("w-32 h-40 object-contain", debugThinking ? "genie-animated" : "")}
+              className={cn("w-50 h-50 object-contain", debugThinking ? "genie-animated" : "")}
               onClick={() => setDebugThinking(v => !v)}
             />
           </div>
