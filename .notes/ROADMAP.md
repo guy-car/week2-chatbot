@@ -1,14 +1,13 @@
 # PRIORITY FOR DEMO DAY
 
 - conversational chips :(
-- style text in chat - make sure we focus on latest message
-- watch providers not always showing up
 - play button on trailer
 - animation needs to be more fun
 
 If I have time:
 - border gradients
 - animation for chat page
+- watch providers not always showing up
 
 
 Whole sheabang 
