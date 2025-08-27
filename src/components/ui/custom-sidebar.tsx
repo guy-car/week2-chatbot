@@ -134,7 +134,7 @@ export default function CustomSidebar({ className, chats }: CustomSidebarProps) 
   return (
     <div 
       ref={sidebarRef}
-      className={`fixed left-0 w-[293px] flex flex-col border border-[rgba(0,229,255,0.99)] rounded-br-[11px] rounded-tr-[11px] bg-[#0A0A0B] z-50 transform transition-transform duration-300 ease-in-out ${className ?? ''}`} 
+      className={`fixed left-0 w-[293px] flex flex-col border border-[rgba(0,229,255,0.79)] rounded-br-[11px] rounded-tr-[11px] bg-[#0A0A0B]/70 backdrop-blur-sm backdrop-saturate-150 z-50 transform transition-transform duration-300 ease-in-out ${className ?? ''}`} 
       style={{
         top: 'calc(123px + 32px)',
         height: 'calc(100vh - 123px - 64px)',
