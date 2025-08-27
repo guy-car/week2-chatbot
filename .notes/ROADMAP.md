@@ -1,7 +1,5 @@
 # PRIORITY FOR DEMO DAY
 
-BUG POSTERS not updating + carousel
-
 BUILD
 
 ANIMATIONS LOOK FRESH
@@ -14,6 +12,7 @@ clicking several times ejects an icon
 If I have time:
 - border gradients
 - watch providers not always showing up
+- carousel posters in chat mode
 
 
 Whole sheabang 
