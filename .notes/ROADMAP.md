@@ -1,11 +1,16 @@
 # PRIORITY FOR DEMO DAY
 
-- conversational chips :(
-- animation needs to be more fun
+BUG POSTERS not updating + carousel
+
+ANIMATIONS LOOK FRESH
+ideas: clicking an icon makes it bounce
+continue scrolling in header
+make them rain on chat
+clicking several times ejects an icon
+
 
 If I have time:
 - border gradients
-- animation for chat page
 - watch providers not always showing up
 
 

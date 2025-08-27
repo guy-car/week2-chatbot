@@ -186,12 +186,13 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick, th
     if (isAiThinking && randomIcons.length > 0 && thinkingVariant === 'scroll') {
         // Use each available icon exactly once per loop
         const sequence = [...randomIcons]
-        const speedSeconds = 8
-        // Spread the stagger evenly so only one is visible entering at a time
-        const staggerSeconds = (speedSeconds * 0.9) / Math.max(sequence.length, 1)
+        const speedSeconds = 9 // ANIMATION SPEED 
+        // Keep a natural start; use positive stagger so loop begins from the left
+        const visibleWindow = 0.9
+        const staggerSeconds = (speedSeconds * visibleWindow) / Math.max(sequence.length, 1)
         const scrollVars: CSSProperties & Record<'--chip-speed', string> = { '--chip-speed': `${speedSeconds}s` }
         return (
-            <div className="-mb-5 w-full chip-scroll chip-scroll-mask" style={scrollVars}>
+            <div className="-mb-5 w-full chip-scroll chip-scroll-mask thinking-fade-in" style={scrollVars}>
                 {sequence.map((icon, i) => (
                     <div
                         key={`${icon}-scroll-${i}`}

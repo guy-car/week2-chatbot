@@ -254,8 +254,8 @@ h1,
 
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-4px); }
-  60% { transform: translateY(-2px); }
+  40% { transform: translateY(-2px); }
+  60% { transform: translateY(-1px); }
 }
 
 .spotlight-beam {
@@ -317,33 +317,82 @@ h1,
   100% { transform: translateX(120%); opacity: 0; }
 }
 
+.genie-bounce {
+  animation: bounce 3s ease-in-out infinite;
+}
+
+@keyframes genieGlowPulse {
+  0% { filter: drop-shadow(0 0 2px rgba(253, 142, 44, 0.25)) drop-shadow(0 0 4px rgba(253, 142, 44, 0.15)); }
+  50% { filter: drop-shadow(0 0 10px rgba(253, 142, 44, 0.95)) drop-shadow(0 0 8px rgba(253, 142, 44, 0.25)); }
+  100% { filter: drop-shadow(0 0 2px rgba(253, 142, 44, 0.25)) drop-shadow(0 0 4px rgba(44, 249, 253, 0.25)); }
+}
+
+.genie-glow {
+  animation: genieGlowPulse 3s ease-in-out infinite;
+}
+
+/* Combined bounce + glow so animations don't override each other */
+.genie-animated {
+  animation: genieBounce 3s ease-in-out infinite, genieGlowPulse 3s ease-in-out infinite;
+  transform-origin: center bottom;
+  will-change: transform, filter;
+}
+
+/* Subtle bounce tuned for the Genie, starts at original position */
+@keyframes genieBounce {
+  0%   { transform: translateY(0); }
+  15%  { transform: translateY(5px); }
+  30%  { transform: translateY(0); }
+  55%  { transform: translateY(6px); }
+  70%  { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
 /* Position-based slide to ensure traversal across container width */
 @keyframes chipSlideRightPos {
   0%   { left: -100px; opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
   100% { left: calc(100% + 100px); opacity: 0; }
 }
 
 .chip-scroll {
   position: relative;
-  height: 80px; /* match current icon size (80x80) */
-  overflow: hidden;
+  height: 112px;            /* extra headroom for higher bounce */
+  overflow-x: hidden;       /* keep edge fade horizontally */
+  overflow-y: visible;      /* let glow + bounce escape vertically */
 }
 
 .chip-scroll-mask {
-  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 10%, rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%);
-  mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 10%, rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to right,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,1) 12%,    /* widen the feather */
+    rgba(0,0,0,1) 88%,
+    rgba(0,0,0,0) 100%
+  );
+  mask-image: linear-gradient(to right,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,1) 12%,
+    rgba(0,0,0,1) 88%,
+    rgba(0,0,0,0) 100%
+  );
 }
 
 .chip-scroll-icon {
   position: absolute;
-  top: 0;
+  top: 16px;                /* centers 80px icon inside 112px track */
   width: 80px;
   height: 80px;
-  animation: chipSlideRightPos var(--chip-speed, 4s) linear infinite;
+  animation: chipSlideRightPos var(--chip-speed, 4s) linear infinite, genieBounce 3s ease-in-out infinite, genieGlowPulse 3s ease-in-out infinite;
   opacity: 0;
   z-index: 1;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
+  transform-origin: center bottom;
 }
+
+/* Crossfade helpers for appearing/disappearing thinking UI */
+@keyframes fadeInSmooth { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOutSmooth { from { opacity: 1; } to { opacity: 0; } }
+.thinking-fade-in { animation: fadeInSmooth 520ms ease-out both; }
+.thinking-fade-out { animation: fadeOutSmooth 520ms ease-in forwards; }
 
