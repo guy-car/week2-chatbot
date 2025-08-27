@@ -1,7 +1,6 @@
 # PRIORITY FOR DEMO DAY
 
 - conversational chips :(
-- play button on trailer
 - animation needs to be more fun
 
 If I have time:
