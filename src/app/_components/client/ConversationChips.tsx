@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, createContext, useContext } from 'react'
+import type { CSSProperties } from 'react'
 import Image from 'next/image'
 import { type Chip } from '~/app/types'
 import { buttonVariants } from '~/styles/component-styles'
@@ -19,20 +20,35 @@ const CINEMA_ICONS = [
   '/icons/animation/camera-1.png'
 ];
 
+// Cache successful/failed icon loads to avoid repeated network checks
+const iconLoadCache = new Map<string, boolean>()
+
+function checkIconAvailable(path: string): Promise<boolean> {
+    if (iconLoadCache.has(path)) {
+        return Promise.resolve(iconLoadCache.get(path)!)
+    }
+    return new Promise<boolean>((resolve) => {
+        const img = new window.Image()
+        const done = (ok: boolean) => {
+            iconLoadCache.set(path, ok)
+            resolve(ok)
+        }
+        img.onload = () => done(true)
+        img.onerror = () => done(false)
+        img.src = path
+    })
+}
+
 // Context for managing promoted icons
 interface PromotedIconsContextType {
   promotedIcons: string[]
   promoteIcon: (iconPath: string) => void
 }
 
-const PromotedIconsContext = createContext<PromotedIconsContextType | null>(null)
+const PromotedIconsContext = createContext<PromotedIconsContextType>(null!)
 
 export function usePromotedIcons() {
-  const context = useContext(PromotedIconsContext)
-  if (!context) {
-    throw new Error('usePromotedIcons must be used within PromotedIconsProvider')
-  }
-  return context
+  return useContext(PromotedIconsContext)
 }
 
 // Provider component
@@ -59,9 +75,10 @@ interface ConversationChipsProps {
     chips: Chip[]
     isAiThinking?: boolean
     onChipClick: (chipText: string) => void
+    thinkingVariant?: 'static' | 'scroll'
 }
 
-export function ConversationChips({ chips, isAiThinking = false, onChipClick }: ConversationChipsProps) {
+export function ConversationChips({ chips, isAiThinking = false, onChipClick, thinkingVariant = 'static' }: ConversationChipsProps) {
     // Random icons state - regenerate when AI starts thinking
     const [randomIcons, setRandomIcons] = useState<string[]>([])
     // Click counters for each icon (persists across AI thinking sessions)
@@ -74,12 +91,25 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
     // Get promoted icons context
     const { promoteIcon } = usePromotedIcons()
     
-    // Generate 3 random icons when AI starts thinking
+    // Generate random icons from those that actually load, when AI starts thinking
     useEffect(() => {
+        let isCancelled = false
         if (isAiThinking) {
-            const shuffled = [...CINEMA_ICONS].sort(() => Math.random() - 0.5)
-            setRandomIcons(shuffled.slice(0, 3))
+            Promise.all(CINEMA_ICONS.map(async (p) => ({ path: p, ok: await checkIconAvailable(p) })))
+                .then(results => {
+                    if (isCancelled) return
+                    const available = results.filter(r => r.ok).map(r => r.path)
+                    const pool = available.length > 0 ? available : CINEMA_ICONS
+                    const shuffled = [...pool].sort(() => Math.random() - 0.5)
+                    setRandomIcons(shuffled)
+                })
+                .catch(() => {
+                    if (isCancelled) return
+                    const shuffled = [...CINEMA_ICONS].sort(() => Math.random() - 0.5)
+                    setRandomIcons(shuffled)
+                })
         }
+        return () => { isCancelled = true }
     }, [isAiThinking])
 
     // Handle icon clicks
@@ -153,7 +183,37 @@ export function ConversationChips({ chips, isAiThinking = false, onChipClick }: 
     }
 
     // Show cinema icons when AI is thinking
-    if (isAiThinking && randomIcons.length > 0) {
+    if (isAiThinking && randomIcons.length > 0 && thinkingVariant === 'scroll') {
+        // Use each available icon exactly once per loop
+        const sequence = [...randomIcons]
+        const speedSeconds = 8
+        // Spread the stagger evenly so only one is visible entering at a time
+        const staggerSeconds = (speedSeconds * 0.9) / Math.max(sequence.length, 1)
+        const scrollVars: CSSProperties & Record<'--chip-speed', string> = { '--chip-speed': `${speedSeconds}s` }
+        return (
+            <div className="-mb-5 w-full chip-scroll chip-scroll-mask" style={scrollVars}>
+                {sequence.map((icon, i) => (
+                    <div
+                        key={`${icon}-scroll-${i}`}
+                        className="chip-scroll-icon pointer-events-none select-none"
+                        style={{ animationDelay: `${i * staggerSeconds}s`, opacity: 0 }}
+                    >
+                        <div className="w-20 h-20 flex items-center justify-center">
+                            <Image
+                                src={icon}
+                                alt="Cinema equipment"
+                                width={80}
+                                height={80}
+                                className="object-contain w-full h-full"
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+
+    if (isAiThinking && randomIcons.length > 0 && thinkingVariant === 'static') {
         return (
             <div className="-mb-5 flex justify-evenly items-center">
                 {randomIcons.map((icon, index) => {

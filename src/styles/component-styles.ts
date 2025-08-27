@@ -66,7 +66,7 @@ export const buttonVariants = {
   
   // Chip button (Conversation chips) - Orange glow effect
   chip: cn(
-    'px-4 py-2 transition-all relative',
+    'px-4 py-3 transition-all relative',
     'rounded-[11px]',
     'bg-gradient-to-r from-black/20 to-black/20',
     'before:absolute before:inset-0 before:rounded-[11px] before:bg-gradient-to-b before:from-orange-500/25 before:to-transparent before:opacity-100',
@@ -171,7 +171,7 @@ export const inputVariants = {
 export const chipVariants = {
   // Conversation chip
   conversation: cn(
-    'px-4 py-2 rounded-[20px]',
+    'px-4 py-3 rounded-[20px]',
     'bg-[rgba(2,255,251,0.07)]',
     'border border-[rgba(244,243,241,0.05)]',
     'text-white text-sm font-medium',

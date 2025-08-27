@@ -52,6 +52,8 @@ export default function Chat({
   const [conversationChips, setConversationChips] = useState<Chip[]>([])
   const [savedMovies, setSavedMovies] = useState<Map<string, MovieData[]>>(new Map());
   const [modeBIntro, setModeBIntro] = useState<string>('')
+  // Debug/testing: allow manual trigger of thinking animation by clicking genie image
+  const [debugThinking, setDebugThinking] = useState<boolean>(false)
 
   const DEFAULT_CHIPS: Chip[] = [
     { text: 'Broaden my horizon', type: 'broaden' },
@@ -300,7 +302,7 @@ export default function Chat({
       {/* New Layout: Genie on left, center content area */}
       <div className="flex gap-8 items-start">
         {/* Genie Image - Left Side */}
-        <div className="hidden lg:block flex-shrink-0">
+        <div className="hidden lg:block flex-shrink-0 cursor-pointer" onClick={() => setDebugThinking(v => !v)}>
           <img 
             src="/genie/genie-1.png" 
             alt="Watch Genie" 
@@ -383,7 +385,8 @@ export default function Chat({
           {/* Conversation Chips - Now below input/send button */}
           <ConversationChips
             chips={conversationChips}
-            isAiThinking={status === 'submitted' || status === 'streaming'}
+            isAiThinking={(status === 'submitted' || status === 'streaming') || debugThinking}
+            thinkingVariant={"scroll"}
             onChipClick={(text) => {
               void append({ role: 'user', content: text })
               setConversationChips([])

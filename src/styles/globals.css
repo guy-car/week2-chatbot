@@ -317,6 +317,14 @@ h1,
   100% { transform: translateX(120%); opacity: 0; }
 }
 
+/* Position-based slide to ensure traversal across container width */
+@keyframes chipSlideRightPos {
+  0%   { left: -100px; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: calc(100% + 100px); opacity: 0; }
+}
+
 .chip-scroll {
   position: relative;
   height: 80px; /* match current icon size (80x80) */
@@ -331,8 +339,11 @@ h1,
 .chip-scroll-icon {
   position: absolute;
   top: 0;
-  left: -20%;
-  animation: chipSlideRight var(--chip-speed, 4s) linear infinite;
+  width: 80px;
+  height: 80px;
+  animation: chipSlideRightPos var(--chip-speed, 4s) linear infinite;
+  opacity: 0;
+  z-index: 1;
   will-change: transform, opacity;
 }
 
