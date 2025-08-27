@@ -20,6 +20,12 @@ import { buttonVariants, cardVariants, inputVariants, textVariants } from '~/sty
 
 
 
+const DEFAULT_CHIPS: Chip[] = [
+  { text: 'Broaden my horizon', type: 'broaden' },
+  { text: 'What should I watch?', type: 'reset' },
+  { text: 'Surprise me', type: 'curveball' },
+]
+
 function extractMoviesFromMessage(message: Message): MovieData[] {
   const movies: MovieData[] = [];
 
@@ -55,11 +61,7 @@ export default function Chat({
   // Debug/testing: allow manual trigger of thinking animation by clicking genie image
   const [debugThinking, setDebugThinking] = useState<boolean>(false)
 
-  const DEFAULT_CHIPS: Chip[] = [
-    { text: 'Broaden my horizon', type: 'broaden' },
-    { text: 'What should I watch?', type: 'reset' },
-    { text: 'Surprise me', type: 'curveball' },
-  ]
+  // moved to module constant
   const chipsStorageKey = (chatId?: string) => (chatId ? `chat:${chatId}:chips` : '')
   const DISABLE_GENERATED_CHIPS = true
 
@@ -291,6 +293,13 @@ export default function Chat({
 
   const router = useRouter()
   const createChatMutation = api.chat.create.useMutation()
+
+  // Restore default chips after streaming completes if chips are empty
+  useEffect(() => {
+    if (status === 'ready' && conversationChips.length === 0) {
+      setConversationChips(DEFAULT_CHIPS)
+    }
+  }, [status, conversationChips.length])
 
   const handleNewChat = async () => {
     const result = await createChatMutation.mutateAsync()
