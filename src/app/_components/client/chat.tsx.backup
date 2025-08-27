@@ -299,22 +299,18 @@ export default function Chat({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-      {/* New Layout: Genie on left, center content area */}
-      <div className="flex gap-8 items-start">
-        {/* Genie Image - Left Side */}
-        <div className="hidden lg:block flex-shrink-0 cursor-pointer" onClick={() => setDebugThinking(v => !v)}>
-          <img 
-            src="/genie/genie-1.png" 
-            alt="Watch Genie" 
-            className={cn(
-              "w-36 h-48 object-contain",
-              (status === 'submitted' || status === 'streaming' || debugThinking) ? "genie-animated" : ""
-            )}
-          />
-        </div>
+      {/* Genie positioned absolutely relative to chat area, doesn't affect layout */}
+      <div className="hidden lg:block absolute left-8 top-1/2 transform -translate-y-1/2 cursor-pointer" onClick={() => setDebugThinking(v => !v)}>
+        <img 
+          src="/genie/genie-1.png" 
+          alt="Watch Genie" 
+          className={cn("w-36 h-48 object-contain", debugThinking ? "genie-animated" : "")}
+        />
+      </div>
 
-        {/* Center Content Area */}
-        <div className="flex-1 min-w-0">
+      {/* Content centered independently of genie */}
+      <div className="flex justify-center">
+        <div className="w-full max-w-4xl">
           {/* Chat Messages */}
           <div
             ref={chatContainerRef}
@@ -347,14 +343,20 @@ export default function Chat({
                   <div className="font-normal">{message.content}</div>
                 )}
               </div>
+      </div>
+    </div>
             ))}
             {modeBIntro && (
               <div className={`mb-4 text-xl leading-relaxed`}>
                 <span className={textVariants.labelAssistant}>{'Genie: '}</span>
                 <div className="font-normal">{modeBIntro}</div>
               </div>
+      </div>
+    </div>
             )}
           </div>
+      </div>
+    </div>
 
           {/* Movie Recommendations */}
           <MovieCardsSection movies={recommendedMovies} />
@@ -408,8 +410,12 @@ export default function Chat({
                 Retry
               </button>
             </div>
+      </div>
+    </div>
           )}
         </div>
+      </div>
+    </div>
       </div>
     </div>
   );
