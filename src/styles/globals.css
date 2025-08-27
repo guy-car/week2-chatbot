@@ -126,7 +126,7 @@
   /* Success/Positive - Brunswick green */
   --success: oklch(0.35 0.10 165);
   /* Card/Surface - Secondary background from design tokens */
-  --card: #292929;
+  --card: #2929293d;
   --card-foreground: #FFFFFF;
 
 }

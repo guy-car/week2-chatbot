@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '~/lib/auth';
 import { api } from '~/trpc/server';
+import { WelcomeMessage } from '~/app/_components/client/WelcomeMessage';
 
 export default async function Page() {
   const session = await auth.api.getSession({
@@ -10,7 +11,11 @@ export default async function Page() {
   });
 
   if (!session?.user?.id) {
-    redirect('/auth/sign-in');
+    return (
+      <div className="text-center py-8">
+        <WelcomeMessage chatId={new Date().toDateString()} />
+      </div>
+    );
   }
 
   const { chatId } = await api.chat.create();

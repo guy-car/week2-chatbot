@@ -8,7 +8,7 @@ export default function AuthPage() {
     ? params.pathname[0]
     : params.pathname;
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background">
+    <div className="flex justify-center items-start">
       <div className="w-full max-w-md p-6">
         <AuthCard
           pathname={pathname}
@@ -19,7 +19,7 @@ export default function AuthPage() {
               primaryButton: "bg-[#00E5FF]/60 text-white border border-white/60 hover:bg-[#00E5FF]/40"
             },
             footerLink: "w-full no-underline",
-            base: "border border-[#00E5FF] rounded-md p-6"
+            base: "border-[0.5px] border-[#00E5FF] rounded-md p-6"
           }}
         />
       </div>
