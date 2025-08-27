@@ -372,7 +372,7 @@ export function RichMovieModal({
               {/* Right column: Action Rail */}
               <aside className={modalVariants.actionRail}>
                 <div className={modalVariants.actionRailSection}>
-                  <div className="w-20 h-20 flex items-center justify-center">
+                  <div className="w-14 h-14 flex items-center justify-center">
                     <img
                       src={isWatchlisted ? "/icons/new_cyan/star-filled-2.png" : "/icons/new_cyan/star.png"}
                       alt="Watchlist"
@@ -386,7 +386,7 @@ export function RichMovieModal({
                 </div>
                 <div className={modalVariants.actionRailSeparator} />
                 <div className={modalVariants.actionRailSection}>
-                  <div className="w-20 h-20 flex items-center justify-center">
+                  <div className="w-16 h-16 flex items-center justify-center">
                     <img
                       src={isWatched ? "/icons/new_cyan/eye-filled-70-opct-dark.png" : "/icons/new_cyan/eye.png"}
                       alt="Seen"
@@ -400,7 +400,7 @@ export function RichMovieModal({
                 </div>
                 <div className={modalVariants.actionRailSeparator} />
                 <div className={modalVariants.actionRailSection}>
-                  <div className="w-20 h-20 flex items-center justify-center">
+                  <div className="w-14 h-14 flex items-center justify-center">
                     <img
                       src={reaction === 'like' ? '/icons/new_cyan/thumb-up-filled-2.png' : '/icons/new_cyan/thumb-up.png'}
                       alt="Show more like this"
@@ -414,7 +414,7 @@ export function RichMovieModal({
                 </div>
                 <div className={modalVariants.actionRailSeparator} />
                 <div className={modalVariants.actionRailSection}>
-                  <div className="w-20 h-20 flex items-center justify-center">
+                  <div className="w-14 h-14 flex items-center justify-center">
                     <img
                       src={reaction === 'dislike' ? '/icons/new_cyan/thumb-down-filled-2.png' : '/icons/new_cyan/thumb-down.png'}
                       alt="Show less like this"
