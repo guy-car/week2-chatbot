@@ -1,9 +1,7 @@
 # PRIORITY FOR DEMO DAY
 
 - conversational chips :(
-- style text in chat
-- homepage layout
-- style toast notifications [07.25.25-2303-toast-design-system-integration]
+- style text in chat - make sure we focus on latest message
 - watch providers not always showing up
 - play button on trailer
 - animation needs to be more fun

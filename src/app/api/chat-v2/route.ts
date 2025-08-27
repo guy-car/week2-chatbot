@@ -320,7 +320,8 @@ export async function POST(req: Request) {
       if (!found) continue;
       const key = `${found.media_type}:${found.id}`;
       if (blockedKey.has(key)) continue;
-      accepted.push(found);
+      // Attach planner reason to the found MovieData so UI can render it
+      accepted.push({ ...found, reason: p.reason });
       await addChatRecommendation({ chatId, id_tmdb: found.id, media_type: found.media_type, title: found.title, year: Number((found.release_date ?? '').slice(0,4)) || p.year });
       blockedKey.add(key);
     }

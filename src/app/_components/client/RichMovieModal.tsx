@@ -17,6 +17,7 @@ export function RichMovieModal({
   movieId,
   mediaType,
   adjacent,
+  seed,
 }: {
   isOpen: boolean
   onClose: () => void
@@ -27,6 +28,7 @@ export function RichMovieModal({
     currentIndex: number
     onIndexChange: (nextIndex: number) => void
   }
+  seed?: Partial<MovieData>
 }) {
   const enabled = isOpen && !!movieId && !!mediaType
 
@@ -41,8 +43,8 @@ export function RichMovieModal({
   )
 
   const movie: MovieData | undefined = useMemo(() => {
-    return base ? { ...base, ...enrich } : undefined
-  }, [base, enrich])
+    return base ? { ...base, ...enrich, ...(seed ?? {}) } : undefined
+  }, [base, enrich, seed])
 
   // Title helpers (from /test-modal)
   const getTitleStyles = useCallback((title: string) => {

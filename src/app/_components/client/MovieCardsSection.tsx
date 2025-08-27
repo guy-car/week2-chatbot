@@ -67,6 +67,7 @@ export function MovieCardsSection({ movies }: MovieCardsSectionProps) {
                     currentIndex: selectedIndex,
                     onIndexChange: (next) => setSelectedIndex(next),
                 } : undefined}
+                seed={selectedIndex !== null ? { reason: movies[selectedIndex]?.reason } : undefined}
             />
         </>
     )
