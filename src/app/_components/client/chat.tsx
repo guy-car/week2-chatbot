@@ -52,6 +52,8 @@ export default function Chat({
   const [conversationChips, setConversationChips] = useState<Chip[]>([])
   const [savedMovies, setSavedMovies] = useState<Map<string, MovieData[]>>(new Map());
   const [modeBIntro, setModeBIntro] = useState<string>('')
+  // Ephemeral bridge for Mode B picks to avoid stale posters before DB message is visible
+  const [ephemeralMovies, setEphemeralMovies] = useState<MovieData[] | null>(null)
   // Debug/testing: allow manual trigger of thinking animation by clicking genie image
   const [debugThinking, setDebugThinking] = useState<boolean>(false)
 
@@ -99,7 +101,8 @@ export default function Chat({
             return ''
           })()
           setModeBIntro(introText)
-          setRecommendedMovies(raw.picks)
+          // Set ephemeral movies so UI updates immediately; final state will be reconciled by effect below
+          setEphemeralMovies(Array.isArray(raw.picks) ? raw.picks : [])
           setConversationChips(prev => (prev.length > 0 ? prev : DEFAULT_CHIPS))
 
           if (id) {
@@ -236,6 +239,43 @@ export default function Chat({
     }
   }, [status])
 
+  // Clear ephemeral movies once the persisted assistant message with tool results is visible
+  useEffect(() => {
+    if (!ephemeralMovies || ephemeralMovies.length === 0) return
+
+    // Find the most recent assistant message that contains movies
+    const candidate: MovieData[] = []
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i]
+      if (m.role !== 'assistant') continue
+      const live = extractMoviesFromMessage(m)
+      if (live.length > 0) {
+        candidate.push(...live)
+        break
+      }
+      const saved = savedMovies.get(m.id)
+      if (saved && saved.length > 0) {
+        candidate.push(...saved)
+        break
+      }
+    }
+
+    if (candidate.length === 0) return
+
+    const key = (mv: MovieData) => `${mv.media_type}:${mv.id}`
+    const sameSet = () => {
+      if (candidate.length !== ephemeralMovies.length) return false
+      const a = candidate.map(key).sort()
+      const b = ephemeralMovies.map(key).sort()
+      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false
+      return true
+    }
+
+    if (sameSet()) {
+      setEphemeralMovies(null)
+    }
+  }, [messages, savedMovies, ephemeralMovies])
+
 
   useEffect(() => {
     // New logic to display the 3 most recent movies from the entire chat
@@ -261,6 +301,14 @@ export default function Chat({
       }
     });
 
+    // If we have ephemeral movies from the latest Mode B response, prioritize them
+    if (ephemeralMovies && ephemeralMovies.length > 0) {
+      const next = ephemeralMovies.slice(0, 3)
+      console.log('[CLIENT_RENDER_MOVIES] Using ephemeral Mode B movies for rendering:', next);
+      setRecommendedMovies(next)
+      return
+    }
+
     // Sort by date descending and take the top 3
     allMoviesWithTimestamp.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     const latestMovies = allMoviesWithTimestamp.slice(0, 3).map(item => item.movie);
@@ -270,7 +318,7 @@ export default function Chat({
       setRecommendedMovies(latestMovies);
     }
 
-  }, [messages, savedMovies]);
+  }, [messages, savedMovies, ephemeralMovies]);
 
   // Ensure chips show up when posters render
   useEffect(() => {

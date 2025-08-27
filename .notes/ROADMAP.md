@@ -2,6 +2,8 @@
 
 BUG POSTERS not updating + carousel
 
+BUILD
+
 ANIMATIONS LOOK FRESH
 ideas: clicking an icon makes it bounce
 continue scrolling in header
