@@ -23,7 +23,14 @@ export default function ProfilePage() {
     })
 
     // Fetch profile data
-    const { data: profile, isLoading, refetch } = api.preferences.get.useQuery()
+    const { data: profile, isLoading, refetch } = api.preferences.get.useQuery(
+        undefined,
+        {
+            staleTime: 0,
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: true,
+        }
+    )
 
     // Update mutation
     const updateProfile = api.preferences.update.useMutation({

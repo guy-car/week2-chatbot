@@ -51,7 +51,12 @@ export const tasteProfileService = {
 // Export hooks for React components
 export const useTasteProfile = () => {
     const profile = api.preferences.get.useQuery();
-    const trackInteraction = api.movies.trackInteraction.useMutation();
+    const utils = api.useUtils();
+    const trackInteraction = api.movies.trackInteraction.useMutation({
+        onSuccess: () => {
+            void utils.preferences.get.invalidate();
+        },
+    });
 
     return {
         profile: profile.data,

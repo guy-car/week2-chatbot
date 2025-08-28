@@ -12,9 +12,10 @@ type EmailData = {
 };
 
 export const auth = betterAuth({
-  baseURL: process.env.AUTH_BASE_URL ?? "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
   trustedOrigins: [
     "http://localhost:3000",
+    "https://watch-genie.com",
     "https://www.watch-genie.com",
     "https://week2-chatbot.vercel.app",
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : [])
