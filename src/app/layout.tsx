@@ -38,7 +38,22 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Watch Genie",
   description: "Your magical movie recommendation assistant",
+  metadataBase: new URL("https://www.watch-genie.com"),
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  openGraph: {
+    type: "website",
+    url: "https://www.watch-genie.com",
+    siteName: "Watch Genie",
+    title: "Watch Genie",
+    description: "Your magical movie recommendation assistant",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Watch Genie" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Watch Genie",
+    description: "Your magical movie recommendation assistant",
+    images: ["/og.png"],
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
