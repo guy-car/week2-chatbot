@@ -37,7 +37,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Watch Genie",
-  description: "Magical, personalized Movie & TV Show recommendations",
+  description: "Magical, personalized Movies & TV Shows recommendations",
   metadataBase: new URL("https://www.watch-genie.com"),
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   openGraph: {
@@ -45,13 +45,13 @@ export const metadata: Metadata = {
     url: "https://www.watch-genie.com",
     siteName: "Watch Genie",
     title: "Watch Genie",
-    description: "Magical, personalized Movie & TV Show recommendations",
+    description: "Magical, personalized Movies & TV Shows recommendations",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Watch Genie" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Watch Genie",
-    description: "Magical, personalized Movie & TV Show recommendations",
+    description: "Magical, personalized Movies & TV Shows recommendations",
     images: ["/og.png"],
   },
 };
