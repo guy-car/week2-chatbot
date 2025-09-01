@@ -389,10 +389,20 @@ export async function POST(req: Request) {
 
   // Use AI SDK streaming instead of broken OpenAI streaming
 
+  // Build full conversational history from DB (supported roles, non-empty content)
+  const historyForModel: Array<{ role: 'user' | 'assistant'; content: string }> = previousMessages
+    .filter(m => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim().length > 0)
+    .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+
+
+
+
+
   const result = streamText({
     model: aiSDKOpenAI('chatgpt-4o-latest'),
     messages: [
       ...systemMessages,
+      ...historyForModel,
       { role: 'user', content: lastUser.content }
     ],
     temperature: 0.8,
@@ -401,7 +411,6 @@ export async function POST(req: Request) {
         const base = [...previousMessages, lastUser];
         const all = appendResponseMessages({ messages: base, responseMessages: response.messages });
         await saveChat({ id: chatId, messages: all });
-        console.log('[FLOW] persisted Mode A via saveChat', { count: all.length });
       } catch {
         console.warn('[FLOW] warn: failed to persist Mode A via saveChat');
       }
