@@ -1,6 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc';
 
+// Debug helper for enrichment logs
+function enrichLog(...args: unknown[]) {
+  if (process.env.ENRICH_DEBUG === '1') {
+    // eslint-disable-next-line no-console
+    console.log(...args);
+  }
+}
+
 export type EnrichOutput = {
   imdbId?: string,
   ratings?: { rottenTomatoes?: string; metacritic?: string; imdb?: string },
@@ -92,14 +100,14 @@ async function fetchExternalIds(type: 'movie' | 'tv', id: number, capMs: number)
     }), capMs, `external_ids:${type}:${id}`);
     const raw = (await res.json()) as unknown as TMDBExternalIds;
     const duration = Date.now() - start;
-    console.log('[ENRICH][external_ids] url=', url, 'status=', res.status, 'ms=', duration, 'raw=', raw);
+    enrichLog('[ENRICH][external_ids] url=', url, 'status=', res.status, 'ms=', duration, 'raw=', raw);
     const imdbId = typeof raw?.imdb_id === 'string' && raw.imdb_id ? raw.imdb_id : undefined;
-    console.log('[ENRICH][external_ids] extracted imdbId=', imdbId);
+    enrichLog('[ENRICH][external_ids] extracted imdbId=', imdbId);
     return imdbId ? { imdbId } : {};
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     const duration = Date.now() - start;
-    console.log('[ENRICH][external_ids] error:', err.message, 'ms=', duration, 'url=', url);
+    enrichLog('[ENRICH][external_ids] error:', err.message, 'ms=', duration, 'url=', url);
     return {};
   }
 }
@@ -126,14 +134,14 @@ async function fetchOmdbRatings(imdbId: string, capMs: number): Promise<{ rotten
     const res = await withTimeout(fetch(url, { method: 'GET', headers: { accept: 'application/json' } }), capMs, `omdb:${imdbId}`);
     const raw = (await res.json()) as unknown as OmdbResponse;
     const duration = Date.now() - start;
-    console.log('[ENRICH][omdb] url=', url, 'status=', res.status, 'ms=', duration, 'raw=', raw);
+    enrichLog('[ENRICH][omdb] url=', url, 'status=', res.status, 'ms=', duration, 'raw=', raw);
     const parsed = parseRatings(raw);
-    console.log('[ENRICH][omdb] parsed=', parsed);
+    enrichLog('[ENRICH][omdb] parsed=', parsed);
     return parsed;
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     const duration = Date.now() - start;
-    console.log('[ENRICH][omdb] error:', err.message, 'ms=', duration, 'url=', url);
+    enrichLog('[ENRICH][omdb] error:', err.message, 'ms=', duration, 'url=', url);
     return undefined;
   }
 }
@@ -201,14 +209,14 @@ async function fetchWatchProviders(type: 'movie' | 'tv', id: number, capMs: numb
     }), capMs, `providers:${type}:${id}`);
     const raw = (await res.json()) as unknown as TMDBProvidersResponse;
     const duration = Date.now() - start;
-    console.log('[ENRICH][providers] url=', url, 'status=', res.status, 'ms=', duration, 'raw.US=', raw?.results?.US);
+    enrichLog('[ENRICH][providers] url=', url, 'status=', res.status, 'ms=', duration, 'raw.US=', raw?.results?.US);
     const watch = filterProviders(raw?.results?.US);
-    console.log('[ENRICH][providers] filtered=', watch);
+    enrichLog('[ENRICH][providers] filtered=', watch);
     return watch;
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     const duration = Date.now() - start;
-    console.log('[ENRICH][providers] error:', err.message, 'ms=', duration, 'url=', url);
+    enrichLog('[ENRICH][providers] error:', err.message, 'ms=', duration, 'url=', url);
     return undefined;
   }
 }
@@ -226,7 +234,7 @@ async function fetchDetails(type: 'movie' | 'tv', id: number, capMs: number): Pr
     }), capMs, `details:${type}:${id}`);
     const raw = (await res.json()) as unknown;
     const duration = Date.now() - start;
-    console.log('[ENRICH][details] url=', url, 'status=', res.status, 'ms=', duration);
+    enrichLog('[ENRICH][details] url=', url, 'status=', res.status, 'ms=', duration);
     if (type === 'movie') {
       const md = raw as TMDBMovieDetails;
       const minutes = typeof md.runtime === 'number' && md.runtime > 0 ? md.runtime : undefined;
@@ -241,7 +249,7 @@ async function fetchDetails(type: 'movie' | 'tv', id: number, capMs: number): Pr
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     const duration = Date.now() - start;
-    console.log('[ENRICH][details] error:', err.message, 'ms=', duration, 'url=', url);
+    enrichLog('[ENRICH][details] error:', err.message, 'ms=', duration, 'url=', url);
     return {};
   }
 }
@@ -296,12 +304,12 @@ async function fetchTrailer(type: 'movie' | 'tv', id: number, capMs: number): Pr
     }), capMs, `videos:${type}:${id}`);
     const raw = (await res.json()) as unknown as TMDBVideosResponse;
     const duration = Date.now() - start;
-    console.log('[ENRICH][videos] url=', url, 'status=', res.status, 'ms=', duration, 'count=', raw?.results?.length ?? 0);
+    enrichLog('[ENRICH][videos] url=', url, 'status=', res.status, 'ms=', duration, 'count=', raw?.results?.length ?? 0);
     return pickBestTrailer(raw.results ?? []);
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     const duration = Date.now() - start;
-    console.log('[ENRICH][videos] error:', err.message, 'ms=', duration, 'url=', url);
+    enrichLog('[ENRICH][videos] error:', err.message, 'ms=', duration, 'url=', url);
     return undefined;
   }
 }
@@ -320,7 +328,7 @@ async function fetchDirector(type: 'movie' | 'tv', id: number, capMs: number): P
     }), capMs, `credits:${type}:${id}`);
     const raw = (await res.json()) as unknown;
     const duration = Date.now() - start;
-    console.log('[ENRICH][credits] url=', url, 'status=', res.status, 'ms=', duration);
+    enrichLog('[ENRICH][credits] url=', url, 'status=', res.status, 'ms=', duration);
     if (type === 'movie') {
       const cd = raw as TMDBMovieCredits;
       const director = cd.crew?.find(c => c.job === 'Director')?.name;
@@ -342,7 +350,7 @@ async function fetchDirector(type: 'movie' | 'tv', id: number, capMs: number): P
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     const duration = Date.now() - start;
-    console.log('[ENRICH][credits] error:', err.message, 'ms=', duration, 'url=', url);
+    enrichLog('[ENRICH][credits] error:', err.message, 'ms=', duration, 'url=', url);
     return undefined;
   }
 }
