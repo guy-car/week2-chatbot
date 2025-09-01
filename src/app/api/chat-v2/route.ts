@@ -12,7 +12,9 @@ import { tasteProfileService } from "~/app/_services/tasteProfile";
 import { listChatRecommendations, addChatRecommendation } from "~/server/db/chat-recommendations";
 import { getUserBlockedList } from "~/server/services/blocked-list";
 import { lookupBestByTitleYear } from "~/server/services/tmdb";
+
 import OpenAI from 'openai';
+import { loadMoviesForChat } from "tools/chat-store";
 
 export const maxDuration = 30;
 
@@ -111,6 +113,12 @@ function getResponseParsed(res: unknown): unknown {
 function getResponseId(res: unknown): string | undefined {
   const r = res as { id?: unknown };
   return typeof r?.id === 'string' ? r.id : undefined;
+}
+
+// Helper: generate a compact picks summary from planner output (title + numeric year)
+function formatPlannerPicksForHistory(picks: Array<{ title: string; year: number | undefined }>): string {
+  const items = picks.map(p => p.year ? `${p.title} (${p.year})` : p.title);
+  return items.length ? `Picks: ${items.join('; ')}` : '';
 }
 
 // (removed unused streaming helpers)
@@ -390,13 +398,36 @@ export async function POST(req: Request) {
   // Use AI SDK streaming instead of broken OpenAI streaming
 
   // Build full conversational history from DB (supported roles, non-empty content)
-  const historyForModel: Array<{ role: 'user' | 'assistant'; content: string }> = previousMessages
-    .filter(m => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim().length > 0)
-    .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+  const historyForModel: Array<{ role: 'user' | 'assistant'; content: string }> = [];
 
+  // Read tool_results for assistant messages so we can include planned picks succinctly
+  const movieRows = await loadMoviesForChat(chatId);
+  const picksByMessageId = new Map<string, MovieData[]>(movieRows.map(r => [r.messageId, r.movies]));
 
+  for (const m of previousMessages) {
+    if ((m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim().length > 0) {
+      historyForModel.push({ role: m.role, content: m.content });
+    }
 
+    if (m.role === 'assistant') {
+      const picks = picksByMessageId.get(m.id);
+      if (Array.isArray(picks) && picks.length > 0) {
+        const summary = formatPlannerPicksForHistory(picks.map(p => ({ title: p.title, year: p.year })));
+        if (summary) {
+          historyForModel.push({ role: 'assistant', content: summary });
+          console.log('🎬 picks_summary_for_history:', summary);
+        }
+      }
+    }
+  }
 
+  // Debug: Log what we're sending to the model
+  console.log('🧵🧵🧵 context history count:', historyForModel.length);
+  historyForModel.forEach((m, idx) => {
+    const preview = (m.content || '').slice(0, 80).replace(/\n/g, ' ');
+    console.log(`[HIST ${idx}]`, m.role, '-', preview);
+  });
+  console.log('[🧵HIST +] user -', (lastUser.content || '').slice(0, 80).replace(/\n/g, ' '));
 
   const result = streamText({
     model: aiSDKOpenAI('chatgpt-4o-latest'),
